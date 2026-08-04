@@ -16,6 +16,29 @@
     @yield('style')
 
     <style>
+        :root {
+            --driver-header-height: 64px;
+            --driver-bottom-nav-height: 68px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        .page-content {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding-top: calc(var(--driver-header-height) + 12px);
+            padding-bottom: calc(var(--driver-bottom-nav-height) + 16px);
+        }
+
+        .page-content > .footer {
+            margin-top: auto;
+            margin-bottom: 0;
+        }
+
         .new-family {
           font-family:'Inter',sans-serif;
         }
@@ -110,7 +133,7 @@
 <body class="theme-light" data-highlight="blue2">
 
 
-    <div id="preloader">
+    <div id="preloader" style="display: none;">
         <div class="spinner-border color-highlight" role="status"></div>
     </div>
 
@@ -121,52 +144,19 @@
 
         <div class="page-content">
             
-            <!-- <div class="page-title page-title-large" style="margin: 20px 20px 12px 20px;">
-                <div style="height:60px"></div>
-                <h2>
-                    <a href="#" data-back-button=""><i class="fa fa-arrow-left"></i></a> Dashboard
-                </h2>
-                <a href="#" data-menu="menu-main" class="bg-fade-highlight-light shadow-xl preload-img"
-                    data-src="images/avatars/5s.png"></a>
-            </div> -->
-            <div class="page-title page-title-small">
-                <h2>
-                    <!-- <a href="#" data-back-button=""><i class="fa fa-arrow-left"></i></a> @yield('heading') -->
-                    <a href="#" data-back-button="" style="padding-right: 5px;">
-                        <i class="fa fa-arrow-left"></i>
-                       
-                    </a>
-                    {{ \Illuminate\Support\Str::limit($__env->yieldContent('heading'), 18, '...') }}
-                </h2>
-                {{-- <div class="position-absolute" style="z-index: 10;right: 70px;top: 8px;">
-                    <select class="form-control p-0 px-2 m-0" style="border-radius: 8px;"
-                        onchange="window.location.href = '{{ url('/local') }}/' + this.value;">
-                        <option value="en" {{ App::getLocale() == 'en' ? 'selected' : '' }}>EN</option>
-                        <option value="kn" {{ App::getLocale() == 'kn' ? 'selected' : '' }}>KN</option>
-                    </select>
-
-
-                </div> --}}
-                <a href="#" data-menu="menu-main" class="bg-fade-highlight-light shadow-xl preload-img entered loaded"
-                    data-src="images/avatars/5s.png" data-ll-status="loaded"
-                    style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTY6qtMj2fJlymAcGTWLvNtVSCULkLnWYCDcQ&s');"></a>
-            </div>
+            @hasSection('show_header_card')
             <div class="card header-card shape-rounded" data-card-height="210">
                 <div class="card-overlay bg-highlight opacity-95"></div>
                 <div class="card-overlay dark-mode-tint"></div>
                 <div class="card-bg preload-img" data-src="images/pictures/20s.jpg"></div>
             </div>
+            @endif
             @yield('content')
 
             <div class="footer" >
                 @include('vehiclepwa.layout.footer')
             </div>
 
-        </div>
-
-        <div id="menu-main" class="menu menu-box-right menu-box-detached rounded-m" data-menu-width="260"
-             data-menu-effect="menu-over">
-             @include('vehiclepwa.layout.sidebar')
         </div>
 
     </div>

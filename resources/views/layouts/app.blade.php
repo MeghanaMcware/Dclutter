@@ -4,9 +4,9 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>CLEARIT</title>
-  <meta name="description" content="CLEARIT">
-  <meta name="keywords" content="CLEARIT">
+  <title>D-Clutter Portal</title>
+  <meta name="description" content="D-Clutter Portal">
+  <meta name="keywords" content="D-Clutter Portal">
 
   <!-- Favicons -->
   <link href="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}" rel="icon">

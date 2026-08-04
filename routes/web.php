@@ -48,12 +48,20 @@ Route::prefix('driver')->group(function () {
     Route::get('/trip-summary', function () {
         return view('vehiclepwa.trip_summary');
     })->name('driver.trip_summary');
+    Route::get('/requests', function () {
+        return view('vehiclepwa.requests.index');
+    })->name('driver.requests');
     Route::get('/notifications', function () {
         return view('vehiclepwa.notifications');
     })->name('driver.notifications');
     Route::get('/profile', function () {
         return view('vehiclepwa.profile_settings');
     })->name('driver.profile_settings');
+    
+});
+
+Route::get('/requests', function () {
+    return view('vehiclepwa.requests.index');
 });
 
 // Vehicle login submit fallback route

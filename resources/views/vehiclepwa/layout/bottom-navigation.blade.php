@@ -1,69 +1,52 @@
-<div id="footer-bar" class="footer-bar-5 vehicle-footer-bar d-flex flex-row align-items-end justify-content-around">
-  
-
-
-   
-
-    {{-- <a href="{{ route('vehicle.requests.index') }}" class="{{ request()->routeIs('vehicle.requests*') ? 'active-nav' : '' }}">
-        <i class="bi bi-bell-fill fs-4"></i>
-        <span>Requests</span>
-    </a> --}}
- <a href="" class="{{ request()->routeIs('vehicle.pickup*') ? 'active-nav' : '' }}">
-        <i class="bi bi-truck fs-4"></i>
-        <span>Pickup</span>
+<div class="bottom-nav">
+    <a href="{{ route('driver.dashboard') }}" class="{{ request()->routeIs('driver.dashboard') ? 'active' : '' }}">
+        <i class="fa-solid fa-house"></i>Home
     </a>
- <a href="" class="{{ request()->routeIs('vehicle.pickup*') ? 'active-nav' : '' }}">
-        <i class="bi bi-shield-check fs-4"></i>
-        <span>Permit</span>
+    <!-- <a href="{{ route('driver.requests') }}" class="{{ request()->routeIs('driver.requests*') ? 'active' : '' }}">
+        <i class="fa-solid fa-list-check"></i>Requests
+    </a> -->
+    <a href="{{ route('driver.trip_progress') }}" class="{{ request()->routeIs('driver.trip_progress*') || request()->routeIs('driver.update_status') || request()->routeIs('driver.trip_summary') ? 'active' : '' }}">
+        <i class="fa-solid fa-truck"></i>Trips
     </a>
-
-    <a href="" class="{{ request()->routeIs('vehicle.dashboard') ? 'active-nav' : '' }}">
-        <i class="bi bi-house-door-fill fs-4"></i>
-        <span>Home</span>
+    <a href="{{ route('driver.route') }}" class="{{ request()->routeIs('driver.route*') || request()->routeIs('driver.stop_details') || request()->routeIs('driver.collect_waste') ? 'active' : '' }}">
+        <i class="fa-solid fa-map-location-dot"></i>Map
     </a>
-    
-
-    <a href="" class="{{ request()->routeIs('vehicle.history*') ? 'active-nav' : '' }}">
-        <i class="bi bi-clock-history fs-4"></i>
-        <span>History</span>
+    <a href="{{ route('driver.profile_settings') }}" class="{{ request()->routeIs('driver.profile_settings*') ? 'active' : '' }}">
+        <i class="fa-solid fa-user"></i>Profile
     </a>
-
 </div>
 
 <style>
-    .vehicle-footer-bar {
-        background: #ffffff;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
-        border-top: 1px solid #e9ecef;
-    }
-    .vehicle-footer-bar a {
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
         display: flex;
-        flex: 1 1 25%;
-        flex-direction: column;
+        justify-content: space-around;
         align-items: center;
-        justify-content: center;
-        gap: 5px;
-        position: relative;
-        padding: 10px 4px 6px;
+        min-height: var(--driver-bottom-nav-height, 68px);
+        padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        max-width: 420px;
+        margin: 0 auto;
+        z-index: 1000;
+    }
+    .bottom-nav a {
         text-align: center;
-        color: #6c757d;
+        color: #94a3b8;
         text-decoration: none;
-        transition: color 0.2s ease;
+        font-size: 10px;
+        font-weight: 600;
+        flex: 1;
     }
-    .vehicle-footer-bar a i {
-        font-size: 22px !important;
+    .bottom-nav a i {
+        font-size: 18px;
+        display: block;
+        margin-bottom: 2px;
     }
-    .vehicle-footer-bar a span {
-        font-size: 11px;
-        line-height: 1.2;
-        font-weight: 500;
-    }
-    .vehicle-footer-bar a.active-nav {
-        color: #1f4e79 !important;
-        font-weight: 700;
-    }
-    .vehicle-footer-bar a.active-nav i {
-        color: #1f4e79 !important;
-        transform: translateY(-2px);
+    .bottom-nav a.active {
+        color: #1d4073;
     }
 </style>

@@ -114,87 +114,169 @@
     color: var(--green);
 }
 
-/* Category Selection UI (From Reference Screenshot) */
+/* Category selection */
 .category-card-container {
-    background: #087d45;
-    border-radius: 12px;
-    padding: 24px;
-    color: #ffffff;
-    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, #ffffff 0%, #f7fcf8 100%);
+    border: 1px solid #dcebe0;
+    border-radius: 20px;
+    padding: 16px;
+    color: var(--ink);
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(20, 56, 38, 0.08);
+}
+
+.category-card-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 5px;
+    /* background: linear-gradient(90deg, #087d45, #36b56a, #b9e7c7); */
+}
+
+.category-intro {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .category-card-container h2 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
-    margin-bottom: 6px;
-    color: #ffffff;
+    letter-spacing: -0.5px;
+    margin: 0 0 4px;
+    color: var(--ink);
 }
 
 .category-card-container p.subtitle {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-bottom: 24px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 0;
 }
 
-.category-group {
-    margin-bottom: 22px;
+.category-count {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    color: #087d45;
+    background: #e7f7ec;
+    border: 1px solid #c9edd4;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
-.category-group-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: #ffffff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding-bottom: 4px;
+.category-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .item-option {
+    position: relative;
+    overflow: hidden;
+    min-height: 56px;
     display: flex;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     gap: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    padding: 10px 14px;
+    background: #ffffff;
+    border: 1px solid #e1e9e4;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    text-align: left;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.03);
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
 }
 
 .item-option:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: #ffffff;
+    transform: translateY(-2px);
+    border-color: var(--tile-color, var(--green));
+    box-shadow: 0 8px 16px color-mix(in srgb, var(--tile-color, var(--green)) 15%, transparent);
 }
 
 .item-option.selected {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border-color: #ffffff !important;
-    box-shadow: 0 0 0 2px #ffffff !important;
+    background: color-mix(in srgb, var(--tile-color, var(--green)) 8%, #ffffff) !important;
+    border-color: var(--tile-color, var(--green)) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color, var(--green)) 16%, transparent), 0 8px 16px rgba(15, 23, 42, 0.06) !important;
 }
 
 .item-option input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-top: 2px;
-    accent-color: #ffffff;
-    cursor: pointer;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.category-icon {
+    display: flex;
     flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    color: var(--tile-color, var(--green));
+    background: color-mix(in srgb, var(--tile-color, var(--green)) 13%, #ffffff);
+    border-radius: 10px;
+    font-size: 18px;
+    transition: transform 0.22s ease, color 0.22s ease, background 0.22s ease;
+}
+
+.item-option.selected .category-icon {
+    color: #ffffff;
+    background: var(--tile-color, var(--green));
+    transform: scale(1.05);
 }
 
 .item-option-text strong {
     display: block;
-    font-size: 15px;
+    font-size: 12.5px;
     font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 2px;
+    line-height: 1.25;
+    color: #1f2937;
 }
 
-.item-option-text small {
-    display: block;
+.item-option::after {
+    content: '\f26a';
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    display: grid;
+    width: 21px;
+    height: 21px;
+    place-items: center;
+    color: #ffffff;
+    background: var(--tile-color, var(--green));
+    border-radius: 50%;
+    font-family: 'bootstrap-icons';
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.35;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.item-option.selected::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .category-card-container { padding: 16px 12px; border-radius: 16px; }
+    .category-intro { gap: 10px; margin-bottom: 14px; }
+    .category-card-container h2 { font-size: 18px; }
+    .category-card-container p.subtitle { font-size: 12px; }
+    .category-count { padding: 4px 8px; font-size: 10px; }
+    .category-card-container .category-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px; }
+    .category-card-container .item-option { min-height: 48px; padding: 8px 10px; border-radius: 10px; gap: 8px; }
+    .category-icon { width: 32px; height: 32px; font-size: 15px; border-radius: 8px; }
+    .item-option-text strong { font-size: 11px; }
 }
 
 /* Form Grid UI */
@@ -474,80 +556,54 @@ textarea.is-invalid ~ .invalid-feedback,
             <!-- ================= STEP 1: CATEGORY SELECT ================= -->
             <div id="step-1" class="wizard-step">
                 <div class="category-card-container">
-                    <h2>Choose items for pickup</h2>
-                    <p class="subtitle">We handle cots, sofas, mattresses, old clothes, shoes, and more!</p>
+                    <div class="category-intro">
+                        <div>
+                            <h2>Choose items for pickup</h2>
+                            <p class="subtitle">Select one or more categories for your pickup request.</p>
+                        </div>
+                        <span class="category-count" id="selected-category-count">0 selected</span>
+                    </div>
 
-                    <!-- Furniture -->
-                    <div class="category-group">
-                        <div class="category-group-title">Furniture</div>
-                        <label class="item-option">
+                    <div class="category-options-grid">
+                        <label class="item-option" style="--tile-color: #0e7a43;">
                             <input type="checkbox" name="pickup_items" value="Furniture (cots, sofas, chairs)" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Furniture (cots, sofas, chairs)</strong>
-                                <small>All types of furniture including cots, sofas, chairs, tables, and other furniture items</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-couch"></i></span>
+                            <span class="item-option-text"><strong>Furniture</strong></span>
                         </label>
-                        <label class="item-option">
+                        <label class="item-option" style="--tile-color: #4d7cda;">
                             <input type="checkbox" name="pickup_items" value="Mattresses and cushions" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Mattresses and cushions</strong>
-                                <small>Old mattresses, cushions, pillows, and bedding items</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-bed"></i></span>
+                            <span class="item-option-text"><strong>Mattresses &amp; Cushions</strong></span>
                         </label>
-                    </div>
-
-                    <!-- Clothing -->
-                    <div class="category-group">
-                        <div class="category-group-title">Clothing</div>
-                        <label class="item-option">
+                        <label class="item-option" style="--tile-color: #d97706;">
                             <input type="checkbox" name="pickup_items" value="Old clothes and shoes" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Old clothes and shoes</strong>
-                                <small>Used clothing, shoes, bags, and accessories in good condition</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-shirt"></i></span>
+                            <span class="item-option-text"><strong>Clothes &amp; Shoes</strong></span>
                         </label>
-                    </div>
-
-                    <!-- Appliances -->
-                    <div class="category-group">
-                        <div class="category-group-title">Appliances</div>
-                        <label class="item-option">
+                        <label class="item-option" style="--tile-color: #8b5cf6;">
                             <input type="checkbox" name="pickup_items" value="Household appliances" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Household appliances</strong>
-                                <small>Refrigerators, washing machines, microwaves, fans, and other household appliances</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-plug-circle-bolt"></i></span>
+                            <span class="item-option-text"><strong>Appliances</strong></span>
                         </label>
-                    </div>
-
-                    <!-- Electronics -->
-                    <div class="category-group">
-                        <div class="category-group-title">Electronics</div>
-                        <label class="item-option">
+                        <label class="item-option" style="--tile-color: #0f9bb4;">
                             <input type="checkbox" name="pickup_items" value="Electronics" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Electronics</strong>
-                                <small>Televisions, computers, mobile phones, and other electronic devices</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-laptop"></i></span>
+                            <span class="item-option-text"><strong>Electronics</strong></span>
                         </label>
-                    </div>
-
-                    <!-- Other -->
-                    <div class="category-group" style="margin-bottom: 0;">
-                        <div class="category-group-title">Other</div>
-                        <label class="item-option">
+                        <label class="item-option" style="--tile-color: #b45309;">
                             <input type="checkbox" name="pickup_items" value="Books and magazines" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Books and magazines</strong>
-                                <small>Old books, magazines, newspapers, and reading materials</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-book-open"></i></span>
+                            <span class="item-option-text"><strong>Books &amp; Magazines</strong></span>
                         </label>
-                        <label class="item-option">
+                        <label class="item-option" style="--tile-color: #e05d3b;">
                             <input type="checkbox" name="pickup_items" value="Toys and games" onchange="onCategoryItemChange(this)">
-                            <div class="item-option-text">
-                                <strong>Toys and games</strong>
-                                <small>Children toys, board games, and recreational items</small>
-                            </div>
+                            <span class="category-icon"><i class="fa-solid fa-puzzle-piece"></i></span>
+                            <span class="item-option-text"><strong>Toys &amp; Games</strong></span>
+                        </label>
+                        <label class="item-option" style="--tile-color: #64748b;">
+                            <input type="checkbox" name="pickup_items" value="Other" onchange="onCategoryItemChange(this)">
+                            <span class="category-icon"><i class="fa-solid fa-box-open"></i></span>
+                            <span class="item-option-text"><strong>Other Items</strong></span>
                         </label>
                     </div>
                 </div>
@@ -748,6 +804,10 @@ function onCategoryItemChange(cb) {
         }
     }
     const checked = document.querySelectorAll('input[name="pickup_items"]:checked');
+    const selectedCount = document.getElementById('selected-category-count');
+    if (selectedCount) {
+        selectedCount.textContent = `${checked.length} selected`;
+    }
     const err = document.getElementById('step1-error');
     if (checked.length > 0) {
         if (err) err.style.display = 'none';
