@@ -370,8 +370,8 @@
 
             <!-- Header Welcome Title -->
             <div class="welcome-header">
-                <h2>Welcome Back!</h2>
-                <p>Login to continue your collections</p>
+                <h2>DCLUTTER - Driver Portal</h2>
+                <p>Login to continue your Credentials</p>
             </div>
 
             <!-- Vector Graphic: Green Waste Truck & Collection Workers with City Skyline -->
@@ -451,14 +451,10 @@
             <!-- Form Content -->
             <div class="form-area">
 
-                @if (Session::has('error'))
-                    <div class="alert alert-danger shadow-sm rounded-3 mb-3 p-3 text-center" style="font-size:13px; font-weight:600; background:#fef2f2; border:1px solid #fecaca; color:#dc2626;">
-                        <i class="fa-solid fa-circle-exclamation me-1"></i> {{ Session::get('error') }}
-                    </div>
-                @endif
+              
 
                 <form method="GET" action="{{ route('driver.dashboard') }}" id="loginForm" onsubmit="event.preventDefault(); window.location.href='{{ route('driver.dashboard') }}';">
-                    @csrf
+                
 
                     <!-- Mobile Login Mode -->
                     <div id="mobileModePanel" class="mode-panel">

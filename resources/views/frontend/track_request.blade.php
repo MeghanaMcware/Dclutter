@@ -237,14 +237,14 @@
     <h1>Track Your Request</h1>
 
     <div class="search-ui">
-        <input type="text" id="trackInput" placeholder="Enter Request ID (e.g. DCL-2025-000123) or Mobile Number" value="{{ request('id', 'DCL-2025-000123') }}">
+        <input type="text" id="trackInput" placeholder="Enter Request ID (e.g. DCL-2025-000123) or Mobile Number" value="DCL-2025-000123">
         <button class="btn-ui" onclick="doTrackSearch()">Track</button>
     </div>
 
     <div class="card-ui track-box">
         <div class="topline">
             <div>
-                <div class="ref" id="trackReqId">{{ request('id', 'DCL-2025-000123') }}</div>
+                <div class="ref" id="trackReqId">DCL-2025-000123</div>
                 <div class="sub" id="trackReqDate">Requested on: 23 May 2025, 10:30 AM</div>
                 <div class="sub" id="trackCategory">Category: D-Clutter Rubble</div>
             </div>
@@ -280,7 +280,7 @@
         </div>
 
         <div style="margin-top: 20px;">
-            <a class="btn-ui" id="viewDetailsBtn" href="{{ route('citizen.details') }}?id={{ request('id', 'DCL-2025-000123') }}">View Details</a>
+            <a class="btn-ui" id="viewDetailsBtn" href="{{ route('citizen.details') }}">View Details</a>
         </div>
     </div>
 </main>

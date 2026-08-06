@@ -43,7 +43,7 @@
 
         <!-- Options Menu -->
         <div class="menu-list mb-4">
-            <a href="#" class="menu-item">
+            <!-- <a href="#" class="menu-item">
                 <div class="left">
                     <i class="fa-solid fa-user"></i>
                     <span>My Profile</span>
@@ -84,7 +84,7 @@
                     <span>Settings</span>
                 </div>
                 <i class="fa-solid fa-chevron-right text-muted font-12"></i>
-            </a>
+            </a> -->
 
             <a href="{{ route('driver.login') }}" class="menu-item logout">
                 <div class="left">

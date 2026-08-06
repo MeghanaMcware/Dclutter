@@ -317,9 +317,92 @@
 }
 
 .request-ui textarea {
-    height: 80px;
-    padding: 10px 14px;
+    padding-top: 10px;
+    min-height: 80px;
     resize: vertical;
+}
+
+/* Custom File Upload Styles */
+.file-upload-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 0;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.2s ease;
+    height: 42px;
+    position: relative;
+}
+.file-upload-box.is-valid {
+    border-color: var(--green);
+    border-width: 2px;
+    background: #f0fdf4;
+}
+.file-upload-btn {
+    padding: 0 16px;
+    font-weight: 500;
+    color: var(--ink);
+    border-right: 1px solid var(--line);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    background: transparent;
+}
+.file-upload-text {
+    padding: 0 16px;
+    color: var(--muted);
+    font-size: 14px;
+    flex-grow: 1;
+}
+.file-upload-box.is-valid .file-upload-text {
+    color: var(--ink);
+    font-weight: 500;
+}
+.file-upload-check {
+    position: absolute;
+    right: 16px;
+    font-size: 18px;
+    font-weight: bold;
+}
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+}
+.image-preview-item {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    overflow: visible;
+    border: 1px solid var(--line);
+    background: #f8f9fa;
+}
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.image-preview-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4d4f;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2;
 }
 
 .request-ui input:focus, 
@@ -606,10 +689,21 @@ textarea.is-invalid ~ .invalid-feedback,
                             <span class="item-option-text"><strong>Other Items</strong></span>
                         </label>
                     </div>
+
+                    <!-- Dynamic Subcategory Section -->
+                    <div id="subcategory-section" style="display: none; margin-top: 20px; border-top: 1px solid #dcebe0; padding-top: 16px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px;">Select  Subcategory</h3>
+                        <div id="subcategory-container" style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Subcategories will be injected here via JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <div id="step1-error" class="error-feedback mb-3" style="display:none; color: #dc3545 !important;">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one item for pickup.
+                </div>
+                <div id="step1-subcat-error" class="error-feedback mb-3" style="display:none; color: #dc3545 !important;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one specific subcategory/detail.
                 </div>
 
                 <button type="button" class="btn-ui continue-btn" onclick="goToStep(2)">
@@ -622,7 +716,28 @@ textarea.is-invalid ~ .invalid-feedback,
                 <div class="step-header">Pickup Location Details</div>
 
                 <div class="grid-ui">
-                    <!-- Address Input -->
+                    <!-- Image Upload -->
+                    <div class="wide">
+                        <label>Upload Waste Images <span class="req">*</span></label>
+                        <div class="custom-file-upload">
+                            <input type="file" id="wasteImagesInput" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
+                            <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
+                                <div class="file-upload-btn">Choose Files</div>
+                                <div class="file-upload-text" id="fileUploadText">No files selected</div>
+                                <i class="bi bi-check-lg text-success file-upload-check" style="display:none;" id="fileUploadCheck"></i>
+                            </div>
+                            <div class="invalid-feedback" id="fileUploadError" style="color: #dc3545 !important; display:none; margin-top:4px;">Please select at least one image.</div>
+                            <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">You can select multiple images to upload.</div>
+                            
+                            <div class="image-preview-container" id="imagePreviewContainer"></div>
+                        </div>
+                    </div>
+
+                  
+                    
+                    
+
+                    <!-- Ward & Pincode -->
                     <div class="wide">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <label style="margin-bottom: 0;">Pickup Location <span class="req">*</span></label>
@@ -650,6 +765,24 @@ textarea.is-invalid ~ .invalid-feedback,
                                 <i class="bi bi-geo-alt-fill text-success"></i> <span id="mapCoordinates">Location selected: 12.9716° N, 77.5946° E</span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- New Fields -->
+                    <div>
+                        <label>House No <span class="req">*</span></label>
+                        <input type="text" id="houseNoInput" placeholder="e.g. #123, 4th Cross" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter your house number.</div>
+                    </div>
+                    
+                    <div>
+                        <label>Corporation  <span class="req">*</span></label>
+                        <input type="text" id="constituencyInput" placeholder="Enter Constituency" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter corporation constituency.</div>
+                    </div>
+                    <div>
+                        <label>Constituency  <span class="req">*</span></label>
+                        <input type="text" id="constituencyInput" placeholder="Enter Constituency" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter corporation constituency.</div>
                     </div>
 
                     <div>
@@ -697,15 +830,9 @@ textarea.is-invalid ~ .invalid-feedback,
             <!-- ================= STEP 3: PICKUP DAY (SUNDAYS ONLY) ================= -->
             <div id="step-3" class="wizard-step" style="display:none;">
                 <div class="step-header">Select Pickup Day (Sundays Only)</div>
+                
 
-                <div style="background: #e8f5ed; border: 1px solid #bce4c8; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-                    <div style="font-weight: 700; color: var(--green); margin-bottom: 4px;">
-                        <i class="bi bi-info-circle-fill"></i> Sunday Pickup Policy
-                    </div>
-                    <div style="font-size: 13px; color: #2b3930;">
-                        D-Clutter waste collection is scheduled <strong>exclusively on Sundays</strong>. Other days are unselectable.
-                    </div>
-                </div>
+               
 
                 <div class="mb-3">
                     <label for="preferredDateInput">Select Pickup Date (Only Sundays) <span class="req">*</span></label>
@@ -715,6 +842,15 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
                 </div>
 
+                 <div style="background: #e8f5ed; border: 1px solid #bce4c8; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                    <div style="font-weight: 700; color: var(--green); margin-bottom: 4px;">
+                        <i class="bi bi-info-circle-fill"></i> Note:
+                    </div>
+                    <div style="font-size: 13px; color: #2b3930;">
+                         All waste Should be dismantalled & should be available on the ground floor.
+
+                    </div>
+                </div>
                 <div class="d-flex gap-3 mt-4">
                     <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(2)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
@@ -739,6 +875,22 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div id="review-items" style="font-weight: 700; color: var(--ink); font-size: 14px; margin-top: 4px;">-</div>
                     </div>
 
+                    <div style="margin-bottom: 14px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
+                        <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">WASTE IMAGES</small>
+                        <div id="review-images" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">-</div>
+                    </div>
+
+                    <div class="grid-ui" style="margin-bottom: 14px;">
+                        <div>
+                            <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">HOUSE NO</small>
+                            <div id="review-house-no" style="font-weight: 700; color: var(--ink); font-size: 13px; margin-top: 4px;">-</div>
+                        </div>
+                        <div>
+                            <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">CONSTITUENCY</small>
+                            <div id="review-constituency" style="font-weight: 700; color: var(--ink); font-size: 13px; margin-top: 4px;">-</div>
+                        </div>
+                    </div>
+
                     <div class="grid-ui" style="margin-bottom: 14px;">
                         <div>
                             <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">PICKUP LOCATION</small>
@@ -760,6 +912,16 @@ textarea.is-invalid ~ .invalid-feedback,
                             <div id="review-date" style="font-weight: 800; color: var(--green); font-size: 14px; margin-top: 4px;">-</div>
                         </div>
                     </div>
+
+                     <div style="background: #e8f5ed; border: 1px solid #bce4c8; border-radius: 8px; padding: 14px; margin-bottom: 20px; margin-top: 10px;">
+                    <div style="font-weight: 700; color: var(--green); margin-bottom: 4px;">
+                        <i class="bi bi-info-circle-fill"></i> Note:
+                    </div>
+                    <div style="font-size: 13px; color: #2b3930;">
+                         All waste Should be dismantalled & should be available on the ground floor.
+
+                    </div>
+                </div>
                 </div>
 
                 <div class="d-flex gap-3 mt-4">
@@ -786,13 +948,222 @@ let globalMap = null;
 let globalMarker = null;
 let currentStep = 1;
 let fpInstance = null;
+let pickupLocationRequestId = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof hideLoader === 'function') hideLoader();
 
     initSundayDatePicker();
-    initLeafletMap();
+    // Add map on mount
+    setTimeout(() => {
+        initLeafletMap();
+    }, 100);
+    // Request device location when the report page opens.
+    fetchCurrentLocation({ silent: true });
 });
+
+// DataTransfer for multiple file uploads
+const dt = new DataTransfer();
+
+function handleImageSelection(event) {
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        dt.items.add(files[i]);
+    }
+    updateImagePreview();
+}
+
+function removeImage(index) {
+    dt.items.remove(index);
+    updateImagePreview();
+}
+
+function updateImagePreview() {
+    const input = document.getElementById('wasteImagesInput');
+    input.files = dt.files;
+    
+    const container = document.getElementById('imagePreviewContainer');
+    container.innerHTML = '';
+    
+    const fileText = document.getElementById('fileUploadText');
+    const box = document.getElementById('fileUploadBox');
+    const check = document.getElementById('fileUploadCheck');
+    const err = document.getElementById('fileUploadError');
+    
+    if (dt.files.length > 0) {
+        fileText.textContent = dt.files.length + ' file(s)';
+        box.classList.add('is-valid');
+        box.style.borderColor = ''; // reset error color
+        check.style.display = 'block';
+        err.style.display = 'none';
+        
+        for (let i = 0; i < dt.files.length; i++) {
+            const file = dt.files[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <div class="image-preview-remove" onclick="removeImage(${i})">
+                        <i class="bi bi-x"></i>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+            reader.readAsDataURL(file);
+        }
+    } else {
+        fileText.textContent = 'No files selected';
+        box.classList.remove('is-valid');
+        check.style.display = 'none';
+    }
+}
+
+const subcategoriesMap = {
+    "Furniture (cots, sofas, chairs)": [
+        { name: "Cots", icon: "fa-bed" },
+        { name: "Sofas", icon: "fa-couch" },
+        { name: "Chairs", icon: "fa-chair" },
+        { name: "Tables", icon: "fa-table" },
+        { name: "Cupboards", icon: "fa-door-closed" },
+        { name: "Other Furniture", icon: "fa-layer-group" }
+    ],
+    "Mattresses and cushions": [
+        { name: "Single Mattress", icon: "fa-bed" },
+        { name: "Double Mattress", icon: "fa-bed" },
+        { name: "Pillows", icon: "fa-cloud" },
+        { name: "Cushions", icon: "fa-cube" }
+    ],
+    "Old clothes and shoes": [
+        { name: "Men's Clothing", icon: "fa-user-tie" },
+        { name: "Women's Clothing", icon: "fa-person-dress" },
+        { name: "Kids Clothing", icon: "fa-child" },
+        { name: "Shoes", icon: "fa-shoe-prints" },
+        { name: "Bags", icon: "fa-bag-shopping" }
+    ],
+    "Household appliances": [
+        { name: "Refrigerator", icon: "fa-snowflake" },
+        { name: "Washing Machine", icon: "fa-soap" },
+        { name: "Microwave", icon: "fa-fire-burner" },
+        { name: "Mixer Grinder", icon: "fa-blender" },
+        { name: "TV", icon: "fa-tv" },
+        { name: "Other Appliances", icon: "fa-plug" }
+    ],
+    "Electronics": [
+        { name: "Laptops/Computers", icon: "fa-laptop" },
+        { name: "Mobile Phones", icon: "fa-mobile-screen" },
+        { name: "Printers", icon: "fa-print" },
+        { name: "Cables/Chargers", icon: "fa-plug" },
+        { name: "Other Electronics", icon: "fa-microchip" }
+    ],
+    "Books and magazines": [
+        { name: "School Books", icon: "fa-book" },
+        { name: "Novels", icon: "fa-book-open" },
+        { name: "Magazines", icon: "fa-newspaper" },
+        { name: "Newspapers", icon: "fa-file-lines" }
+    ],
+    "Toys and games": [
+        { name: "Soft Toys", icon: "fa-paw" },
+        { name: "Board Games", icon: "fa-chess-board" },
+        { name: "Electronic Toys", icon: "fa-gamepad" },
+        { name: "Bicycles", icon: "fa-bicycle" }
+    ],
+    "Other": [
+        { name: "Utensils", icon: "fa-utensils" },
+        { name: "Plastic Items", icon: "fa-bottle-water" },
+        { name: "Glassware", icon: "fa-wine-glass" },
+        { name: "Miscellaneous", icon: "fa-box-open" }
+    ]
+};
+
+const categoryStyles = {
+    "Furniture (cots, sofas, chairs)": { color: "#0e7a43", icon: "fa-couch" },
+    "Mattresses and cushions": { color: "#4d7cda", icon: "fa-bed" },
+    "Old clothes and shoes": { color: "#d97706", icon: "fa-shirt" },
+    "Household appliances": { color: "#8b5cf6", icon: "fa-plug-circle-bolt" },
+    "Electronics": { color: "#0f9bb4", icon: "fa-laptop" },
+    "Books and magazines": { color: "#b45309", icon: "fa-book-open" },
+    "Toys and games": { color: "#e05d3b", icon: "fa-puzzle-piece" },
+    "Other": { color: "#64748b", icon: "fa-box-open" }
+};
+
+function renderSubcategories() {
+    const checked = Array.from(document.querySelectorAll('input[name="pickup_items"]:checked')).map(cb => cb.value);
+    const container = document.getElementById('subcategory-container');
+    const section = document.getElementById('subcategory-section');
+    
+    container.innerHTML = '';
+    
+    if (checked.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    
+    checked.forEach(category => {
+        if (subcategoriesMap[category]) {
+            const catDiv = document.createElement('div');
+            catDiv.style.marginBottom = '20px';
+            
+            const title = document.createElement('div');
+            title.style.fontWeight = '700';
+            title.style.fontSize = '14px';
+            title.style.marginBottom = '12px';
+            title.style.color = 'var(--ink)';
+            title.textContent = `Details for ${category}`;
+            catDiv.appendChild(title);
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'category-options-grid';
+            
+            const styleInfo = categoryStyles[category];
+            const tileColor = styleInfo ? styleInfo.color : '#087d45';
+            
+            subcategoriesMap[category].forEach(subcatObj => {
+                const subcatName = subcatObj.name;
+                const subcatIcon = subcatObj.icon;
+
+                const label = document.createElement('label');
+                label.className = 'item-option';
+                label.style.setProperty('--tile-color', tileColor);
+                
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'pickup_subitems';
+                input.value = `${category}: ${subcatName}`;
+                
+                input.onchange = function() {
+                    if (this.checked) {
+                        label.classList.add('selected');
+                        const err = document.getElementById('step1-subcat-error');
+                        if (err) err.style.display = 'none';
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                };
+                
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'category-icon';
+                iconSpan.innerHTML = `<i class="fa-solid ${subcatIcon}"></i>`;
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'item-option-text';
+                textSpan.innerHTML = `<strong>${subcatName}</strong>`;
+                
+                label.appendChild(input);
+                label.appendChild(iconSpan);
+                label.appendChild(textSpan);
+                optionsDiv.appendChild(label);
+            });
+            
+            catDiv.appendChild(optionsDiv);
+            container.appendChild(catDiv);
+        }
+    });
+}
+
 
 function onCategoryItemChange(cb) {
     const parentLabel = cb.closest('.item-option');
@@ -811,6 +1182,17 @@ function onCategoryItemChange(cb) {
     const err = document.getElementById('step1-error');
     if (checked.length > 0) {
         if (err) err.style.display = 'none';
+    }
+
+    renderSubcategories();
+
+    if (cb.checked) {
+        setTimeout(() => {
+            const section = document.getElementById('subcategory-section');
+            if (section && section.style.display !== 'none') {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 50);
     }
 }
 
@@ -943,23 +1325,52 @@ function validateStep(step) {
     if (step === 1) {
         const checkedItems = document.querySelectorAll('input[name="pickup_items"]:checked');
         const errorDiv = document.getElementById('step1-error');
+        const subcatErrorDiv = document.getElementById('step1-subcat-error');
+        
+        let valid = true;
+        
         if (checkedItems.length === 0) {
             if (errorDiv) errorDiv.style.display = 'block';
-            return false;
+            if (subcatErrorDiv) subcatErrorDiv.style.display = 'none';
+            valid = false;
         } else {
             if (errorDiv) errorDiv.style.display = 'none';
-            return true;
+            
+            const checkedSubItems = document.querySelectorAll('input[name="pickup_subitems"]:checked');
+            if (checkedSubItems.length === 0) {
+                if (subcatErrorDiv) subcatErrorDiv.style.display = 'block';
+                valid = false;
+            } else {
+                if (subcatErrorDiv) subcatErrorDiv.style.display = 'none';
+            }
         }
+        
+        return valid;
     }
 
     if (step === 2) {
+        const images = document.getElementById('wasteImagesInput');
         const address = document.getElementById('addressInput');
+        const houseNo = document.getElementById('houseNoInput');
+        const constituency = document.getElementById('constituencyInput');
         const ward = document.getElementById('wardSelect');
         const pincode = document.getElementById('pincodeInput');
         const mobile = document.getElementById('mobileInput');
 
         let valid = true;
-        [address, ward, pincode, mobile].forEach(el => {
+        
+        // Custom validation for images
+        const imageError = document.getElementById('fileUploadError');
+        const imageBox = document.getElementById('fileUploadBox');
+        if (dt.files.length === 0) {
+            imageError.style.display = 'block';
+            imageBox.style.borderColor = '#dc3545';
+            valid = false;
+        } else {
+            imageError.style.display = 'none';
+        }
+
+        [address, houseNo, constituency, ward, pincode, mobile].forEach(el => {
             if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                 if (el) {
                     el.classList.remove('is-valid');
@@ -987,7 +1398,46 @@ function validateStep(step) {
 
 function buildReviewSummary() {
     const checkedItems = Array.from(document.querySelectorAll('input[name="pickup_items"]:checked')).map(cb => cb.value);
-    document.getElementById('review-items').innerText = checkedItems.length ? checkedItems.join(', ') : 'None selected';
+    const checkedSubItems = Array.from(document.querySelectorAll('input[name="pickup_subitems"]:checked')).map(cb => cb.value.split(': ')[1]);
+    
+    let itemsText = checkedItems.length ? checkedItems.join(', ') : 'None selected';
+    if (checkedSubItems.length > 0) {
+        itemsText += `\n(Details: ${checkedSubItems.join(', ')})`;
+    }
+    document.getElementById('review-items').innerText = itemsText;
+    
+    const imageContainer = document.getElementById('review-images');
+    imageContainer.innerHTML = '';
+    
+    if (dt.files.length > 0) {
+        imageContainer.style.fontWeight = 'normal';
+        imageContainer.style.color = '';
+        imageContainer.style.fontSize = '';
+        
+        for (let i = 0; i < dt.files.length; i++) {
+            const file = dt.files[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '64px';
+                img.style.height = '64px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '6px';
+                img.style.border = '1px solid var(--line)';
+                imageContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    } else {
+        imageContainer.innerText = 'None';
+        imageContainer.style.fontWeight = '700';
+        imageContainer.style.color = 'var(--ink)';
+        imageContainer.style.fontSize = '14px';
+    }
+    
+    document.getElementById('review-house-no').innerText = document.getElementById('houseNoInput').value || '-';
+    document.getElementById('review-constituency').innerText = document.getElementById('constituencyInput').value || '-';
     document.getElementById('review-address').innerText = document.getElementById('addressInput').value || '-';
     
     const wardVal = document.getElementById('wardSelect').value;
@@ -1030,11 +1480,13 @@ function initLeafletMap() {
     globalMarker.on('dragend', function(e) {
         const position = globalMarker.getLatLng();
         updateMarkerCoords(position.lat, position.lng);
+        updatePickupLocation(position.lat, position.lng);
     });
 
     globalMap.on('click', function(e) {
         globalMarker.setLatLng(e.latlng);
         updateMarkerCoords(e.latlng.lat, e.latlng.lng);
+        updatePickupLocation(e.latlng.lat, e.latlng.lng);
     });
 
     window.searchOnMap = function() {
@@ -1049,20 +1501,47 @@ function initLeafletMap() {
                     globalMap.setView([lat, lon], 14);
                     globalMarker.setLatLng([lat, lon]);
                     updateMarkerCoords(lat, lon);
+                    updatePickupLocation(lat, lon);
                 }
             })
             .catch(err => console.error('Map search failed', err));
     };
 }
 
-window.fetchCurrentLocation = function() {
-    if (typeof showLoader === 'function') {
+function updatePickupLocation(lat, lng) {
+    const requestId = ++pickupLocationRequestId;
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Unable to find address');
+            return res.json();
+        })
+        .then(data => {
+            // Ignore late responses from an earlier marker position.
+            if (requestId !== pickupLocationRequestId) return;
+            const addrEl = document.getElementById('addressInput');
+            if (data && data.display_name && addrEl) {
+                addrEl.value = data.display_name;
+                validateSingleField(addrEl);
+            }
+
+            const pinEl = document.getElementById('pincodeInput');
+            if (data && data.address && data.address.postcode && pinEl) {
+                pinEl.value = data.address.postcode;
+                validateSingleField(pinEl);
+            }
+        })
+        .catch(err => console.error('Unable to update pickup location', err));
+}
+
+window.fetchCurrentLocation = function(options = {}) {
+    const silent = options.silent === true;
+    if (!silent && typeof showLoader === 'function') {
         showLoader('Fetching your GPS location...');
     }
 
     if (!navigator.geolocation) {
-        if (typeof hideLoader === 'function') hideLoader();
-        alert("Geolocation is not supported by your browser.");
+        if (!silent && typeof hideLoader === 'function') hideLoader();
+        if (!silent) alert("Geolocation is not supported by your browser.");
         return;
     }
 
@@ -1071,7 +1550,7 @@ window.fetchCurrentLocation = function() {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
 
-            if (typeof hideLoader === 'function') hideLoader();
+            if (!silent && typeof hideLoader === 'function') hideLoader();
 
             if (globalMap && globalMarker) {
                 globalMap.setView([lat, lng], 15);
@@ -1140,11 +1619,13 @@ function handleFormSubmit(event) {
         const reqId = `DCL-2025-${randomNum}`;
 
         const checkedItems = Array.from(document.querySelectorAll('input[name="pickup_items"]:checked')).map(cb => cb.value);
+        const checkedSubItems = Array.from(document.querySelectorAll('input[name="pickup_subitems"]:checked')).map(cb => cb.value);
 
         const requestData = {
             id: reqId,
             items: checkedItems,
-            wasteType: checkedItems.join(', '),
+            subItems: checkedSubItems,
+            wasteType: checkedItems.join(', ') + (checkedSubItems.length ? ' (' + checkedSubItems.join(', ') + ')' : ''),
             address: document.getElementById('addressInput').value,
             ward: document.getElementById('wardSelect').value,
             landmark: document.getElementById('landmarkInput').value,

@@ -1,0 +1,551 @@
+body{
+    margin:0;
+    padding:20px;
+    background:#f5f5f5;
+}
+
+.certificate{
+    width:1200px;
+    height:auto;
+    position:relative;
+    margin:auto;
+    background:#fff;
+    margin-bottom: 20px;
+}
+
+.frame{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:10;
+    pointer-events:none;
+}
+
+.content{
+    position:relative;
+    z-index:1;
+    padding:50px;
+}
+
+.certificate::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:url('images/frame.png') no-repeat center;
+
+    background-size:100% 100%;
+
+    pointer-events:none;
+
+    z-index:1000;
+
+}
+
+.certificate-header{
+    width:1060px;
+    margin:0 auto;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+
+    padding-top:80px;
+}
+
+/* Left & Right */
+.leader{
+    width:155px;
+    text-align:center;
+}
+
+.leader-img{
+    width:120px;
+    height:120px;
+    border:2px solid #2d6a3d;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.leader h4{
+    margin-top:5px;
+    color:#0c4b1d;
+    font-size:15px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.leader p{
+    margin:3px 0;
+    font-size:14px;
+}
+
+/* Center */
+.center-section{
+    flex:1;
+    text-align:center;
+}
+
+.gov-logo{
+    width:120px;
+    margin-bottom:10px;
+}
+
+.center-section h1{
+    margin:0;
+    font-size:32px;
+    color:#0d4b1e;
+    font-family:Georgia, serif;
+    font-weight:bold;
+}
+
+.sub-title{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin-top:15px;
+}
+
+.sub-title h2{
+    margin:0;
+    font-size:30px;
+    font-family:Georgia, serif;
+    font-weight:500;
+}
+
+.line{
+    width:90px;
+    height:2px;
+    background:#d7b04c;
+}
+
+.leaf{
+    width:35px;
+}
+
+.minister-section{
+    width:100%;
+    text-align:center;
+    margin-top:0px;
+}
+
+.minister-photo{
+    width:90px;
+    height:90px;
+    border:2px solid #2f6d3b;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.minister-section h3{
+    margin-top:8px;
+    margin-bottom:4px;
+    font-size:15px;
+    font-weight:700;
+    color:#0b4d21;
+    text-transform:uppercase;
+}
+
+.minister-section p{
+    margin:2px 0;
+    font-size:18px;
+    color:#222;
+    width:85%;
+}
+
+.certificate-divider{
+    margin:0px auto 10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+.certificate-divider span{
+    width:170px;
+    height:2px;
+    background:#d6ad3d;
+}
+
+.certificate-divider img{
+    width:28px;
+    height:auto;
+}
+
+.minister-section h1{
+    margin:0;
+    font-size:38px;
+    color:#0b4d21;
+    font-family:Georgia, serif;
+    font-weight:700;
+    letter-spacing:2px;
+}
+
+.certificate-text{
+    margin-top:8px;
+    font-size:20px;
+    line-height:1.4;
+    text-align: center;
+}
+.newpara{
+        text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* ==========================
+   Details Table
+========================== */
+
+.certificate-details{
+
+    width:70%;
+    margin:20px auto;
+
+    border:2px solid #2b6b3c;
+    border-radius:12px;
+
+    overflow:hidden;
+
+}
+
+.certificate-details table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+.certificate-details tr{
+
+    border-bottom:1px dotted #2b6b3c;
+
+}
+
+.certificate-details tr:last-child{
+
+    border-bottom:none;
+
+}
+
+.certificate-details th{
+
+    width:35%;
+    padding:12px;
+
+    font-size:20px;
+
+    text-align:left;
+
+}
+
+.certificate-details td{
+
+    padding:12px;
+
+    font-size:20px;
+
+}
+
+.value{
+
+    color:#114b24;
+
+    font-weight:bold;
+
+}
+
+/* ==========================
+        Footer
+========================== */
+
+.certificate-footer{
+
+    width:90%;
+    margin:35px auto 0;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 0px 0px 90px 0px;
+
+}
+
+.footer-box{
+    display:flex;
+    align-items:center;      /* Vertically center image and text */
+    gap:15px;
+}
+
+.footer-icon{
+    width:55px;
+    height:55px;
+    object-fit:contain;
+    flex-shrink:0;
+}
+
+.footer-content{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.footer-content small{
+    font-size:18px;
+    color:#333;
+    line-height:1;
+    margin-bottom:5px;
+}
+
+.footer-content h4{
+    margin:0;
+    font-size:25px;
+    font-weight:700;
+    color:#0b4d21;
+    line-height:1;
+}
+
+.footer-divider{
+
+    width:2px;
+    height:180px;
+
+    background:#d5a623;
+
+}
+
+.signature{
+
+    text-align:center;
+
+}
+
+.signature-img{
+
+    width:180px;
+
+}
+
+.signature h4{
+
+    color:#114b24;
+
+    margin-top:8px;
+
+    font-size:20px;
+
+}
+
+.signature p{
+
+    margin:2px;
+
+    font-size:18px;
+
+}
+
+
+
+
+.certificate-box{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:18px 22px;
+    border-radius:4px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-top: 10px;
+   
+    background-size:8px 8px;
+}
+
+/* Decorative line */
+
+.top-divider{
+    width:170px;
+    margin:0 auto 15px;
+    position:relative;
+    border-top:2px solid #6d8197;
+}
+
+.top-divider:before{
+    content:"❦";
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    top:-14px;
+    background:#fff;
+    color:#333;
+    padding:0 8px;
+    font-size:14px;
+}
+
+/* Left */
+
+.details{
+    width:70%;
+}
+
+.details h3{
+    color:#0f5b37;
+    font-size:20px;
+    margin-bottom:18px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.info-row{
+    display:flex;
+    margin-bottom:12px;
+    font-size:15px;
+}
+
+.label{
+    width:150px;
+    color:#111;
+}
+
+.colon{
+    width:15px;
+    text-align:center;
+}
+
+.value{
+    flex:1;
+    color:#111;
+}
+
+/* QR Card */
+
+.qr-card{
+    width:150px;
+    border:2px solid #d8b25a;
+    border-radius:8px;
+    overflow:hidden;
+    background:#fafafa;
+    text-align:center;
+}
+
+.qr-card img{
+    width:110px;
+    margin:10px auto 6px;
+    display:block;
+}
+
+.verify{
+    border-top:1px solid #ddd;
+    background:#efefef;
+    padding:8px;
+    font-size:14px;
+    color:#222;
+}
+
+@media(max-width:768px){
+
+.certificate-box{
+    flex-direction:column;
+    gap:20px;
+}
+
+.details{
+    width:100%;
+}
+
+.qr-card{
+    margin:auto;
+}
+
+.label{
+    width:120px;
+}
+
+}
+
+
+.vehicle-card{
+    width:420px;
+    background:#fff;
+    border:1px solid #8d8d8d;
+    border-radius:5px;
+    overflow:hidden;
+    box-shadow:0 2px 6px rgba(0,0,0,.12);
+}
+
+.w-48{
+    width: 100%;
+}
+
+.vehicle-title{
+    background:linear-gradient(#0d6b41,#04552f);
+    color:#fff;
+    text-align:start;
+    padding:8px;
+    font-size:18px;
+    font-weight:bold;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.vehicle-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.vehicle-table tr{
+    border-bottom:1px solid #d7d7d7;
+}
+
+.vehicle-table tr:last-child{
+    border-bottom:none;
+}
+
+.vehicle-table td{
+    padding:10px 12px;
+    font-size:15px;
+    color:#222;
+}
+
+.vehicle-table td:nth-child(1){
+    width:45%;
+    font-weight:600;
+    background:#fafafa;
+}
+
+.vehicle-table td:nth-child(2){
+    width:5%;
+    text-align:center;
+    font-weight:bold;
+}
+
+.vehicle-table td:nth-child(3){
+    width:50%;
+}
+
+.vehicle-table tr:nth-child(even){
+    background:#fcfcfc;
+}
+
+@media(max-width:576px){
+
+.vehicle-card{
+    width:100%;
+}
+
+.vehicle-table td{
+    font-size:14px;
+    padding:8px;
+}
+
+.vehicle-title{
+    font-size:16px;
+}
+
+}

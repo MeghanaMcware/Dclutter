@@ -11,6 +11,7 @@ Route::view('/track-request', 'frontend.track_request')->name('citizen.track');
 Route::view('/request-details', 'frontend.request_details')->name('citizen.details');
 Route::view('/request-submitted', 'frontend.request_submitted')->name('citizen.success');
 Route::view('/showcase', 'vehiclepwa.showcase');
+Route::view('/registration', 'vehiclepwa.auth.registration');
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,15 @@ Route::prefix('driver')->group(function () {
     Route::get('/login', function () {
         return view('vehiclepwa.auth.login');
     })->name('driver.login');
+
+
+    Route::get('/registration', function () {
+        return view('vehiclepwa.auth.registration');
+    })->name('auth.registration');
+
+    Route::get('/register', function () {
+        return view('vehiclepwa.register');
+    })->name('driver.register');
     Route::get('/dashboard', function () {
         return view('vehiclepwa.dashboard');
     })->name('driver.dashboard');
@@ -39,8 +49,11 @@ Route::prefix('driver')->group(function () {
     Route::get('/collect-waste', function () {
         return view('vehiclepwa.collect_waste');
     })->name('driver.collect_waste');
+    Route::get('/after_pickup', function () {
+        return view('vehiclepwa.updated.after_pickup');
+    })->name('driver.after_pickup');
     Route::get('/update-status', function () {
-        return view('vehiclepwa.update_status');
+        return view('vehiclepwa.updated.update_status');
     })->name('driver.update_status');
     Route::get('/trip-progress', function () {
         return view('vehiclepwa.trip_progress');
@@ -69,3 +82,10 @@ Route::match(['get', 'post'], '/vehicle/login-submit', function () {
     return redirect()->route('driver.dashboard');
 })->name('vehicle.login.submit');
 
+Route::get('/admin/requests', function () {
+    return view('admin.requests.index');
+});
+
+Route::get('/admin/dashboard', function () {
+    return view('admin.dashboard');
+});

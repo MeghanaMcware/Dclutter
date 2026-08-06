@@ -7,7 +7,7 @@
     <style>
         :root { --primary-green: #0e7a43; --primary-dark: #095930; }
 
-        .profile-card { background: #fff; border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
+        .profile-card { background: #fff; border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #0e7a43; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
         .profile-info { display: flex; align-items: center; gap: 12px; }
         .profile-avatar { width: 50px; height: 50px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary-green); border: 2px solid #e6f4ea; }
         .profile-text h3 { font-size: 16px; font-weight: 800; margin: 0; color: #0f172a; }
@@ -15,7 +15,7 @@
         .status-badge { background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: #fff; border-radius: 14px; padding: 16px; text-align: center; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .stat-card { background: #0e7a430f; border-radius: 14px; padding: 16px; text-align: center; border: 1px solid var(--primary-green); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         .stat-card .num { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
         .stat-card .label { font-size: 12px; color: #64748b; font-weight: 500; }
 
@@ -57,19 +57,19 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="num">12</div>
-                <div class="label">Trips Today</div>
+                <div class="label">Total pickups</div>
             </div>
             <div class="stat-card">
                 <div class="num">35</div>
-                <div class="label">Stops Today</div>
+                <div class="label">Today pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">8.7 km</div>
-                <div class="label">Distance</div>
+                <div class="num">5</div>
+                <div class="label">Pending pickups</div>
             </div>
             <div class="stat-card">
                 <div class="num">1.2 Ton</div>
-                <div class="label">Waste Collected</div>
+                <div class="label">Waste Collected(Approx.)</div>
             </div>
         </div>
 

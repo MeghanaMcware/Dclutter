@@ -162,26 +162,56 @@
         .badge-status-pending {
             background-color: var(--status-yellow);
             color: #111827 !important;
-            font-size: 12.5px;
+            font-size: 11px;
             font-weight: 800;
-            padding: 5px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             letter-spacing: 0.3px;
         }
 
         .badge-status-accepted {
             background-color: #10b981;
             color: #ffffff !important;
-            font-size: 12.5px;
+            font-size: 11px;
             font-weight: 800;
-            padding: 5px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Custom Map Route Markers */
+        .custom-map-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .route-marker-green {
+            background-color: #0f763b;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 800;
+            font-size: 11px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .route-marker-blue {
+            background-color: #2563eb;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
         }
 
         /* Get Directions Button */
@@ -249,6 +279,7 @@
             box-shadow: 0 2px 6px rgba(14, 122, 67, 0.25);
             cursor: pointer;
             text-decoration: none;
+            margin-top: 8px;
         }
 
         .btn-view-card:hover {
@@ -326,53 +357,72 @@
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 pb-0" style="background: var(--primary-brand); color: #fff; border-radius: 16px 16px 0 0;">
                     <div>
-                        <span class="badge bg-warning text-dark font-11 mb-1">Commercial Waste Request</span>
-                        <h5 class="modal-title fw-extrabold text-white" id="modalRefTitle">CWD-2026-04177</h5>
+                       
+                        <h5 class="modal-title fw-extrabold text-white" id="modalRefTitle">DCL-2025-000123</h5>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 bg-light border">
-                        <span class="small text-muted font-weight-bold">Status:</span>
-                        <span class="badge-status-pending" id="modalStatusBadge"><i class="fa-regular fa-clock"></i> PENDING</span>
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="d-flex align-items-center px-2 py-1 rounded-3 bg-light border" style="gap: 12px;">
+                            <span class="small text-muted font-weight-bold" style="margin-bottom: 0; font-size: 12px;">Status:</span>
+                            <span class="badge-status-pending" id="modalStatusBadge"><i class="fa-regular fa-clock"></i> PENDING</span>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Applicant Name</label>
-                        <strong class="fs-6 text-dark" id="modalApplicantName">Ramesh Kumar</strong>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Applicant Name</label>
+                            <strong class="fs-6 text-dark" id="modalApplicantName">Ramesh Kumar</strong>
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Mobile No</label>
+                            <strong class="fs-6 text-dark">
+                                <a href="#" id="modalMobileLink" class="text-decoration-none text-dark" style="border-bottom: 1px dashed;">
+                                    <i class="fa-solid fa-phone text-success me-1"></i> <span id="modalMobile">9876543210</span>
+                                </a>
+                            </strong>
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Pickup Address</label>
-                        <p class="small text-dark mb-0" id="modalAddress">BTM Layout 2nd Stage, Bengaluru</p>
+                        <p class="small text-dark mb-1">
+                            <strong id="modalHouseNo">#123</strong>, <span id="modalAddress">BTM Layout 2nd Stage, Bengaluru</span>
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-secondary text-white fw-normal" id="modalWard">Ward 150</span>
+                            <span class="badge bg-secondary text-white fw-normal" id="modalConstituency">Bommanahalli</span>
+                            <span class="badge bg-secondary text-white fw-normal" id="modalPincode">560102</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Pickup Date</label>
+                        <strong class="fs-6 text-dark"><i class="fa-regular fa-calendar text-primary me-1"></i> <span id="modalDate">09-Aug-2026</span></strong>
                     </div>
 
                     <div class="row g-2 mb-3">
+                       
                         <div class="col-6">
-                            <div class="p-2 border rounded-3 bg-light">
-                                <span class="small text-muted d-block">Est. Weight</span>
-                                <strong class="text-dark" id="modalWeight">2.00 Tons</strong>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-2 border rounded-3 bg-light">
-                                <span class="small text-muted d-block">Assigned Vehicle</span>
-                                <strong class="text-dark" id="modalVehicle">Not Assigned</strong>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="p-2 border rounded-3 bg-light">
+                            <div class="p-2 border rounded-3 bg-light h-100">
                                 <span class="small text-muted d-block">Pickup Category</span>
                                 <strong class="text-dark" id="modalCategory">Furniture</strong>
                             </div>
                         </div>
+                        <div class="col-6">
+                            <div class="p-2 border rounded-3 bg-light h-100">
+                                <span class="small text-muted d-block">Sub Category</span>
+                                <strong class="text-dark" id="modalSubCategory">Cots, Sofas</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-grid gap-2 mt-4" id="modalActionButtons">
-                        <a id="modalDirectionsBtn" href="#" target="_blank" class="btn btn-get-directions text-center justify-content-center py-2">
-                            <i class="fa-solid fa-diamond-turn-right me-1"></i> Open Google Maps Directions
+                    <div class="d-flex gap-2 mt-4" id="modalActionButtons">
+                        <a id="modalDirectionsBtn" href="#" target="_blank" class="btn btn-get-directions w-50 d-flex align-items-center justify-content-center py-2">
+                            <i class="fa-solid fa-diamond-turn-right me-1"></i> Directions
                         </a>
-                        <a href="{{ route('driver.update_status') }}" class="btn btn-view-card text-center justify-content-center py-2">
+                        <a href="{{ route('driver.update_status') }}" class="btn btn-view-card w-50 d-flex align-items-center justify-content-center py-2">
                             <i class="fa-solid fa-camera me-1"></i> Update
                         </a>
                     </div>
@@ -389,36 +439,51 @@
         const allRequestData = [
             {
                 id: 4177,
-                ref: 'CWD-2026-04177',
+                ref: 'DCL-2025-000123',
                 status: 'PENDING',
-                weight: '2.00 Tons',
-                vehicle: 'Not Assigned',
                 category: 'Furniture',
-                applicant: 'Ramesh Kumar (RWA Green Heights)',
+                subCategory: 'Cots, Sofas',
+                applicant: 'Ramesh Kumar',
+                mobile: '9876543210',
+                date: '09-Aug-2026',
+                houseNo: '#123',
+                ward: 'Ward 150',
+                constituency: 'Bommanahalli',
+                pincode: '560102',
                 location: 'BTM Layout 2nd Stage, Bengaluru',
                 lat: 12.9166,
                 lng: 77.6101
             },
             {
                 id: 4178,
-                ref: 'CWD-2026-04178',
+                ref: 'DCL-2025-000124',
                 status: 'PENDING',
-                weight: '1.50 Tons',
-                vehicle: 'Not Assigned',
                 category: 'Electronics',
+                subCategory: 'Laptops, Mobile Phones',
                 applicant: 'AE Spot Officer - Ward 174',
+                mobile: '9123456780',
+                date: '16-Aug-2026',
+                houseNo: 'Opp. Park',
+                ward: 'Ward 174',
+                constituency: 'HSR Layout',
+                pincode: '560102',
                 location: 'Silk Board Flyover Dump Site',
                 lat: 12.9172,
                 lng: 77.6228
             },
             {
                 id: 4179,
-                ref: 'CWD-2026-04179',
+                ref: 'DCL-2025-000125',
                 status: 'ACCEPTED',
-                weight: '3.20 Tons',
-                vehicle: 'KA-01-EA-4412',
                 category: 'Mattresses & Cushions',
+                subCategory: 'Double Mattress',
                 applicant: 'Suresh Reddy (Commercial Complex)',
+                mobile: '9988776655',
+                date: '23-Aug-2026',
+                houseNo: '#45, Ground Floor',
+                ward: 'Ward 151',
+                constituency: 'Koramangala',
+                pincode: '560034',
                 location: 'Koramangala 5th Block',
                 lat: 12.9352,
                 lng: 77.6245
@@ -464,14 +529,42 @@
             }).addTo(mapInstance);
 
             const bounds = [];
-            allRequestData.forEach(item => {
-                const marker = L.marker([item.lat, item.lng]).addTo(mapInstance);
+
+            // Draw connecting route line
+            const latlngs = allRequestData.map(item => [item.lat, item.lng]);
+            if (latlngs.length > 1) {
+                L.polyline(latlngs, {
+                    color: '#0f763b',
+                    weight: 4,
+                    opacity: 0.9,
+                    lineJoin: 'round'
+                }).addTo(mapInstance);
+            }
+
+            allRequestData.forEach((item, index) => {
+                const markerNumber = index + 1;
+                let iconHtml = `<div class="route-marker-green">${markerNumber}</div>`;
+                
+                // Make the first one a blue dot (current location / starting point)
+                if (index === 0) {
+                    iconHtml = `<div class="route-marker-blue"></div>`;
+                }
+
+                const customIcon = L.divIcon({
+                    className: 'custom-map-icon',
+                    html: iconHtml,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13]
+                });
+
+                const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(mapInstance);
                 const popupHtml = `
                     <div style="min-width:200px; padding:4px;">
                         <span class="badge-cwd-id" style="font-size:11px;">${item.ref}</span>
                         <div class="small fw-bold text-dark mt-2">${item.applicant}</div>
                         <div class="small text-muted mb-2">${item.location}</div>
-                        <div class="small text-muted mb-2"><strong>Category:</strong> ${item.category}</div>
+                        <div class="small text-muted mb-1"><strong>Category:</strong> ${item.category}</div>
+                        <div class="small text-muted mb-2"><strong>Sub Category:</strong> ${item.subCategory}</div>
                         <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" class="btn-get-directions py-1 px-2 font-11">
                             <i class="fa-solid fa-diamond-turn-right"></i> Navigate
                         </a>
@@ -488,19 +581,26 @@
         }
 
         let currentActiveRef = '';
-        function openRequestModal(ref, applicant, location, weight, vehicle, category, status, lat, lng) {
-            currentActiveRef = ref;
-            document.getElementById('modalRefTitle').innerText = ref;
-            document.getElementById('modalApplicantName').innerText = applicant;
-            document.getElementById('modalAddress').innerText = location;
-            document.getElementById('modalWeight').innerText = weight;
-            document.getElementById('modalVehicle').innerText = vehicle;
-            document.getElementById('modalCategory').innerText = category;
+        function openRequestModal(item) {
+            currentActiveRef = item.ref;
+            document.getElementById('modalRefTitle').innerText = item.ref;
+            document.getElementById('modalApplicantName').innerText = item.applicant;
+            document.getElementById('modalMobile').innerText = item.mobile;
+            document.getElementById('modalMobileLink').href = 'tel:' + item.mobile;
+            document.getElementById('modalHouseNo').innerText = item.houseNo;
+            document.getElementById('modalAddress').innerText = item.location;
+            document.getElementById('modalWard').innerText = item.ward;
+            document.getElementById('modalConstituency').innerText = item.constituency;
+            document.getElementById('modalPincode').innerText = item.pincode;
+            document.getElementById('modalDate').innerText = item.date;
+          
+            document.getElementById('modalCategory').innerText = item.category;
+            document.getElementById('modalSubCategory').innerText = item.subCategory;
             
             // Set Directions Link
             const directionsBtn = document.getElementById('modalDirectionsBtn');
             if (directionsBtn) {
-                directionsBtn.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                directionsBtn.href = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
             }
 
             const modal = new bootstrap.Modal(document.getElementById('requestDetailModal'));
@@ -530,20 +630,16 @@
                         <hr class="card-divider">
                         <div class="d-flex justify-content-between align-items-end">
                             <div>
-                                <div class="card-info-item">
-                                    <i class="fa-solid fa-gauge-high text-warning"></i>
-                                    <span class="card-info-label">Weight:</span>
-                                    <span class="card-info-value">${item.weight}</span>
-                                </div>
-                                <div class="card-info-item">
-                                    <i class="fa-solid fa-truck text-secondary"></i>
-                                    <span class="card-info-label">Vehicle:</span>
-                                    <span class="card-info-value">${item.vehicle}</span>
-                                </div>
+
                                 <div class="card-info-item">
                                     <i class="fa-solid fa-recycle text-success"></i>
                                     <span class="card-info-label">Category:</span>
                                     <span class="card-info-value">${item.category}</span>
+                                </div>
+                                <div class="card-info-item" style="margin-top: 4px;">
+                                    <i class="fa-solid fa-list-ul text-info"></i>
+                                    <span class="card-info-label">Sub Category:</span>
+                                    <span class="card-info-value">${item.subCategory}</span>
                                 </div>
                             </div>
                             <button type="button" class="btn-view-card" data-request-index="${index}">
@@ -556,7 +652,7 @@
             cardsContainer.querySelectorAll('[data-request-index]').forEach(button => {
                 button.addEventListener('click', () => {
                     const item = allRequestData[Number(button.dataset.requestIndex)];
-                    openRequestModal(item.ref, item.applicant, item.location, item.weight, item.vehicle, item.category, item.status, item.lat, item.lng);
+                    openRequestModal(item);
                 });
             });
         }

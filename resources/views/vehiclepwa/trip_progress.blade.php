@@ -7,7 +7,7 @@
     <style>
         :root { --primary-green: #0e7a43; --primary-dark: #095930; }
 
-        .trip-card { background: #fff; border-radius: 16px; padding: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
+        .trip-card { background: #fff; border-radius: 16px; padding: 16px; border: 1px solid #0e7a43; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
         .trip-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
         .trip-header-row h3 { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; }
         .badge-in-progress { background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
@@ -18,7 +18,7 @@
         .progress-bar-fill { width: 48%; height: 100%; background: var(--primary-green); border-radius: 10px; }
 
         .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .metric-card { background: #fff; border-radius: 14px; padding: 16px; text-align: center; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .metric-card { background: #0e7a430f; border-radius: 14px; padding: 16px; text-align: center; border: 1px solid #0e7a43; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         .metric-card .num { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
         .metric-card .label { font-size: 12px; color: #64748b; font-weight: 500; }
 

@@ -328,10 +328,11 @@
     <section class="waste-categories">
         <h3 class="waste-categories-title">D-Clutter Categories</h3>
         <div class="waste-category-list">
-            <a href="{{ route('citizen.report') }}?type=Bricks%20%2F%20Concrete" class="waste-category-pill">Bricks / Concrete</a>
-            <a href="{{ route('citizen.report') }}?type=Tiles%20%2F%20Ceramics" class="waste-category-pill">Tiles / Ceramics</a>
-            <a href="{{ route('citizen.report') }}?type=Metal%20%2F%20Steel" class="waste-category-pill">Metals / Steel</a>
-            <a href="{{ route('citizen.report') }}?type=Wood%20%2F%20C%26D%20Parts" class="waste-category-pill">Wood / Debris</a>
+            <a href="{{ route('citizen.report') }}?type=Bricks%20%2F%20Concrete" class="waste-category-pill">Furniture</a>
+            <a href="{{ route('citizen.report') }}?type=Tiles%20%2F%20Ceramics" class="waste-category-pill">Mattresses & Cushions</a>
+            <a href="{{ route('citizen.report') }}?type=Metal%20%2F%20Steel" class="waste-category-pill">Electronics</a>
+            <a href="{{ route('citizen.report') }}?type=Wood%20%2F%20C%26D%20Parts" class="waste-category-pill">Clothes & Footwear</a>
+            <a href="{{ route('citizen.report') }}?type=Wood%20%2F%20C%26D%20Parts" class="waste-category-pill">Books & Magazines</a>
             <a href="{{ route('citizen.report') }}?type=Others" class="waste-category-pill">Others</a>
         </div>
     </section>

@@ -1,7 +1,7 @@
 @extends('vehiclepwa.layout.app')
 
-@section('title') Update Status @endsection
-@section('heading') Update Status @endsection
+@section('title') After Pickup @endsection
+@section('heading') After Pickup @endsection
 
 @section('style')
     <style>
@@ -18,9 +18,6 @@
         .btn-update { width: 100%; height: 50px; background: var(--primary-green); color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 14px rgba(14,122,67,0.3); cursor: pointer; }
         .btn-update:hover { background: var(--primary-dark); color: #fff; }
         
-        .location-group { display: flex; gap: 12px; }
-        .location-group .form-group { flex: 1; }
-
         /* Success Screen Styles */
         .check-circle { width: 90px; height: 90px; background: var(--primary-green); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px auto 24px; font-size: 42px; box-shadow: 0 10px 25px rgba(14,122,67,0.3); }
         .success-title { font-size: 22px; font-weight: 800; color: var(--primary-green); margin-bottom: 6px; }
@@ -33,19 +30,11 @@
 @section('content')
     <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
         
-        <!-- Form Section -->
-        <div id="formSection">
-            <h5 class="fw-bold text-dark mb-3 px-1">Pickup Verification</h5>
+        <div id="afterFormSection">
+            <h5 class="fw-bold text-dark mb-3 px-1">Step 2: After Pickup</h5>
 
             <div class="form-card">
                 <form id="statusUpdateForm">
-                    <div class="form-group">
-                        <label>Before Photo<span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="beforePhoto" accept="image/*" multiple required>
-                        <div class="invalid-feedback">Please capture or upload at least one before photo.</div>
-                        <div id="beforePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
-                    </div>
-
                     <div class="form-group">
                         <label>After Photo<span class="text-danger">*</span></label>
                         <input type="file" class="form-control" id="afterPhoto" accept="image/*" multiple required>
@@ -53,13 +42,19 @@
                         <div id="afterPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                     </div>
 
-                    <div class="location-group">
-                        <div class="form-group">
+                    <div class="form-group">
+                        <label>Approximate Weight (kg)<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="approxWeight" placeholder="Enter approximate weight" min="0" step="0.1" required>
+                        <div class="invalid-feedback">Please enter the approximate weight.</div>
+                    </div>
+
+                    <div class="location-group d-flex gap-2 mb-3">
+                        <div class="form-group flex-fill mb-0">
                             <label>Latitude</label>
                             <input type="text" class="form-control bg-light" id="currentLat" readonly placeholder="Fetching...">
                             <div class="invalid-feedback">Location required.</div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group flex-fill mb-0">
                             <label>Longitude</label>
                             <input type="text" class="form-control bg-light" id="currentLng" readonly placeholder="Fetching...">
                             <div class="invalid-feedback">Location required.</div>
@@ -67,7 +62,7 @@
                     </div>
 
                     <button type="button" id="submitBtn" class="btn-update mt-4" onclick="submitStatusUpdate()">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Update</span>
+                        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Final Update</span>
                     </button>
                 </form>
             </div>
@@ -79,7 +74,7 @@
                 <i class="fa-solid fa-check"></i>
             </div>
             <h2 class="success-title">Collection Completed!</h2>
-            <p class="success-sub">You have successfully completed</p>
+            <p class="success-sub">You have successfully completed the collection.</p>
             
             <a href="{{ route('driver.trip_summary') }}" class="btn-end-trip mt-5">
                 <span>View Trip Summary</span>
@@ -100,6 +95,8 @@
 
 @section('script')
 <script>
+    const selectedFilesArray = { 'after': [] };
+
     document.addEventListener('DOMContentLoaded', () => {
         // Auto-fetch location on load
         if (navigator.geolocation) {
@@ -139,179 +136,142 @@
             lngInput.classList.add('is-invalid');
         }
 
-        // Standard Javascript arrays to hold our selected files reliably
-        const selectedFilesArray = {
-            'before': [],
-            'after': []
-        };
-
-        // Live Validation & Preview: Turn Green on file selection and show thumbnails
-        ['before', 'after'].forEach(prefix => {
-            const input = document.getElementById(prefix + 'Photo');
-            
-            input.addEventListener('change', function() {
-                // Append new selection to the existing array
-                Array.from(this.files).forEach(file => {
-                    // Prevent duplicates reliably using array
-                    let isDuplicate = false;
-                    for (let i = 0; i < selectedFilesArray[prefix].length; i++) {
-                        let existing = selectedFilesArray[prefix][i];
-                        if (existing.name === file.name && existing.size === file.size && existing.lastModified === file.lastModified) {
-                            isDuplicate = true;
-                            break;
-                        }
-                    }
-                    if (!isDuplicate) {
-                        selectedFilesArray[prefix].push(file);
-                    }
-                });
-                
-                // Clear the input so selecting the exact same file again triggers 'change' event
-                this.value = '';
-                
-                renderPreviews(prefix);
+        // Live validation for regular inputs (Approximate Weight)
+        document.querySelectorAll('input:not([type="file"]), select').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
             });
         });
 
-        function renderPreviews(prefix) {
-            const input = document.getElementById(prefix + 'Photo');
-            const previewContainer = document.getElementById(prefix + 'Preview');
-            previewContainer.innerHTML = '';
+        const fileInput = document.getElementById('afterPhoto');
+        const previewContainer = document.getElementById('afterPreview');
+
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
             
-            // Sync the input files with our array using a fresh DataTransfer
-            const dt = new DataTransfer();
-            selectedFilesArray[prefix].forEach(file => dt.items.add(file));
-            input.files = dt.files;
-            
-            if (selectedFilesArray[prefix].length > 0) {
-                input.classList.add('is-valid');
-                input.classList.remove('is-invalid');
+            if (files.length > 0) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+
+            files.forEach(file => {
+                if (selectedFilesArray['after'].length >= 3) {
+                    Swal.fire('Limit Reached', 'You can upload a maximum of 3 after photos.', 'warning');
+                    return;
+                }
                 
-                selectedFilesArray[prefix].forEach((file, index) => {
-                    // Create a wrapper for the image and the remove button
-                    const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
-                    wrapper.style.display = 'inline-block';
-                    wrapper.style.marginTop = '8px';
-                    
+                selectedFilesArray['after'].push(file);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.position = 'relative';
+                    imgContainer.style.width = '70px';
+                    imgContainer.style.height = '70px';
+                    imgContainer.style.borderRadius = '8px';
+                    imgContainer.style.overflow = 'hidden';
+                    imgContainer.style.border = '1px solid #cbd5e1';
+
                     const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file); // Synchronous and much faster than FileReader
-                    img.style.width = '64px';
-                    img.style.height = '64px';
+                    img.src = e.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
                     img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    img.style.border = '1px solid #cbd5e1';
-                    
-                    // Create the red 'x' button
+
                     const removeBtn = document.createElement('button');
                     removeBtn.innerHTML = '&times;';
                     removeBtn.style.position = 'absolute';
-                    removeBtn.style.top = '-6px';
-                    removeBtn.style.right = '-6px';
-                    removeBtn.style.width = '22px';
-                    removeBtn.style.height = '22px';
-                    removeBtn.style.background = '#ef4444'; // Red color
+                    removeBtn.style.top = '2px';
+                    removeBtn.style.right = '2px';
+                    removeBtn.style.background = 'rgba(0,0,0,0.6)';
                     removeBtn.style.color = '#fff';
                     removeBtn.style.border = 'none';
                     removeBtn.style.borderRadius = '50%';
-                    removeBtn.style.fontSize = '16px';
+                    removeBtn.style.width = '20px';
+                    removeBtn.style.height = '20px';
+                    removeBtn.style.fontSize = '14px';
                     removeBtn.style.lineHeight = '1';
                     removeBtn.style.cursor = 'pointer';
                     removeBtn.style.display = 'flex';
                     removeBtn.style.alignItems = 'center';
                     removeBtn.style.justifyContent = 'center';
-                    removeBtn.style.padding = '0';
-                    removeBtn.style.paddingBottom = '2px';
-                    removeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-                    
-                    removeBtn.onclick = function(event) {
-                        event.preventDefault();
-                        selectedFilesArray[prefix].splice(index, 1); // Remove from array
-                        renderPreviews(prefix); // Re-render
+
+                    removeBtn.onclick = function(ev) {
+                        ev.preventDefault();
+                        const index = selectedFilesArray['after'].indexOf(file);
+                        if (index > -1) {
+                            selectedFilesArray['after'].splice(index, 1);
+                        }
+                        imgContainer.remove();
+                        if (selectedFilesArray['after'].length === 0) {
+                            fileInput.classList.remove('is-valid');
+                            fileInput.classList.add('is-invalid');
+                        }
                     };
-                    
-                    wrapper.appendChild(img);
-                    wrapper.appendChild(removeBtn);
-                    previewContainer.appendChild(wrapper);
-                });
-            } else {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-            }
-        }
+
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(removeBtn);
+                    previewContainer.appendChild(imgContainer);
+                }
+                reader.readAsDataURL(file);
+            });
+            
+            // Clear input so same file can be selected again if needed
+            this.value = '';
+        });
     });
 
     function submitStatusUpdate() {
-        const beforePhotoInput = document.getElementById('beforePhoto');
         const afterPhotoInput = document.getElementById('afterPhoto');
-        const beforePhoto = beforePhotoInput.files.length;
-        const afterPhoto = afterPhotoInput.files.length;
+        const approxWeightInput = document.getElementById('approxWeight');
         const latInput = document.getElementById('currentLat');
         const lngInput = document.getElementById('currentLng');
-        const currentLat = latInput.value;
         const submitBtn = document.getElementById('submitBtn');
+        const loader = document.getElementById('pageLoader');
+        const formSection = document.getElementById('afterFormSection');
+        const successSection = document.getElementById('successSection');
 
         let isValid = true;
         
-        // Remove valid classes in case user clears them
-        if (beforePhoto === 0) {
-            beforePhotoInput.classList.remove('is-valid');
-            beforePhotoInput.classList.add('is-invalid');
-            isValid = false;
-        }
-
-        if (afterPhoto === 0) {
+        if (selectedFilesArray['after'].length === 0) {
             afterPhotoInput.classList.remove('is-valid');
             afterPhotoInput.classList.add('is-invalid');
             isValid = false;
         }
 
+        if (!approxWeightInput.value || parseFloat(approxWeightInput.value) <= 0) {
+            approxWeightInput.classList.remove('is-valid');
+            approxWeightInput.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        const currentLat = latInput.value;
         if (!currentLat || currentLat === 'Fetching...' || currentLat === 'Error' || currentLat === 'Not Supported') {
             latInput.classList.remove('is-valid');
             latInput.classList.add('is-invalid');
             lngInput.classList.remove('is-valid');
             lngInput.classList.add('is-invalid');
             isValid = false;
+            Swal.fire('Location Error', 'Unable to fetch your current location. Please wait or ensure location services are enabled.', 'warning');
         }
 
         if (!isValid) return;
 
-        // Add Loader State
-        document.getElementById('pageLoader').style.display = 'flex';
+        // Simulate API call
         submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        loader.style.display = 'flex';
 
-        // Save first images to localStorage for the summary page mockup
-        if (beforeFilesArray.length > 0) {
-            const readerBefore = new FileReader();
-            readerBefore.onload = (e) => localStorage.setItem('recentBeforeImg', e.target.result);
-            readerBefore.readAsDataURL(beforeFilesArray[0]);
-        }
-        if (afterFilesArray.length > 0) {
-            const readerAfter = new FileReader();
-            readerAfter.onload = (e) => localStorage.setItem('recentAfterImg', e.target.result);
-            readerAfter.readAsDataURL(afterFilesArray[0]);
-        }
-
-        // Simulate network request (1.5 seconds)
         setTimeout(() => {
-            // Hide loaders and show success screen
-            document.getElementById('pageLoader').style.display = 'none';
-            document.getElementById('formSection').style.display = 'none';
-            document.getElementById('successSection').style.display = 'block';
-            
-            // Restore button in case they go back
-            submitBtn.disabled = false;
-            
-            // Optional tiny success toast before the big screen takes focus
-            Swal.fire({
-                title: 'Success!',
-                text: 'Photos uploaded.',
-                icon: 'success',
-                timer: 1200,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false
-            });
+            loader.style.display = 'none';
+            formSection.style.display = 'none';
+            successSection.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 1500);
     }
 </script>
