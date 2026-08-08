@@ -167,10 +167,7 @@
             </div>
         </div>
         
-        <div class="d-flex justify-content-end gap-2 mb-4">
-            <a href="{{ url('admin/vehicles/edit') }}" class="btn btn-warning text-white"><i class="fa fa-pencil me-1"></i> Edit Vehicle</a>
-            <a href="{{ url('admin/vehicles') }}" class="btn btn-light"><i class="fa fa-arrow-left me-1"></i> Back to List</a>
-        </div>
+        
     </div>
 </div>
 @endsection

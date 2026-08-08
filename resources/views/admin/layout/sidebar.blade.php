@@ -44,7 +44,7 @@
           </li>
 
           <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav" href="{{ url('admin/vehicles') }}">
+            <a class="sidebar-link sidebar-title link-nav" href="{{ url('vehicles') }}">
               <i data-feather="truck"></i>
               <span>Vehicle Details</span>
             </a>
@@ -63,11 +63,7 @@
               <span>Masters</span>
             </a>
             <ul class="sidebar-submenu">
-              <li>
-                <a href="#plants">
-                  Vehicle 
-                </a>
-              </li>
+            
               <li>
                 <a href="{{ url('admin/masters/categories') }}">
                   Category 

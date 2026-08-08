@@ -48,7 +48,7 @@
             <div class="col-12">
                 <div class="card card-custom">
                     <div class="card-body">
-                        <form class="needs-validation" novalidate action="#" method="POST" enctype="multipart/form-data">
+                        <form class="needs-validation" novalidate action="javascript:void(0);" onsubmit="handleFormSubmit(event)" enctype="multipart/form-data">
                             @csrf
                             
                             <!-- Vehicle Information -->
@@ -115,7 +115,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="ownerPhone">Owner Phone Number <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="ownerPhone" name="owner_phone" value="9876543210" pattern="[0-9]{10}" required>
+                                    <input type="tel" class="form-control" id="ownerPhone" name="owner_phone" value="9876543210" placeholder="Enter owner phone number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
@@ -130,7 +130,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="driverPhone">Driver Phone Number <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="driverPhone" name="driver_phone" value="8765432109" pattern="[0-9]{10}" required>
+                                    <input type="tel" class="form-control" id="driverPhone" name="driver_phone" value="9123456780" placeholder="Enter driver phone number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
@@ -162,21 +162,29 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Bootstrap validation script
-    (function () {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-    })()
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        const form = document.querySelector('.needs-validation');
+        
+        if (!form.checkValidity()) {
+            event.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        // Simulating form submission
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Vehicle details updated successfully.',
+            confirmButtonColor: '#198754'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.reload();
+            }
+        });
+    }
 </script>
 @endsection

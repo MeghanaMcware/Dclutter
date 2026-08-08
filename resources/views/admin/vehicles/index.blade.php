@@ -14,8 +14,15 @@
         min-width: 80px;
         text-align: center;
     }
-    .status-active { background-color: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
-    .status-inactive { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
+    .form-switch .form-check-input {
+        width: 2.5em;
+        height: 1.25em;
+        cursor: pointer;
+    }
+    .form-switch .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
 
     .action-btn {
         width: 28px;
@@ -82,7 +89,7 @@
                 <div class="card" >
                     <div class="card-body">
                          <div class="col-md-3 mt-3 mb-3 mt-md-0 text-md-end text-start ms-auto">
-                    <a href="{{ url('admin/vehicles/create') }}" class="btn btn-primary" style="font-size: 13px; font-weight: 500; padding: 8px 16px;">
+                    <a href="{{ url('vehicles/create') }}" class="btn btn-primary" style="font-size: 13px; font-weight: 500; padding: 8px 16px;">
                         <i class="fa fa-plus me-1"></i> Add New Vehicle
                     </a>
                 </div>
@@ -109,19 +116,19 @@
                                         <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">John Doe</td>
                                         <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Jane Smith</td>
                                         <td style="padding: 15px 20px; vertical-align: middle;">
-                                            <span class="status-badge status-active">Active</span>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox" checked>
+                                            </div>
                                         </td>
                                         <td style="padding: 15px 20px; vertical-align: middle; text-align: right;">
                                             <div class="d-flex justify-content-end gap-1">
-                                                <a href="{{ url('admin/vehicles/view') }}" class="action-btn" title="View" style="background: #e3f2fd; color: #2196f3;">
+                                                <a href="{{ url('vehicles/view') }}" class="btn btn-info text-white" title="View" style="background: #e3f2fd; color: #2196f3;">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <a href="{{ url('admin/vehicles/edit') }}" class="action-btn" title="Edit" style="background: #fff3e0; color: #ff9800;">
+                                                <a href="{{ url('vehicles/edit') }}" class="btn btn-warning text-white" title="Edit" style="background: #fff3e0; color: #ff9800;">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
-                                                <button class="action-btn" title="Delete" style="background: #ffebee; color: #f44336; border: none;">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
+                                               
                                             </div>
                                         </td>
                                     </tr>
@@ -134,14 +141,16 @@
                                         <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Ali Khan</td>
                                         <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Mohd Ravi</td>
                                         <td style="padding: 15px 20px; vertical-align: middle;">
-                                            <span class="status-badge status-inactive">Inactive</span>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
                                         </td>
                                         <td style="padding: 15px 20px; vertical-align: middle; text-align: right;">
                                             <div class="d-flex justify-content-end gap-1">
-                                                <a href="{{ url('admin/vehicles/view') }}" class="action-btn" title="View" style="background: #e3f2fd; color: #2196f3;">
+                                                <a href="{{ url('vehicles/view') }}" class="btn btn-info text-white" title="View" style="background: #e3f2fd; color: #2196f3;">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <a href="{{ url('admin/vehicles/edit') }}" class="action-btn" title="Edit" style="background: #fff3e0; color: #ff9800;">
+                                                <a href="{{ url('vehicles/edit') }}" class="btn btn-warning text-white" title="Edit" style="background: #fff3e0; color: #ff9800;">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
                                               

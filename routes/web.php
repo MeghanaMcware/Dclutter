@@ -101,10 +101,10 @@ Route::get('/admin/dashboard', function () {
     Route::get('/vehicles/create', function () {
         return view('admin.vehicles.create');
     });
-    Route::get('/view', function () {
+    Route::get('vehicles/view', function () {
         return view('admin.vehicles.show');
     });
-    Route::get('/edit', function () {
+    Route::get('vehicles/edit', function () {
         return view('admin.vehicles.edit');
     });
 

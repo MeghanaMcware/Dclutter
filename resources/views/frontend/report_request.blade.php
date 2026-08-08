@@ -848,7 +848,7 @@ textarea.is-invalid ~ .invalid-feedback,
                         <i class="bi bi-info-circle-fill"></i> Note:
                     </div>
                     <div style="font-size: 13px; color: #2b3930;">
-                         All waste Should be dismantalled & should be available on the ground floor.
+                         All Waste should be dismantalled & should be available on the ground floor.
 
                     </div>
                 </div>
@@ -919,7 +919,7 @@ textarea.is-invalid ~ .invalid-feedback,
                         <i class="bi bi-info-circle-fill"></i> Note:
                     </div>
                     <div style="font-size: 13px; color: #2b3930;">
-                         All waste Should be dismantalled & should be available on the ground floor.
+                         All Waste should be dismantalled & should be available on the ground floor.
 
                     </div>
                 </div>
