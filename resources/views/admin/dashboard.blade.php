@@ -171,12 +171,12 @@
     }
 
     .action-link {
-        color: #94a3b8;
+        color: #fff;
         font-size: 16px;
         text-decoration: none;
         transition: color 0.2s;
     }
-    .action-link:hover { color: #2563eb; }
+    .action-link:hover { color: #fff; }
 
     .view-all {
         font-size: 13px;
@@ -296,43 +296,43 @@
                             <tbody>
                                 <tr>
                                     <td style="color: #64748b; font-size: 12px; font-weight:600;">#DCL-1256</td>
-                                    <td style="font-weight: 600;">Unmanned Debris</td>
+                                    <td style="font-weight: 600;">Furniture</td>
                                     <td>BTM Layout</td>
                                     <td><span class="status-badge in-progress">In Progress</span></td>
                                     <td style="color: #64748b; font-size: 12px;">23 May, 10:30 AM</td>
-                                    <td class="text-center"><a href="#" class="action-link"><i class="fa fa-eye"></i></a></td>
+                                    <td class="text-center"><a href="#" class="action-link btn btn-primary">View</a></td>
                                 </tr>
                                 <tr>
                                     <td style="color: #64748b; font-size: 12px; font-weight:600;">#DCL-1255</td>
-                                    <td style="font-weight: 600;">C&D Waste</td>
+                                    <td style="font-weight: 600;">Furniture</td>
                                     <td>HSR Layout</td>
                                     <td><span class="status-badge assigned">Assigned</span></td>
                                     <td style="color: #64748b; font-size: 12px;">23 May, 10:15 AM</td>
-                                    <td class="text-center"><a href="#" class="action-link"><i class="fa fa-eye"></i></a></td>
+                                    <td class="text-center"><a href="#" class="action-link btn btn-primary">View</a></td>
                                 </tr>
                                 <tr>
                                     <td style="color: #64748b; font-size: 12px; font-weight:600;">#DCL-1254</td>
-                                    <td style="font-weight: 600;">Bulk Waste</td>
+                                    <td style="font-weight: 600;">Furniture</td>
                                     <td>Indiranagar</td>
                                     <td><span class="status-badge in-progress">In Progress</span></td>
                                     <td style="color: #64748b; font-size: 12px;">23 May, 09:45 AM</td>
-                                    <td class="text-center"><a href="#" class="action-link"><i class="fa fa-eye"></i></a></td>
+                                    <td class="text-center"><a href="#" class="action-link btn btn-primary">View</a></td>
                                 </tr>
                                 <tr>
                                     <td style="color: #64748b; font-size: 12px; font-weight:600;">#DCL-1253</td>
-                                    <td style="font-weight: 600;">Overflowing Bin</td>
+                                    <td style="font-weight: 600;">Furniture</td>
                                     <td>Jayanagar</td>
                                     <td><span class="status-badge completed">Completed</span></td>
                                     <td style="color: #64748b; font-size: 12px;">23 May, 09:30 AM</td>
-                                    <td class="text-center"><a href="#" class="action-link"><i class="fa fa-eye"></i></a></td>
+                                    <td class="text-center"><a href="#" class="action-link btn btn-primary">View</a></td>
                                 </tr>
                                 <tr>
                                     <td style="color: #64748b; font-size: 12px; font-weight:600;">#DCL-1252</td>
-                                    <td style="font-weight: 600;">Dead Animal</td>
+                                    <td style="font-weight: 600;">Furniture</td>
                                     <td>Koramangala</td>
                                     <td><span class="status-badge pending">Pending</span></td>
                                     <td style="color: #64748b; font-size: 12px;">23 May, 09:20 AM</td>
-                                    <td class="text-center"><a href="#" class="action-link"><i class="fa fa-eye"></i></a></td>
+                                    <td class="text-center"><a href="#" class="action-link btn btn-primary">View</a></td>
                                 </tr>
                             </tbody>
                         </table>

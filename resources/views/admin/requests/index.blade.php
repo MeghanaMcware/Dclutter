@@ -26,13 +26,13 @@
         align-items: center;
         justify-content: center;
         border-radius: 4px;
-        color: #6c757d;
+        color: #fff;
         background: transparent;
         transition: all 0.2s;
     }
     .action-btn:hover {
         background: #f8f9fa;
-        color: #212529;
+        color: #fff;
     }
     
     .filter-section {
@@ -93,132 +93,186 @@
                 <div class="card-body p-3">
                     
                     <!-- Top Filters matching screenshot -->
-                    <div class="row gx-2 mb-3 align-items-center">
-                        <div class="col-md-3">
-                            <input type="text" class="form-control filter-input" placeholder="Search Request ID, Location...">
-                        </div>
+                    <!-- Top Filters matching screenshot -->
+                    <div class="row gx-3 mb-4 align-items-end">
                         <div class="col-md-2">
-                            <select class="form-select filter-input">
-                                <option value="">All Categories</option>
-                                <option value="unmanned">Unmanned Debris</option>
-                                <option value="cd">C&D Waste Pickup</option>
-                                <option value="bulk">Bulk Waste Pickup</option>
-                                <option value="overflow">Overflowing Bin</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Status</label>
                             <select class="form-select filter-input">
                                 <option value="">All Status</option>
-                                <option value="in-progress">In-Progress</option>
-                                <option value="assigned">Assigned</option>
-                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
                                 <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Constituency</label>
                             <select class="form-select filter-input">
-                                <option value="">All Wards</option>
-                                <option value="112">112</option>
-                                <option value="95">95</option>
-                                <option value="150">150</option>
+                                <option value="">All Constituencies</option>
+                                <option value="vasanth-nagar">Vasanth Nagar</option>
+                                <option value="jp-nagar">JP Nagar</option>
+                                <option value="koramangala">Koramangala</option>
+                                <option value="btm-layout">BTM Layout</option>
+                                <option value="hsr-layout">HSR Layout</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <input class="form-control filter-input" type="text" placeholder="Date Range">
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">From Date</label>
+                            <input class="form-control filter-input" type="date" placeholder="Select Date">
                         </div>
-                        <div class="col-md-1 text-end">
-                            <button class="btn btn-export w-100"><i class="fa fa-download me-1"></i> Export</button>
+                        <div class="col-md-2">
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">To Date</label>
+                            <input class="form-control filter-input" type="date" placeholder="Select Date">
+                        </div>
+                       
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-export w-100 d-flex align-items-center justify-content-center gap-1"><i class="fa fa-download"></i> Export</button>
                         </div>
                     </div>
 
                     <!-- Table Data -->
                     <div class="table-responsive">
-                        <table class="table" id="requests-table">
+                        <table class="table table-bordered table-striped  text-center align-middle" id="data-source-1">
                             <thead>
                                 <tr>
-                                    <th>Request ID</th>
-                                    <th>Category</th>
-                                    <th>Location</th>
-                                    <th>Ward</th>
+                                    <th class="text-start">Request ID</th>
+                                    <th class="text-start">Category</th>
+                                    <th class="text-start">Pickup Location</th>
+                                    <th class="text-start">Constituency</th>
+                                    <th class="text-start">Requested By</th>
+                                    <th class="text-start">Mobile</th>
                                     <th>Status</th>
-                                    <th>Assigned To</th>
-                                    <th>Submitted On</th>
+                                    <th class="text-start">Created At</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="text-primary">#DCL-2025-001256</td>
-                                    <td>Unmanned Debris</td>
-                                    <td>12th Cross, BTM Layout</td>
-                                    <td>112</td>
-                                    <td><span class="status-badge status-in-progress">In-Progress</span></td>
-                                    <td>Ramesh B.</td>
-                                    <td>23 May 2025, 10:30 AM</td>
-                                    <td class="text-center">
-                                        <a href="#" class="action-btn" title="View"><i class="fa fa-eye"></i></a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-primary">#DCL-2025-001255</td>
-                                    <td>C&D Waste Pickup</td>
-                                    <td>HSR Layout, 3rd Main Road</td>
-                                    <td>95</td>
-                                    <td><span class="status-badge status-assigned">Assigned</span></td>
-                                    <td>Mahesh K.</td>
-                                    <td>23 May 2025, 10:15 AM</td>
-                                    <td class="text-center">
-                                        <a href="#" class="action-btn" title="View"><i class="fa fa-eye"></i></a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-primary">#DCL-2025-001254</td>
-                                    <td>Bulk Waste Pickup</td>
-                                    <td>Indiranagar, 100ft Road</td>
-                                    <td>150</td>
-                                    <td><span class="status-badge status-in-progress">In-Progress</span></td>
-                                    <td>Suresh P.</td>
-                                    <td>23 May 2025, 09:45 AM</td>
-                                    <td class="text-center">
-                                        <a href="#" class="action-btn" title="View"><i class="fa fa-eye"></i></a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-primary">#DCL-2025-001253</td>
-                                    <td>Overflowing Bin</td>
-                                    <td>Jayanagar 4th Block</td>
-                                    <td>112</td>
-                                    <td><span class="status-badge status-completed">Completed</span></td>
-                                    <td>Mahesh K.</td>
-                                    <td>23 May 2025, 09:30 AM</td>
-                                    <td class="text-center">
-                                        <a href="#" class="action-btn" title="View"><i class="fa fa-eye"></i></a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-primary">#DCL-2025-001252</td>
-                                    <td>Dead Animal</td>
-                                    <td>Koramangala, 8th Block</td>
-                                    <td>95</td>
+                                    <td class="text-start text-dark fw-bold">#REQ-000128</td>
+                                    <td class="text-start">Furniture</td>
+                                    <td class="text-start">30th Main Road, Banashankari</td>
+                                    <td class="text-start">Vasanth Nagar</td>
+                                    <td class="text-start">Ramesh Kumar</td>
+                                    <td class="text-start">6361457263</td>
                                     <td><span class="status-badge status-pending">Pending</span></td>
-                                    <td>-</td>
-                                    <td>23 May 2025, 09:20 AM</td>
+                                    <td class="text-start">09 Aug 2026</td>
                                     <td class="text-center">
-                                        <a href="#" class="action-btn" title="View"><i class="fa fa-eye"></i></a>
-                                    </td>
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{{ url('admin/requests/show') }}" 
+           class="btn btn-primary" 
+           title="View">
+            <i class="fa fa-eye"></i>
+        </a>
+
+        <a href="#" 
+           class="btn btn-success" 
+           title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+    </div>
+</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-primary">#DCL-2025-001251</td>
-                                    <td>Street Sweeping</td>
-                                    <td>Ejipura Main Road</td>
-                                    <td>144</td>
-                                    <td><span class="status-badge status-assigned">Assigned</span></td>
-                                    <td>Ramesh B.</td>
-                                    <td>23 May 2025, 09:10 AM</td>
+                                    <td class="text-start text-dark fw-bold">#REQ-000127</td>
+                                    <td class="text-start">Appliances</td>
+                                    <td class="text-start">14th Cross, JP Nagar</td>
+                                    <td class="text-start">JP Nagar</td>
+                                    <td class="text-start">Anita Sharma</td>
+                                    <td class="text-start">9845012345</td>
+                                    <td><span class="status-badge status-assigned">In Progress</span></td>
+                                    <td class="text-start">09 Aug 2026</td>
                                     <td class="text-center">
-                                        <a href="#" class="action-btn" title="View"><i class="fa fa-eye"></i></a>
-                                    </td>
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{{ url('admin/requests/show') }}" 
+           class="btn btn-primary" 
+           title="View">
+            <i class="fa fa-eye"></i>
+        </a>
+
+        <a href="#" 
+           class="btn btn-success" 
+           title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+    </div>
+</td>
                                 </tr>
+                                <tr>
+                                    <td class="text-start text-dark fw-bold">#REQ-000126</td>
+                                    <td class="text-start">Mattresses</td>
+                                    <td class="text-start">7th Block, Koramangala</td>
+                                    <td class="text-start">Koramangala</td>
+                                    <td class="text-start">Suresh Babu</td>
+                                    <td class="text-start">9008123456</td>
+                                    <td><span class="status-badge status-completed">Completed</span></td>
+                                    <td class="text-start">09 Aug 2026</td>
+                                    <td class="text-center">
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{{ url('admin/requests/show') }}" 
+           class="btn btn-primary" 
+           title="View">
+            <i class="fa fa-eye"></i>
+        </a>
+
+        <a href="#" 
+           class="btn btn-success" 
+           title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+    </div>
+</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start text-dark fw-bold">#REQ-000125</td>
+                                    <td class="text-start">Furniture</td>
+                                    <td class="text-start">1st Stage, BTM Layout</td>
+                                    <td class="text-start">BTM Layout</td>
+                                    <td class="text-start">Priya N</td>
+                                    <td class="text-start">6367788990</td>
+                                    <td><span class="status-badge status-pending">Pending</span></td>
+                                    <td class="text-start">08 Aug 2026</td>
+                                   <td class="text-center">
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{{ url('admin/requests/show') }}" 
+           class="btn btn-primary" 
+           title="View">
+            <i class="fa fa-eye"></i>
+        </a>
+
+        <a href="#" 
+           class="btn btn-success" 
+           title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+    </div>
+</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start text-dark fw-bold">#REQ-000124</td>
+                                    <td class="text-start">Electronics</td>
+                                    <td class="text-start">5th Block, HSR Layout</td>
+                                    <td class="text-start">HSR Layout</td>
+                                    <td class="text-start">Vikram Singh</td>
+                                    <td class="text-start">7890123456</td>
+                                    <td><span class="status-badge status-rejected" style="background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a;">Rejected</span></td>
+                                    <td class="text-start">08 Aug 2026</td>
+                                    <td class="text-center">
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{{ url('admin/requests/show') }}" 
+           class="btn btn-primary" 
+           title="View">
+            <i class="fa fa-eye"></i>
+        </a>
+
+        <a href="#" 
+           class="btn btn-success" 
+           title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+    </div>
+</td>
+                                </tr>
+                                
                             </tbody>
                         </table>
                     </div>

@@ -85,7 +85,52 @@ Route::match(['get', 'post'], '/vehicle/login-submit', function () {
 Route::get('/admin/requests', function () {
     return view('admin.requests.index');
 });
+Route::get('/admin/requests/show', function () {
+    return view('admin.requests.show');
+});
 
 Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
 });
+
+// Admin Vehicle Routes
+
+    Route::get('/vehicles', function () {
+        return view('admin.vehicles.index');
+    });
+    Route::get('/vehicles/create', function () {
+        return view('admin.vehicles.create');
+    });
+    Route::get('/view', function () {
+        return view('admin.vehicles.show');
+    });
+    Route::get('/edit', function () {
+        return view('admin.vehicles.edit');
+    });
+
+
+// Admin Masters Routes
+
+    
+        Route::get('/categories', function () {
+            return view('admin.masters.categories.index');
+        });
+        Route::get('/categoriescreate', function () {
+            return view('admin.masters.categories.create');
+        });
+        Route::get('/categoriesedit', function () {
+            return view('admin.masters.categories.edit');
+        });
+    
+
+    
+        Route::get('/subcategories', function () {
+            return view('admin.masters.subcategories.index');
+        });
+        Route::get('/subcategoriescreate', function () {
+            return view('admin.masters.subcategories.create');
+        });
+        Route::get('/subcategoriesedit', function () {
+            return view('admin.masters.subcategories.edit');
+        });
+  

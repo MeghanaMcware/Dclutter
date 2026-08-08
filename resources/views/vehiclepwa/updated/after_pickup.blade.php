@@ -42,11 +42,6 @@
                         <div id="afterPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Approximate Weight (kg)<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="approxWeight" placeholder="Enter approximate weight" min="0" step="0.1" required>
-                        <div class="invalid-feedback">Please enter the approximate weight.</div>
-                    </div>
 
                     <div class="location-group d-flex gap-2 mb-3">
                         <div class="form-group flex-fill mb-0">
@@ -228,7 +223,7 @@
 
     function submitStatusUpdate() {
         const afterPhotoInput = document.getElementById('afterPhoto');
-        const approxWeightInput = document.getElementById('approxWeight');
+
         const latInput = document.getElementById('currentLat');
         const lngInput = document.getElementById('currentLng');
         const submitBtn = document.getElementById('submitBtn');
@@ -241,12 +236,6 @@
         if (selectedFilesArray['after'].length === 0) {
             afterPhotoInput.classList.remove('is-valid');
             afterPhotoInput.classList.add('is-invalid');
-            isValid = false;
-        }
-
-        if (!approxWeightInput.value || parseFloat(approxWeightInput.value) <= 0) {
-            approxWeightInput.classList.remove('is-valid');
-            approxWeightInput.classList.add('is-invalid');
             isValid = false;
         }
 

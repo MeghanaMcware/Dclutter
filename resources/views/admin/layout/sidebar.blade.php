@@ -23,14 +23,14 @@
           
 
           <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav active" href="#dashboard">
+            <a class="sidebar-link sidebar-title link-nav" href="{{ url('admin/dashboard') }}">
               <i data-feather="home"></i>
               <span>Dashboard</span>
             </a>
           </li>
 
           <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav" href="#requests">
+            <a class="sidebar-link sidebar-title link-nav" href="{{ url('admin/requests') }}">
               <i data-feather="list"></i>
               <span>All Requests</span>
             </a>
@@ -43,12 +43,12 @@
             </a>
           </li>
 
-          <!-- <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav" href="#vehicles">
+          <li class="sidebar-list">
+            <a class="sidebar-link sidebar-title link-nav" href="{{ url('admin/vehicles') }}">
               <i data-feather="truck"></i>
-              <span>Vehicle Creations & Approvals</span>
+              <span>Vehicle Details</span>
             </a>
-          </li> -->
+          </li>
 
           <!-- <li class="sidebar-list">
             <a class="sidebar-link sidebar-title link-nav" href="#trips">
@@ -68,12 +68,16 @@
                   Vehicle 
                 </a>
               </li>
-              <!-- <li>
-                <a href="#ae-accounts">
-                  AE Accounts Creation
+              <li>
+                <a href="{{ url('admin/masters/categories') }}">
+                  Category 
                 </a>
-              </li> -->
-              
+              </li>
+              <li>
+                <a href="{{ url('admin/masters/subcategories') }}">
+                  Sub Category
+                </a>
+              </li>
             </ul>
           </li>
 

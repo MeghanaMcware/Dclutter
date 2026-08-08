@@ -770,19 +770,19 @@ textarea.is-invalid ~ .invalid-feedback,
                     <!-- New Fields -->
                     <div>
                         <label>House No <span class="req">*</span></label>
-                        <input type="text" id="houseNoInput" placeholder="e.g. #123, 4th Cross" required oninput="validateSingleField(this)">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter your house number.</div>
+                        <input type="text" id="houseNoInput" placeholder="e.g. #123" pattern="^[#0-9]+$" required oninput="this.value = this.value.replace(/[^#0-9]/g, ''); validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a valid house number (only # and numbers).</div>
                     </div>
                     
                     <div>
                         <label>Corporation  <span class="req">*</span></label>
-                        <input type="text" id="constituencyInput" placeholder="Enter Constituency" required oninput="validateSingleField(this)">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter corporation constituency.</div>
+                        <input type="text" id="corporationInput" placeholder="Enter Corporation" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter corporation.</div>
                     </div>
                     <div>
                         <label>Constituency  <span class="req">*</span></label>
                         <input type="text" id="constituencyInput" placeholder="Enter Constituency" required oninput="validateSingleField(this)">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter corporation constituency.</div>
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter constituency.</div>
                     </div>
 
                     <div>
@@ -800,8 +800,9 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
 
                     <div>
-                        <label>Landmark</label>
-                        <input type="text" id="landmarkInput" placeholder="Enter nearby landmark (e.g. Near Metro Station)">
+                        <label>Landmark <span class="req">*</span></label>
+                        <input type="text" id="landmarkInput" placeholder="Enter nearby landmark (e.g. Near Metro Station)" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a landmark.</div>
                     </div>
 
                     <div>
@@ -1352,7 +1353,9 @@ function validateStep(step) {
         const images = document.getElementById('wasteImagesInput');
         const address = document.getElementById('addressInput');
         const houseNo = document.getElementById('houseNoInput');
+        const corporation = document.getElementById('corporationInput');
         const constituency = document.getElementById('constituencyInput');
+        const landmark = document.getElementById('landmarkInput');
         const ward = document.getElementById('wardSelect');
         const pincode = document.getElementById('pincodeInput');
         const mobile = document.getElementById('mobileInput');
@@ -1370,7 +1373,7 @@ function validateStep(step) {
             imageError.style.display = 'none';
         }
 
-        [address, houseNo, constituency, ward, pincode, mobile].forEach(el => {
+        [address, houseNo, corporation, constituency, landmark, ward, pincode, mobile].forEach(el => {
             if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                 if (el) {
                     el.classList.remove('is-valid');

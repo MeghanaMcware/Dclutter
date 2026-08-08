@@ -2,9 +2,9 @@
     <a href="{{ route('driver.dashboard') }}" class="{{ request()->routeIs('driver.dashboard') ? 'active' : '' }}">
         <i class="fa-solid fa-house"></i>Home
     </a>
-    <!-- <a href="{{ route('driver.requests') }}" class="{{ request()->routeIs('driver.requests*') ? 'active' : '' }}">
+    <a href="{{ route('driver.requests') }}" class="{{ request()->routeIs('driver.requests*') ? 'active' : '' }}">
         <i class="fa-solid fa-list-check"></i>Requests
-    </a> -->
+    </a>
     <a href="{{ route('driver.trip_progress') }}" class="{{ request()->routeIs('driver.trip_progress*') || request()->routeIs('driver.update_status') || request()->routeIs('driver.trip_summary') ? 'active' : '' }}">
         <i class="fa-solid fa-truck"></i>Trips
     </a>
