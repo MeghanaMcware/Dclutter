@@ -319,6 +319,7 @@
 
             return false;
         };
+    </script>
     @yield('script')
 </body>
 

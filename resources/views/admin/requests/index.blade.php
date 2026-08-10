@@ -18,52 +18,63 @@
     .status-assigned { background-color: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
     .status-pending { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
     .status-completed { background-color: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
+    .status-rejected { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
 
-    .action-btn {
-        width: 28px;
-        height: 28px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 4px;
-        color: #fff;
-        background: transparent;
-        transition: all 0.2s;
-    }
-    .action-btn:hover {
-        background: #f8f9fa;
-        color: #fff;
-    }
-    
-    .filter-section {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-        padding: 15px;
-        border: 1px solid #eaebf0;
-    }
-    
     .filter-input {
         font-size: 13px;
-        border-radius: 4px;
+        border-radius: 6px;
         border: 1px solid #ced4da;
+        height: 40px;
+    }
+    
+    .btn-filter-primary {
+        background-color: #0d6efd;
+        color: white;
+        font-size: 13px;
+        padding: 8px 18px;
+        border-radius: 6px;
+        border: none;
+        height: 40px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .btn-filter-primary:hover {
+        background-color: #0b5ed7;
+        color: white;
+    }
+
+    .btn-reset-outline {
+        background-color: #ffffff;
+        color: #6c757d;
+        font-size: 13px;
+        padding: 8px 18px;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        height: 40px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .btn-reset-outline:hover {
+        background-color: #f8f9fa;
+        color: #212529;
     }
     
     .btn-export {
         background-color: #198754;
         color: white;
         font-size: 13px;
-        padding: 6px 16px;
-        border-radius: 4px;
+        padding: 8px 18px;
+        border-radius: 6px;
         border: none;
+        height: 40px;
+        font-weight: 600;
+        transition: all 0.2s ease;
     }
     .btn-export:hover {
         background-color: #157347;
         color: white;
     }
     
-    /* Table styling to match the screenshot */
     table.dataTable thead th {
         font-size: 12px;
         color: #6c757d;
@@ -90,49 +101,64 @@
             <h4 class="mb-3 font-weight-bold" style="color: #1e293b; font-weight: 700;">All Requests</h4>
             
             <div class="card" style="border: 1px solid #eaebf0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border-radius: 8px;">
-                <div class="card-body p-3">
+                <div class="card-body p-4">
                     
-                    <!-- Top Filters matching screenshot -->
-                    <!-- Top Filters matching screenshot -->
-                    <div class="row gx-3 mb-4 align-items-end">
-                        <div class="col-md-2">
+                    <!-- Clean 2-Row Filter Section -->
+                    <div class="row g-3 mb-4">
+                        <!-- Row 1: Dropdown Selection Filters -->
+                        <div class="col-md-4">
                             <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Status</label>
-                            <select class="form-select filter-input">
+                            <select id="statusFilter" class="form-select filter-input">
                                 <option value="">All Status</option>
-                                <option value="in-progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="pending">Pending</option>
-                                <option value="rejected">Rejected</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Assigned">Assigned</option>
+                                <option value="Picked Up">Picked Up</option>
+                                <option value="Dumped">Dumped</option>
+                                <option value="Rejected">Rejected</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Corporation</label>
+                            <select id="corporationFilter" class="form-select filter-input">
+                                <option value="">All Corporations</option>
+                                @foreach($corporations as $corp)
+                                    <option value="{{ $corp->name }}">{{ $corp->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Constituency</label>
-                            <select class="form-select filter-input">
+                            <select id="constituencyFilter" class="form-select filter-input">
                                 <option value="">All Constituencies</option>
-                                <option value="vasanth-nagar">Vasanth Nagar</option>
-                                <option value="jp-nagar">JP Nagar</option>
-                                <option value="koramangala">Koramangala</option>
-                                <option value="btm-layout">BTM Layout</option>
-                                <option value="hsr-layout">HSR Layout</option>
+                                @foreach($constituencies as $constituency)
+                                    <option value="{{ $constituency->name }}">{{ $constituency->name }}</option>
+                                @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+
+                        <!-- Row 2: Date Filters & Action Buttons -->
+                        <div class="col-md-4">
                             <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">From Date</label>
-                            <input class="form-control filter-input" type="date" placeholder="Select Date">
+                            <input id="fromDateFilter" class="form-control filter-input" type="date">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">To Date</label>
-                            <input class="form-control filter-input" type="date" placeholder="Select Date">
+                            <input id="toDateFilter" class="form-control filter-input" type="date">
                         </div>
-                       
-                        <div class="col-md-2 text-end">
-                            <button class="btn btn-export w-100 d-flex align-items-center justify-content-center gap-1"><i class="fa fa-download"></i> Export</button>
+                        <div class="col-md-4 d-flex align-items-end justify-content-end gap-2">
+                            <button type="button" id="applyFilterBtn" class="btn btn-filter-primary d-flex align-items-center gap-1">
+                                <i class="fa fa-filter"></i> Filter
+                            </button>
+                            <button type="button" id="resetFilterBtn" class="btn btn-reset-outline">Reset</button>
+                            <button type="button" id="exportBtn" class="btn btn-export d-flex align-items-center gap-1" onclick="exportTableToCSV('waste_requests.csv')">
+                                <i class="fa fa-download"></i> Export
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Table Data -->
+                    <!-- Table Data with Unique ID admin-waste-requests-table -->
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped  text-center align-middle" id="data-source-1">
+                        <table class="table table-bordered table-striped text-center align-middle" id="admin-waste-requests-table">
                             <thead>
                                 <tr>
                                     <th class="text-start">Request ID</th>
@@ -147,132 +173,51 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td class="text-start text-dark fw-bold">#REQ-000128</td>
-                                    <td class="text-start">Furniture</td>
-                                    <td class="text-start">30th Main Road, Banashankari</td>
-                                    <td class="text-start">Vasanth Nagar</td>
-                                    <td class="text-start">Ramesh Kumar</td>
-                                    <td class="text-start">6361457263</td>
-                                    <td><span class="status-badge status-pending">Pending</span></td>
-                                    <td class="text-start">09 Aug 2026</td>
-                                    <td class="text-center">
-    <div class="d-flex justify-content-center gap-2">
-        <a href="{{ url('admin/requests/show') }}" 
-           class="btn btn-primary" 
-           title="View">
-            <i class="fa fa-eye"></i>
-        </a>
-
-        <a href="#" 
-           class="btn btn-success" 
-           title="Edit">
-            <i class="fa fa-edit"></i>
-        </a>
-    </div>
-</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start text-dark fw-bold">#REQ-000127</td>
-                                    <td class="text-start">Appliances</td>
-                                    <td class="text-start">14th Cross, JP Nagar</td>
-                                    <td class="text-start">JP Nagar</td>
-                                    <td class="text-start">Anita Sharma</td>
-                                    <td class="text-start">9845012345</td>
-                                    <td><span class="status-badge status-assigned">In Progress</span></td>
-                                    <td class="text-start">09 Aug 2026</td>
-                                    <td class="text-center">
-    <div class="d-flex justify-content-center gap-2">
-        <a href="{{ url('admin/requests/show') }}" 
-           class="btn btn-primary" 
-           title="View">
-            <i class="fa fa-eye"></i>
-        </a>
-
-        <a href="#" 
-           class="btn btn-success" 
-           title="Edit">
-            <i class="fa fa-edit"></i>
-        </a>
-    </div>
-</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start text-dark fw-bold">#REQ-000126</td>
-                                    <td class="text-start">Mattresses</td>
-                                    <td class="text-start">7th Block, Koramangala</td>
-                                    <td class="text-start">Koramangala</td>
-                                    <td class="text-start">Suresh Babu</td>
-                                    <td class="text-start">9008123456</td>
-                                    <td><span class="status-badge status-completed">Completed</span></td>
-                                    <td class="text-start">09 Aug 2026</td>
-                                    <td class="text-center">
-    <div class="d-flex justify-content-center gap-2">
-        <a href="{{ url('admin/requests/show') }}" 
-           class="btn btn-primary" 
-           title="View">
-            <i class="fa fa-eye"></i>
-        </a>
-
-        <a href="#" 
-           class="btn btn-success" 
-           title="Edit">
-            <i class="fa fa-edit"></i>
-        </a>
-    </div>
-</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start text-dark fw-bold">#REQ-000125</td>
-                                    <td class="text-start">Furniture</td>
-                                    <td class="text-start">1st Stage, BTM Layout</td>
-                                    <td class="text-start">BTM Layout</td>
-                                    <td class="text-start">Priya N</td>
-                                    <td class="text-start">6367788990</td>
-                                    <td><span class="status-badge status-pending">Pending</span></td>
-                                    <td class="text-start">08 Aug 2026</td>
-                                   <td class="text-center">
-    <div class="d-flex justify-content-center gap-2">
-        <a href="{{ url('admin/requests/show') }}" 
-           class="btn btn-primary" 
-           title="View">
-            <i class="fa fa-eye"></i>
-        </a>
-
-        <a href="#" 
-           class="btn btn-success" 
-           title="Edit">
-            <i class="fa fa-edit"></i>
-        </a>
-    </div>
-</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start text-dark fw-bold">#REQ-000124</td>
-                                    <td class="text-start">Electronics</td>
-                                    <td class="text-start">5th Block, HSR Layout</td>
-                                    <td class="text-start">HSR Layout</td>
-                                    <td class="text-start">Vikram Singh</td>
-                                    <td class="text-start">7890123456</td>
-                                    <td><span class="status-badge status-rejected" style="background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a;">Rejected</span></td>
-                                    <td class="text-start">08 Aug 2026</td>
-                                    <td class="text-center">
-    <div class="d-flex justify-content-center gap-2">
-        <a href="{{ url('admin/requests/show') }}" 
-           class="btn btn-primary" 
-           title="View">
-            <i class="fa fa-eye"></i>
-        </a>
-
-        <a href="#" 
-           class="btn btn-success" 
-           title="Edit">
-            <i class="fa fa-edit"></i>
-        </a>
-    </div>
-</td>
-                                </tr>
-                                
+                                @forelse($requests as $req)
+                                    <tr>
+                                        <td class="text-start text-dark fw-bold">{{ $req->request_number }}</td>
+                                        <td class="text-start">
+                                            @if(is_array($req->category_ids))
+                                                {{ implode(', ', $req->category_ids) }}
+                                            @else
+                                                {{ $req->category_ids }}
+                                            @endif
+                                        </td>
+                                        <td class="text-start">{{ $req->house_no }}, {{ Str::limit($req->address, 30) }}</td>
+                                        <td class="text-start">{{ $req->constituency?->name ?? 'N/A' }}</td>
+                                        <td class="text-start">{{ $req->applicant_name }}</td>
+                                        <td class="text-start">{{ $req->mobile_number }}</td>
+                                        <td>
+                                            @php
+                                                $statusClasses = [
+                                                    'pending' => 'status-pending',
+                                                    'assigned' => 'status-assigned',
+                                                    'picked_up' => 'status-in-progress',
+                                                    'dumped' => 'status-completed',
+                                                    'rejected' => 'status-rejected',
+                                                ];
+                                            @endphp
+                                            <span class="status-badge {{ $statusClasses[$req->status] ?? 'status-pending' }}">
+                                                {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-start">{{ $req->created_at->format('d M Y') }}</td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="{{ route('admin.requests.show', $req->id) }}" class="btn btn-primary" title="View">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-success" title="Edit">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9" class="text-muted py-4">No waste requests found.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -287,22 +232,172 @@
 @section('script')
 <script>
     $(document).ready(function() {
-        if ($.fn.DataTable.isDataTable('#requests-table')) {
-            $('#requests-table').DataTable().destroy();
+        // Prevent DataTables popup alerts
+        $.fn.dataTable.ext.errMode = 'none';
+
+        const corporationsData = @json($corporations);
+
+        // Dependent Constituency Dropdown Filter
+        $('#corporationFilter').on('change', function() {
+            const corpName = $(this).val();
+            const $constSelect = $('#constituencyFilter');
+            $constSelect.html('<option value="">All Constituencies</option>');
+
+            if (corpName) {
+                const corp = corporationsData.find(c => c.name === corpName);
+                if (corp && corp.constituencies) {
+                    corp.constituencies.forEach(constituency => {
+                        $constSelect.append(new Option(constituency.name, constituency.name));
+                    });
+                }
+            } else {
+                @foreach($constituencies as $constituency)
+                    $constSelect.append(new Option("{{ $constituency->name }}", "{{ $constituency->name }}"));
+                @endforeach
+            }
+        });
+
+        // Initialize DataTables on unique ID admin-waste-requests-table
+        if ($.fn.DataTable.isDataTable('#admin-waste-requests-table')) {
+            $('#admin-waste-requests-table').DataTable().destroy();
         }
-        $('#requests-table').DataTable({
-            "order": [], // Disable initial sorting to keep the dummy data order
+
+        var table = $('#admin-waste-requests-table').DataTable({
+            "order": [],
             "pageLength": 10,
-            "lengthChange": false, // Hide "show x entries" as per screenshot
-            "searching": false,    // Hide default datatable search since we have custom filters
-            "info": true,          // Show "Showing 1 to 10 of x entries"
+            "lengthChange": false,
+            "searching": true,
+            "info": true,
             "language": {
                 "paginate": {
                     "previous": "<",
                     "next": ">"
-                }
+                },
+                "emptyTable": "No waste requests found matching selected criteria."
             }
         });
+
+        // Dynamic AJAX Filtering without Page Reload
+        function performAjaxFilter() {
+            const status = $('#statusFilter').val();
+            const corporation = $('#corporationFilter').val();
+            const constituency = $('#constituencyFilter').val();
+            const fromDate = $('#fromDateFilter').val();
+            const toDate = $('#toDateFilter').val();
+
+            const $tableBody = $('#admin-waste-requests-table tbody');
+            $tableBody.css('opacity', '0.4');
+
+            const params = new URLSearchParams({
+                status: status,
+                corporation: corporation,
+                constituency: constituency,
+                from_date: fromDate,
+                to_date: toDate
+            });
+
+            fetch(`{{ route('admin.requests.index') }}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                table.clear();
+
+                if (data.success && Array.isArray(data.requests) && data.requests.length > 0) {
+                    const statusClassMap = {
+                        'pending': 'status-pending',
+                        'assigned': 'status-assigned',
+                        'picked_up': 'status-in-progress',
+                        'dumped': 'status-completed',
+                        'rejected': 'status-rejected'
+                    };
+
+                    data.requests.forEach(req => {
+                        const statusClass = statusClassMap[req.status] || 'status-pending';
+                        const statusHtml = `<span class="status-badge ${statusClass}">${req.status_label}</span>`;
+                        const actionsHtml = `
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="${req.show_url}" class="btn btn-primary" title="View">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                <a href="#" class="btn btn-success" title="Edit">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                            </div>
+                        `;
+
+                        table.row.add([
+                            `<span class="text-start text-dark fw-bold">${req.request_number}</span>`,
+                            `<span class="text-start">${req.category}</span>`,
+                            `<span class="text-start">${req.pickup_location}</span>`,
+                            `<span class="text-start">${req.constituency}</span>`,
+                            `<span class="text-start">${req.applicant_name}</span>`,
+                            `<span class="text-start">${req.mobile_number}</span>`,
+                            statusHtml,
+                            `<span class="text-start">${req.created_at}</span>`,
+                            actionsHtml
+                        ]);
+                    });
+                }
+
+                table.draw();
+                $tableBody.css('opacity', '1');
+            })
+            .catch(err => {
+                console.error('AJAX Filter failed', err);
+                $tableBody.css('opacity', '1');
+            });
+        }
+
+        // Apply Filter Button Click
+        $('#applyFilterBtn').on('click', function(e) {
+            e.preventDefault();
+            performAjaxFilter();
+        });
+
+        // Reset Button Click
+        $('#resetFilterBtn').on('click', function(e) {
+            e.preventDefault();
+            $('#statusFilter').val('');
+            $('#corporationFilter').val('');
+            $('#fromDateFilter').val('');
+            $('#toDateFilter').val('');
+            
+            const $constSelect = $('#constituencyFilter');
+            $constSelect.html('<option value="">All Constituencies</option>');
+            @foreach($constituencies as $constituency)
+                $constSelect.append(new Option("{{ $constituency->name }}", "{{ $constituency->name }}"));
+            @endforeach
+
+            performAjaxFilter();
+        });
     });
+
+    // Simple Table CSV Export helper
+    function exportTableToCSV(filename) {
+        var csv = [];
+        var rows = document.querySelectorAll("#admin-waste-requests-table tr");
+        
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll("td, th");
+            for (var j = 0; j < cols.length - 1; j++) {
+                var text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                row.push('"' + text.replace(/"/g, '""') + '"');
+            }
+            csv.push(row.join(","));
+        }
+
+        var csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+        var downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
 </script>
 @endsection

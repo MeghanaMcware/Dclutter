@@ -1,5 +1,6 @@
 @extends('layouts.app')
 
+@section('content')
 <style>
 :root {
     --green: #087d45;
@@ -69,17 +70,21 @@
 
 .pill {
     font-size: 11px;
-    background: #e3f3e8;
-    color: var(--green);
     border-radius: 20px;
     padding: 6px 14px;
     font-weight: 700;
-    border: 1px solid #bce4c8;
+    text-transform: uppercase;
+    display: inline-block;
 }
+.pill-pending { background: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
+.pill-assigned { background: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
+.pill-picked_up { background: #fff4e5; color: #ff9800; border: 1px solid #ffcc80; }
+.pill-dumped { background: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
+.pill-rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
 .facts {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     border-top: 1px solid var(--line);
     padding-top: 20px;
     gap: 16px;
@@ -162,14 +167,14 @@
 
 .photos-gallery {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-top: 14px;
 }
 
 .photos-gallery img {
     width: 100%;
-    height: 110px;
+    height: 140px;
     object-fit: cover;
     border-radius: 6px;
     border: 1px solid var(--line);
@@ -183,116 +188,156 @@
 
 @media (max-width: 768px) {
     .details-grid { grid-template-columns: 1fr; }
-    .facts { grid-template-columns: 1fr 1fr; }
+    .facts { grid-template-columns: 1fr; }
 }
 </style>
 
-@section('content')
 <main class="request-ui">
-    <div class="crumb"><a href="{{ url('/') }}">Home</a> / <a href="{{ route('citizen.track') }}">Track Request</a> / Request Details</div>
+    <div class="crumb">
+        <a href="{{ url('/') }}">Home</a> / 
+        <a href="{{ route('citizen.track', ['id' => $wasteRequest?->request_number]) }}">Track Request</a> / 
+        Request Details
+    </div>
     <h1>Request Details</h1>
 
-    <div class="details-grid">
-        <div class="card-ui">
-            <div class="topline">
-                <div>
-                    <div class="ref" id="detailsReqId">{{ request('id', 'DCL-2025-000123') }}</div>
-                    <div class="sub" id="detailsReqDate">Requested on: 23 May 2025, 10:30 AM</div>
+    @if($wasteRequest)
+        @php
+            $status = $wasteRequest->status;
+            $pillMap = [
+                'pending' => 'pill-pending',
+                'assigned' => 'pill-assigned',
+                'picked_up' => 'pill-picked_up',
+                'dumped' => 'pill-dumped',
+                'rejected' => 'pill-rejected',
+            ];
+        @endphp
+
+        <div class="details-grid">
+            <div class="card-ui">
+                <div class="topline">
+                    <div>
+                        <div class="ref" id="detailsReqId">{{ $wasteRequest->request_number }}</div>
+                        <div class="sub" id="detailsReqDate">
+                            Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
+                        </div>
+                    </div>
+                    <span class="pill {{ $pillMap[$status] ?? 'pill-pending' }}">
+                        {{ ucfirst(str_replace('_', ' ', $status)) }}
+                    </span>
                 </div>
-                <span class="pill">In Progress</span>
+
+                <div class="facts">
+                    <div>
+                        <small>Pickup Address</small>
+                        <b>{{ $wasteRequest->house_no }}, {{ $wasteRequest->address }} (Pincode: {{ $wasteRequest->pincode }})</b>
+                    </div>
+                    <div>
+                        <small>Waste Categories</small>
+                        <b>
+                            @if(is_array($wasteRequest->category_ids))
+                                {{ implode(', ', $wasteRequest->category_ids) }}
+                            @else
+                                {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
+                            @endif
+                        </b>
+                    </div>
+                    <div>
+                        <small>Ward &amp; Zone</small>
+                        <b>
+                            {{ $wasteRequest->ward ? ($wasteRequest->ward->name . ' (Ward ' . $wasteRequest->ward->ward_number . ')') : 'N/A' }} 
+                            - {{ $wasteRequest->constituency?->name ?? 'N/A' }}
+                        </b>
+                    </div>
+                    <div>
+                        <small>Corporation</small>
+                        <b>{{ $wasteRequest->corporation?->name ?? ($wasteRequest->ward?->constituency?->corporation?->name ?? 'N/A') }}</b>
+                    </div>
+                    <div>
+                        <small>Scheduled Pickup Date</small>
+                        <b>{{ $wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d M Y (l)') : 'Sunday Scheduled' }}</b>
+                    </div>
+                    <div>
+                        <small>Landmark</small>
+                        <b>{{ $wasteRequest->landmark ?? 'N/A' }}</b>
+                    </div>
+                </div>
+
+                <div class="section-label">Status Timeline</div>
+                <div class="timeline">
+                    <div>
+                        <b>Request Submitted</b>
+                        <small>{{ $wasteRequest->created_at->format('d M Y, h:i A') }}</small>
+                    </div>
+                    
+                    <div class="{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? '' : 'pending' }}">
+                        <b>Verified &amp; Processed</b>
+                        <small>{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? 'Verified by BBMP Team' : 'Processing verification' }}</small>
+                    </div>
+                    
+                    <div class="{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? '' : 'pending' }}">
+                        <b>Assigned to Vehicle</b>
+                        <small>
+                            @if($wasteRequest->vehicle)
+                                {{ $wasteRequest->vehicle->registration_number }} ({{ $wasteRequest->vehicle->driver?->name ?? 'Driver' }})
+                            @else
+                                Pending vehicle assignment
+                            @endif
+                        </small>
+                    </div>
+                    
+                    <div class="{{ in_array($status, ['picked_up', 'dumped']) ? '' : 'pending' }}">
+                        <b>On the Way / Picked Up</b>
+                        <small>{{ in_array($status, ['picked_up', 'dumped']) ? 'Picked up from location' : 'Pending pickup' }}</small>
+                    </div>
+                    
+                    <div class="{{ $status == 'dumped' ? '' : 'pending' }}">
+                        <b>Disposed &amp; Dumped</b>
+                        <small>{{ $status == 'dumped' ? 'Dumped at processing facility' : 'Pending completion' }}</small>
+                    </div>
+                </div>
             </div>
 
-            <div class="facts" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
-                <div>
-                    <small>Pickup Location</small>
-                    <b id="detailsAddress">123, 1st Cross, Kanamangala 6th Block, Bengaluru, Karnataka - 560064</b>
-                </div>
-                <div>
-                    <small>Waste Details</small>
-                    <b id="detailsWasteType">Bricks / Concrete</b>
-                </div>
-                <div>
-                    <small>Ward &amp; Zone</small>
-                    <b id="detailsWard">Ward 95 - South Zone</b>
-                </div>
-                <div>
-                    <small>Estimated Quantity</small>
-                    <b id="detailsQuantity">2.5 Ton</b>
-                </div>
-                <div>
-                    <small>Preferred Date</small>
-                    <b id="detailsPrefDate">23 May 2025</b>
-                </div>
-                <div>
-                    <small>Description</small>
-                    <b id="detailsDesc">Renovation debris</b>
-                </div>
-            </div>
-
-            <div class="section-label">Status Timeline</div>
-            <div class="timeline">
-                <div>
-                    <b>Request Submitted</b>
-                    <small id="timelineSubDate">23 May 2025, 10:30 AM</small>
-                </div>
-                <div>
-                    <b>Verified</b>
-                    <small>23 May 2025, 10:45 AM</small>
-                </div>
-                <div>
-                    <b>Assigned to Contractor</b>
-                    <small>23 May 2025, 11:15 AM</small>
-                </div>
-                <div>
-                    <b>On the Way / Pickup</b>
-                    <small>23 May 2025, 01:45 PM</small>
-                </div>
-                <div class="pending">
-                    <b style="color: var(--muted);">Disposed &amp; Recycled</b>
-                    <small>Pending completion</small>
+            <!-- Evidence Photos Card -->
+            <div class="card-ui">
+                <div class="section-label" style="margin-top: 0;">Uploaded Waste Photos</div>
+                <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
+                    Digital photo evidence uploaded during request submission:
+                </p>
+                
+                @if(is_array($wasteRequest->waste_images) && count($wasteRequest->waste_images) > 0)
+                    <div class="photos-gallery">
+                        @foreach($wasteRequest->waste_images as $index => $imgPath)
+                            <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                 alt="Waste Photo {{ $index + 1 }}" 
+                                 onclick="window.open(this.src, '_blank')"
+                                 onerror="this.src='https://placehold.co/400x300?text=Waste+Image'">
+                        @endforeach
+                    </div>
+                @else
+                    <div class="p-4 border rounded text-center bg-light mt-3">
+                        <i class="fa fa-image fa-3x text-muted mb-2"></i>
+                        <p class="text-muted mb-0" style="font-size: 13px;">No waste photos uploaded for this request.</p>
+                    </div>
+                @endif
+                
+                <div class="mt-4 pt-3 border-top">
+                    <a href="{{ route('citizen.track', ['id' => $wasteRequest->request_number]) }}" class="btn-ui w-100 text-center">
+                        <i class="fa fa-arrow-left me-1"></i> Back to Track Request
+                    </a>
                 </div>
             </div>
         </div>
-
-        <div class="card-ui">
-            <div class="section-label" style="margin-top: 0;">Evidence Photos</div>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
-                Digital proof uploaded for site inspection and transport verification:
+    @else
+        <div class="card-ui text-center py-5">
+            <i class="fa fa-search fa-3x text-muted mb-3"></i>
+            <h4 class="fw-bold" style="color: #2c3e50;">Request Details Not Found</h4>
+            <p class="text-muted mb-0" style="font-size: 14px;">
+                We couldn't find any request matching "<strong>{{ $reqId }}</strong>".
             </p>
-            <div class="photos-gallery">
-                <img src="{{ asset('frontendwebsite/img/candd_new_image.png') }}" alt="Waste Debris Photo 1" onclick="openPhotoModal(this.src)">
-                <img src="{{ asset('frontendwebsite/img/candd_new_image.png') }}" alt="Waste Debris Photo 2" onclick="openPhotoModal(this.src)">
-                <img src="{{ asset('frontendwebsite/img/candd_new_image.png') }}" alt="Waste Debris Photo 3" onclick="openPhotoModal(this.src)">
+            <div class="mt-4">
+                <a href="{{ route('citizen.track') }}" class="btn-ui">Return to Track Request</a>
             </div>
         </div>
-    </div>
+    @endif
 </main>
-@endsection
-
-@section('script')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof hideLoader === 'function') hideLoader();
-
-    const searchId = new URLSearchParams(window.location.search).get('id') || 'DCL-2025-000123';
-    const saved = JSON.parse(localStorage.getItem('dclutter_requests') || '[]');
-    const found = saved.find(r => r.id === searchId);
-
-    if (found) {
-        document.getElementById('detailsReqId').innerText = found.id;
-        document.getElementById('detailsReqDate').innerText = `Requested on: ${found.dateSubmitted}`;
-        document.getElementById('detailsAddress').innerText = `${found.address}, Pincode: ${found.pincode}`;
-        document.getElementById('detailsWasteType').innerText = found.wasteType;
-        document.getElementById('detailsWard').innerText = found.ward;
-        document.getElementById('detailsQuantity').innerText = found.quantity;
-        document.getElementById('detailsPrefDate').innerText = found.prefDate;
-        document.getElementById('detailsDesc').innerText = found.description || 'N/A';
-        document.getElementById('timelineSubDate').innerText = found.dateSubmitted;
-    }
-});
-
-function openPhotoModal(src) {
-    window.open(src, '_blank');
-}
-</script>
 @endsection

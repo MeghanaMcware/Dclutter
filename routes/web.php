@@ -6,10 +6,14 @@ Route::get('/', function () {
     return view('frontend.home');
 });
 
-Route::view('/report-request', 'frontend.report_request')->name('citizen.report');
-Route::view('/track-request', 'frontend.track_request')->name('citizen.track');
-Route::view('/request-details', 'frontend.request_details')->name('citizen.details');
-Route::view('/request-submitted', 'frontend.request_submitted')->name('citizen.success');
+use App\Http\Controllers\Citizen\CitizenRequestController;
+
+Route::get('/report-request', [CitizenRequestController::class, 'create'])->name('citizen.report');
+Route::post('/report-request', [CitizenRequestController::class, 'store'])->name('citizen.report.store');
+Route::get('/request-submitted', [CitizenRequestController::class, 'success'])->name('citizen.success');
+Route::get('/lookup-ward', [CitizenRequestController::class, 'lookupWardByCoords'])->name('citizen.lookup-ward');
+Route::get('/track-request', [CitizenRequestController::class, 'trackRequest'])->name('citizen.track');
+Route::get('/request-details', [CitizenRequestController::class, 'requestDetails'])->name('citizen.details');
 Route::view('/showcase', 'vehiclepwa.showcase');
 Route::view('/registration', 'vehiclepwa.auth.registration');
 
@@ -82,12 +86,10 @@ Route::match(['get', 'post'], '/vehicle/login-submit', function () {
     return redirect()->route('driver.dashboard');
 })->name('vehicle.login.submit');
 
-Route::get('/admin/requests', function () {
-    return view('admin.requests.index');
-});
-Route::get('/admin/requests/show', function () {
-    return view('admin.requests.show');
-});
+use App\Http\Controllers\Admin\AdminRequestController;
+
+Route::get('/admin/requests', [AdminRequestController::class, 'index'])->name('admin.requests.index');
+Route::get('/admin/requests/{id}', [AdminRequestController::class, 'show'])->name('admin.requests.show');
 
 Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
@@ -109,28 +111,15 @@ Route::get('/admin/dashboard', function () {
     });
 
 
-// Admin Masters Routes
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubcategoryController;
 
-    
-        Route::get('/categories', function () {
-            return view('admin.masters.categories.index');
-        });
-        Route::get('/categoriescreate', function () {
-            return view('admin.masters.categories.create');
-        });
-        Route::get('/categoriesedit', function () {
-            return view('admin.masters.categories.edit');
-        });
-    
+// Admin Masters Resource Routes
+Route::prefix('admin/masters')->name('admin.masters.')->group(function () {
+    Route::resource('categories', CategoryController::class);
+    Route::patch('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
 
-    
-        Route::get('/subcategories', function () {
-            return view('admin.masters.subcategories.index');
-        });
-        Route::get('/subcategoriescreate', function () {
-            return view('admin.masters.subcategories.create');
-        });
-        Route::get('/subcategoriesedit', function () {
-            return view('admin.masters.subcategories.edit');
-        });
+    Route::resource('subcategories', SubcategoryController::class);
+    Route::patch('subcategories/{subcategory}/toggle-status', [SubcategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
+});
   
