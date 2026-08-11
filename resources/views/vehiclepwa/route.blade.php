@@ -100,7 +100,7 @@
         <div id="route-map" class="map-box mb-4"></div>
 
         <!-- Start Navigation Button -->
-        <a href="{{ route('driver.stop_details') }}" class="btn-end-trip">
+        <a href="{{ route('driver.requests') }}" class="btn-end-trip">
             <i class="fa-solid fa-location-arrow"></i>
             <span>Start Navigation</span>
         </a>
