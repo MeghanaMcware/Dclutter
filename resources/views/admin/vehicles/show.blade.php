@@ -45,129 +45,169 @@
         <div class="page-title">
             <div class="row">
                 <div class="col-12 col-sm-6">
-                    <h3>
-                        View Vehicle Details
-                    </h3>
+                    <h3>View Vehicle Details</h3>
                 </div>
                 <div class="col-12 col-sm-6">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="index.html">
+                            <a href="{{ route('admin.dashboard') }}">
                                 <i class="bi bi-house"></i>
                             </a>
                         </li>
-                        <li class="breadcrumb-item">View Vehicle Details</li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.vehicles.index') }}">Vehicles</a></li>
+                        <li class="breadcrumb-item active">View Vehicle Details</li>
                     </ol>
                 </div>
             </div>
         </div>
     </div>
-        <div class="row">
-            <div class="col-xl-8 col-lg-8">
-                <div class="card card-custom mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title">Vehicle Information</h5>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="detail-label">Vehicle Number</div>
-                                <div class="detail-value">KA-01-AB-1234</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="detail-label">Vehicle Type</div>
-                                <div class="detail-value">Truck</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="detail-label">Capacity</div>
-                                <div class="detail-value">1000 kg</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="detail-label">Status</div>
-                                <div class="detail-value text-success">Active</div>
+        
+    <div class="row">
+        <div class="col-xl-8 col-lg-8">
+            <div class="card card-custom mb-4">
+                <div class="card-body">
+                    <h5 class="section-title">Vehicle Information</h5>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="detail-label">Vehicle Number</div>
+                            <div class="detail-value">{{ $vehicle->vehicle_number }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Vehicle Type</div>
+                            <div class="detail-value">{{ $vehicle->vehicle_type ?? 'N/A' }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Capacity</div>
+                            <div class="detail-value">
+                                @if($vehicle->capacity_tons)
+                                    {{ (float)$vehicle->capacity_tons * 1000 }} kg ({{ $vehicle->capacity_tons }} T)
+                                @else
+                                    N/A
+                                @endif
                             </div>
                         </div>
-
-                        <h5 class="section-title mt-4">Owner Details</h5>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="detail-label">Name</div>
-                                <div class="detail-value">John Doe</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="detail-label">Phone Number</div>
-                                <div class="detail-value">9876543210</div>
-                            </div>
-                        </div>
-
-                        <h5 class="section-title mt-4">Driver Details</h5>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="detail-label">Name</div>
-                                <div class="detail-value">Jane Smith</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="detail-label">Phone Number</div>
-                                <div class="detail-value">8765432109</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="detail-label">License Number</div>
-                                <div class="detail-value">DL-14-2020-0012345</div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value {{ $vehicle->status ? 'text-success' : 'text-danger' }}">
+                                {{ $vehicle->status ? 'Active' : 'Inactive' }}
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="col-xl-4 col-lg-4">
-                <div class="card card-custom mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title">Photos & Documents</h5>
-                        
-                        <div class="mb-4">
-                            <div class="detail-label">Vehicle Photo</div>
-                            <div class="p-2 border rounded text-center bg-light">
-                                <i class="fa fa-image fa-3x text-muted mb-2"></i>
-                                <p class="mb-0 text-muted" style="font-size: 12px;">vehicle_photo.jpg</p>
-                            </div>
+                    <h5 class="section-title mt-4">Owner Details</h5>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="detail-label">Name</div>
+                            <div class="detail-value">{{ $vehicle->owner?->name ?? 'N/A' }}</div>
                         </div>
-                        
-                        <div class="mb-4">
-                            <div class="detail-label">Driver License Photo</div>
-                            <div class="p-2 border rounded text-center bg-light">
-                                <i class="fa fa-id-card fa-3x text-muted mb-2"></i>
-                                <p class="mb-0 text-muted" style="font-size: 12px;">license_img.jpg</p>
-                            </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Phone Number</div>
+                            <div class="detail-value">{{ $vehicle->owner?->mobile_number ?? 'N/A' }}</div>
                         </div>
+                    </div>
 
-                        <div class="mb-4">
-                            <div class="detail-label">RC Document</div>
-                            <div class="p-2 border rounded text-center bg-light">
-                                <i class="fa fa-file-pdf fa-3x text-muted mb-2"></i>
-                                <p class="mb-0 text-muted" style="font-size: 12px;">rc_cert.pdf</p>
-                            </div>
+                    <h5 class="section-title mt-4">Driver Details</h5>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="detail-label">Name</div>
+                            <div class="detail-value">{{ $vehicle->driver_name ?? 'N/A' }}</div>
                         </div>
-
-                        <div class="mb-4">
-                            <div class="detail-label">Fitness Certificate</div>
-                            <div class="p-2 border rounded text-center bg-light">
-                                <i class="fa fa-file-pdf fa-3x text-muted mb-2"></i>
-                                <p class="mb-0 text-muted" style="font-size: 12px;">fitness_cert.pdf</p>
-                            </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Phone Number</div>
+                            <div class="detail-value">{{ $vehicle->driver_phone ?? 'N/A' }}</div>
                         </div>
-
-                        <div class="mb-3">
-                            <div class="detail-label">Insurance Document</div>
-                            <div class="p-2 border rounded text-center bg-light">
-                                <i class="fa fa-file-pdf fa-3x text-muted mb-2"></i>
-                                <p class="mb-0 text-muted" style="font-size: 12px;">insurance.pdf</p>
-                            </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">License Number</div>
+                            <div class="detail-value">{{ $vehicle->license_number ?? 'N/A' }}</div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
-        
-        
+
+        <div class="col-xl-4 col-lg-4">
+            <div class="card card-custom mb-4">
+                <div class="card-body">
+                    <h5 class="section-title">Photos & Documents</h5>
+                    
+                    <div class="mb-4">
+                        <div class="detail-label">Vehicle Photo</div>
+                        <div class="p-2 border rounded text-center bg-light">
+                            @if($vehicle->vehicle_photo)
+                                <a href="{{ asset('storage/' . $vehicle->vehicle_photo) }}" target="_blank">
+                                    <i class="fa fa-image fa-3x text-primary mb-2"></i>
+                                    <p class="mb-0 text-primary fw-bold" style="font-size: 12px;">View Vehicle Photo</p>
+                                </a>
+                            @else
+                                <i class="fa fa-image fa-3x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">No photo uploaded</p>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="detail-label">Driver License Photo</div>
+                        <div class="p-2 border rounded text-center bg-light">
+                            @if($vehicle->license_photo)
+                                <a href="{{ asset('storage/' . $vehicle->license_photo) }}" target="_blank">
+                                    <i class="fa fa-id-card fa-3x text-primary mb-2"></i>
+                                    <p class="mb-0 text-primary fw-bold" style="font-size: 12px;">View License Photo</p>
+                                </a>
+                            @else
+                                <i class="fa fa-id-card fa-3x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">No license photo uploaded</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="detail-label">RC Document</div>
+                        <div class="p-2 border rounded text-center bg-light">
+                            @if($vehicle->rc_document)
+                                <a href="{{ asset('storage/' . $vehicle->rc_document) }}" target="_blank">
+                                    <i class="fa fa-file-pdf fa-3x text-danger mb-2"></i>
+                                    <p class="mb-0 text-primary fw-bold" style="font-size: 12px;">View RC Document</p>
+                                </a>
+                            @else
+                                <i class="fa fa-file-pdf fa-3x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">No RC document uploaded</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="detail-label">Fitness Certificate</div>
+                        <div class="p-2 border rounded text-center bg-light">
+                            @if($vehicle->fitness_document)
+                                <a href="{{ asset('storage/' . $vehicle->fitness_document) }}" target="_blank">
+                                    <i class="fa fa-file-pdf fa-3x text-danger mb-2"></i>
+                                    <p class="mb-0 text-primary fw-bold" style="font-size: 12px;">View Fitness Certificate</p>
+                                </a>
+                            @else
+                                <i class="fa fa-file-pdf fa-3x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">No fitness cert uploaded</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="detail-label">Insurance Document</div>
+                        <div class="p-2 border rounded text-center bg-light">
+                            @if($vehicle->insurance_document)
+                                <a href="{{ asset('storage/' . $vehicle->insurance_document) }}" target="_blank">
+                                    <i class="fa fa-file-pdf fa-3x text-danger mb-2"></i>
+                                    <p class="mb-0 text-primary fw-bold" style="font-size: 12px;">View Insurance Document</p>
+                                </a>
+                            @else
+                                <i class="fa fa-file-pdf fa-3x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">No insurance doc uploaded</p>
+                            @endif
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
