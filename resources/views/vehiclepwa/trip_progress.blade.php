@@ -72,9 +72,9 @@
         </div>
 
         <!-- End Trip Action -->
-        <a href="{{ route('driver.trip_summary') }}" class="btn-end-trip">
+        <!-- <a href="{{ route('driver.trip_summary') }}" class="btn-end-trip">
             <span>End Trip</span>
-        </a>
+        </a> -->
 
     </div>
 @endsection
