@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminVehicleController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubcategoryController;
+use App\Http\Controllers\Vehicle\VehicleAuthController;
+use App\Http\Controllers\Vehicle\VehicleDashboardController;
+use App\Http\Controllers\Vehicle\VehicleRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,60 +67,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| DCLUTTER Driver PWA Routes (All 10 Screens)
+| DCLUTTER Driver / Vehicle PWA Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('driver')->group(function () {
+Route::prefix('driver')->name('driver.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('driver.login');
     });
     Route::get('/showcase', function () {
         return view('vehiclepwa.showcase');
-    })->name('driver.showcase');
-    Route::get('/login', function () {
-        return view('vehiclepwa.auth.login');
-    })->name('driver.login');
+    })->name('showcase');
+    Route::get('/login', [VehicleAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [VehicleAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [VehicleAuthController::class, 'logout'])->name('logout');
+    Route::get('/register', [VehicleAuthController::class, 'showRegistrationForm'])->name('register');
 
-    Route::get('/registration', function () {
-        return view('vehiclepwa.auth.registration');
-    })->name('auth.registration');
+    Route::get('/dashboard', [VehicleDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/trip-progress', [VehicleDashboardController::class, 'tripProgress'])->name('trip_progress');
+    Route::get('/trip-summary', [VehicleDashboardController::class, 'tripSummary'])->name('trip_summary');
+    Route::get('/profile', [VehicleDashboardController::class, 'profile'])->name('profile_settings');
+    Route::get('/notifications', [VehicleDashboardController::class, 'notifications'])->name('notifications');
 
-    Route::get('/register', function () {
-        return view('vehiclepwa.register');
-    })->name('driver.register');
-    Route::get('/dashboard', function () {
-        return view('vehiclepwa.dashboard');
-    })->name('driver.dashboard');
-    Route::get('/route', function () {
-        return view('vehiclepwa.route');
-    })->name('driver.route');
-    Route::get('/stop-details', function () {
-        return view('vehiclepwa.stop_details');
-    })->name('driver.stop_details');
-    Route::get('/collect-waste', function () {
-        return view('vehiclepwa.collect_waste');
-    })->name('driver.collect_waste');
-    Route::get('/after_pickup', function () {
-        return view('vehiclepwa.updated.after_pickup');
-    })->name('driver.after_pickup');
-    Route::get('/update-status', function () {
-        return view('vehiclepwa.updated.update_status');
-    })->name('driver.update_status');
-    Route::get('/trip-progress', function () {
-        return view('vehiclepwa.trip_progress');
-    })->name('driver.trip_progress');
-    Route::get('/trip-summary', function () {
-        return view('vehiclepwa.trip_summary');
-    })->name('driver.trip_summary');
-    Route::get('/requests', function () {
-        return view('vehiclepwa.requests.index');
-    })->name('driver.requests');
-    Route::get('/notifications', function () {
-        return view('vehiclepwa.notifications');
-    })->name('driver.notifications');
-    Route::get('/profile', function () {
-        return view('vehiclepwa.profile_settings');
-    })->name('driver.profile_settings');
+    Route::get('/requests', [VehicleRequestController::class, 'index'])->name('requests');
+    Route::get('/route', [VehicleRequestController::class, 'route'])->name('route');
+    Route::get('/stop-details', [VehicleRequestController::class, 'stopDetails'])->name('stop_details');
+    Route::get('/collect-waste', [VehicleRequestController::class, 'collectWaste'])->name('collect_waste');
+    Route::get('/after_pickup', [VehicleRequestController::class, 'afterPickup'])->name('after_pickup');
+    Route::get('/update-status', [VehicleRequestController::class, 'updateStatus'])->name('update_status');
 });
 
 Route::get('/requests', function () {
@@ -181,3 +157,4 @@ Route::get('/users/create', function () {
         return view('admin.masters.users.create');
     })->name('masters.users.create');
 })->name('vehicle.login.submit');
+Route::match(['get', 'post'], '/vehicle/login-submit', [VehicleAuthController::class, 'login'])->name('vehicle.login.submit');
