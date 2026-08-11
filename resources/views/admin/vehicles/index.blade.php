@@ -59,109 +59,110 @@
 
 @section('content')
 <div class="content-body">
-   <div class="container-fluid">
+    <div class="container-fluid">
         <div class="page-title">
             <div class="row">
                 <div class="col-12 col-sm-6">
-                    <h3>
-                        Vehicle Details
-                    </h3>
+                    <h3>Vehicle Details</h3>
                 </div>
                 <div class="col-12 col-sm-6">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="index.html">
+                            <a href="{{ route('admin.dashboard') }}">
                                 <i class="bi bi-house"></i>
                             </a>
                         </li>
-                        <li class="breadcrumb-item">Vehicle Details</li>
+                        <li class="breadcrumb-item active">Vehicle Details</li>
                     </ol>
                 </div>
             </div>
         </div>
     </div>
         
-        
+    <!-- Table Data -->
+    <div class="row">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                    <div class="col-md-3 mt-3 mb-3 mt-md-0 text-md-end text-start ms-auto">
+                        <a href="{{ route('admin.vehicles.create') }}" class="btn btn-primary" style="font-size: 13px; font-weight: 500; padding: 8px 16px;">
+                            <i class="fa fa-plus me-1"></i> Add New Vehicle
+                        </a>
+                    </div>
 
-        <!-- Table Data -->
-        <div class="row">
-            <div class="container-fluid">
-                <div class="card" >
-                    <div class="card-body">
-                         <div class="col-md-3 mt-3 mb-3 mt-md-0 text-md-end text-start ms-auto">
-                    <a href="{{ url('vehicles/create') }}" class="btn btn-primary" style="font-size: 13px; font-weight: 500; padding: 8px 16px;">
-                        <i class="fa fa-plus me-1"></i> Add New Vehicle
-                    </a>
-                </div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped  text-center align-middle" id="data-source-1" style="font-size: 13px;">
-                                <thead style="background: #f8f9fa;">
-                                    <tr>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Vehicle No.</th>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Type</th>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Capacity</th>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Owner</th>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Driver</th>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Status</th>
-                                        <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none; text-align: right;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid #eaebf0;">
-                                        <td style="padding: 15px 20px; vertical-align: middle;">
-                                            <span style="font-weight: 600; color: #2c3e50;">KA-01-AB-1234</span>
-                                        </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Medium Truck</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">1000 kg</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">John Doe</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Jane Smith</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle;">
-                                            <div class="form-check form-switch d-flex justify-content-center">
-                                                <input class="form-check-input" type="checkbox" checked>
-                                            </div>
-                                        </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; text-align: right;">
-                                            <div class="d-flex justify-content-end gap-1">
-                                                <a href="{{ url('vehicles/view') }}" class="btn btn-info text-white" title="View" style="background: #e3f2fd; color: #2196f3;">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                                <a href="{{ url('vehicles/edit') }}" class="btn btn-warning text-white" title="Edit" style="background: #fff3e0; color: #ff9800;">
-                                                    <i class="fa fa-pencil"></i>
-                                                </a>
-                                               
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid #eaebf0;">
-                                        <td style="padding: 15px 20px; vertical-align: middle;">
-                                            <span style="font-weight: 600; color: #2c3e50;">MH-12-XY-9876</span>
-                                        </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Small Van</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">500 kg</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Ali Khan</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">Mohd Ravi</td>
-                                        <td style="padding: 15px 20px; vertical-align: middle;">
-                                            <div class="form-check form-switch d-flex justify-content-center">
-                                                <input class="form-check-input" type="checkbox">
-                                            </div>
-                                        </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; text-align: right;">
-                                            <div class="d-flex justify-content-end gap-1">
-                                                <a href="{{ url('vehicles/view') }}" class="btn btn-info text-white" title="View" style="background: #e3f2fd; color: #2196f3;">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                                <a href="{{ url('vehicles/edit') }}" class="btn btn-warning text-white" title="Edit" style="background: #fff3e0; color: #ff9800;">
-                                                    <i class="fa fa-pencil"></i>
-                                                </a>
-                                              
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                        
-                       
+                    @endif
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped text-center align-middle" id="data-source-1" style="font-size: 13px;">
+                            <thead style="background: #f8f9fa;">
+                                <tr>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Vehicle No.</th>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Type</th>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Capacity</th>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Owner</th>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Driver</th>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Status</th>
+                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none; text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($vehicles as $vehicle)
+                                    <tr style="border-bottom: 1px solid #eaebf0;">
+                                        <td style="padding: 15px 20px; vertical-align: middle;">
+                                            <span style="font-weight: 600; color: #2c3e50;">{{ $vehicle->vehicle_number }}</span>
+                                        </td>
+                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                            {{ $vehicle->vehicle_type ?? 'N/A' }}
+                                        </td>
+                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                            @if($vehicle->capacity_tons)
+                                                {{ (float)$vehicle->capacity_tons * 1000 }} kg
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                            {{ $vehicle->owner?->name ?? 'N/A' }}
+                                        </td>
+                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                            {{ $vehicle->driver_name ?? 'N/A' }}
+                                        </td>
+                                        <td style="padding: 15px 20px; vertical-align: middle;">
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input class="form-check-input vehicle-status-switch" 
+                                                       type="checkbox" 
+                                                       data-id="{{ $vehicle->id }}" 
+                                                       {{ $vehicle->status ? 'checked' : '' }} 
+                                                       style="cursor: pointer;"
+                                                       title="Toggle vehicle status">
+                                            </div>
+                                        </td>
+                                        <td style="padding: 15px 20px; vertical-align: middle; text-align: right;">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{{ route('admin.vehicles.show', $vehicle->id) }}" class="btn btn-info text-white" title="View" style="background: #e3f2fd; color: #2196f3;">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('admin.vehicles.edit', $vehicle->id) }}" class="btn btn-warning text-white" title="Edit" style="background: #fff3e0; color: #ff9800;">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                                <form action="{{ route('admin.vehicles.destroy', $vehicle->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger text-white" title="Delete" style="background: #ffebee; color: #f44336; border: none;">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -172,13 +173,37 @@
 
 @section('script')
 <script>
-    // Mock delete action
-    document.querySelectorAll('.fa-trash').forEach(item => {
-        item.closest('button').addEventListener('click', function() {
-            if(confirm('Are you sure you want to delete this vehicle?')) {
-                alert('Vehicle deleted successfully');
+$(document).ready(function() {
+    $(document).on('change', '.vehicle-status-switch', function() {
+        const vehicleId = $(this).data('id');
+        const isChecked = $(this).is(':checked');
+        const switchElem = $(this);
+
+        $.ajax({
+            url: '/admin/vehicles/' + vehicleId + '/toggle-status',
+            type: 'PATCH',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Status Updated',
+                        text: response.message || 'Vehicle status updated successfully!',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            },
+            error: function() {
+                switchElem.prop('checked', !isChecked);
+                alert('Failed to update vehicle status.');
             }
         });
     });
+});
 </script>
 @endsection

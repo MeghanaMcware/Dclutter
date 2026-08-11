@@ -17,6 +17,14 @@ class Vehicle extends Model
         'user_id',
         'vehicle_type',
         'capacity_tons',
+        'vehicle_photo',
+        'rc_document',
+        'fitness_document',
+        'insurance_document',
+        'driver_name',
+        'driver_phone',
+        'license_number',
+        'license_photo',
         'status',
     ];
 
@@ -26,9 +34,17 @@ class Vehicle extends Model
     ];
 
     /**
-     * Driver account linked to this vehicle for login.
+     * Owner/Driver user account linked to this vehicle for login.
      */
     public function driver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Owner user alias relationship.
+     */
+    public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
