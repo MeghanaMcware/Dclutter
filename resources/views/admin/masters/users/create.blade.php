@@ -52,11 +52,11 @@
             <div class="col-12 col-sm-6">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{{ url('admin/dashboard') }}">
+                        <a href="{{ route('admin.dashboard') }}">
                             <i class="bi bi-house"></i>
                         </a>
                     </li>
-                    <li class="breadcrumb-item"><a href="{{ route('masters.users.index') ?? '#' }}">Users</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.masters.users.index') }}">Users</a></li>
                     <li class="breadcrumb-item active">Add User</li>
                 </ol>
             </div>
@@ -67,40 +67,64 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-           
-
+            <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <form id="userForm" action="#" method="POST" class="needs-validation" novalidate>
-                           
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-4">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form id="userForm" action="{{ route('admin.masters.users.store') }}" method="POST" class="needs-validation" novalidate>
+                            @csrf
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold" for="name">Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Enter Name" required>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Enter Name" required>
                                     <div class="invalid-feedback">Please enter the name.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold" for="phone">Phone Number <span class="text-danger">*</span></label>
+<<<<<<< HEAD
                                     <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+=======
+                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Enter 10-digit Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
+>>>>>>> 3e1e6a40921ecc474287b43b7318a85b0f881cbd
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
 
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-bold" for="email">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="Enter Email" required>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="Enter Email" required>
                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-bold" for="password">Password <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter Password" required>
+                                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Enter Password" required>
                                     <div class="invalid-feedback">Please enter a password.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                                        <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select Role</option>
+                                        <option value="agm" {{ old('role') == 'agm' ? 'selected' : '' }}>AGM (Additional General Manager)</option>
+                                        <option value="dgm" {{ old('role') == 'dgm' ? 'selected' : '' }}>DGM (Deputy General Manager)</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a user role.</div>
                                 </div>
                             </div>
                             
+                            <!-- Dynamic Jurisdiction Scoping Row -->
                             <div class="row mb-3">
+<<<<<<< HEAD
                               <div class="col-md-6">
                                     <label class="form-label fw-bold" for="constituency">Corporation </label>
                                     <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple" >
@@ -130,10 +154,34 @@
                                         <option value="AGM">AGM</option>
                                     </select>
                                     <div class="invalid-feedback">Please select a role.</div>
+=======
+                                <div class="col-md-6" id="corporationCol" style="display: none;">
+                                    <label class="form-label fw-bold" for="corporation">Corporation (DGM Jurisdiction) <span class="text-danger">*</span></label>
+                                    <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple">
+                                        @foreach($corporations as $corp)
+                                            <option value="{{ $corp->id }}" {{ is_array(old('corporation')) && in_array($corp->id, old('corporation')) ? 'selected' : '' }}>
+                                                {{ $corp->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback">Please select at least one corporation for DGM.</div>
+                                </div>
+                                <div class="col-md-6" id="constituencyCol" style="display: none;">
+                                    <label class="form-label fw-bold" for="constituency">Constituency (AGM Jurisdiction) <span class="text-danger">*</span></label>
+                                    <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple">
+                                        @foreach($constituencies as $const)
+                                            <option value="{{ $const->id }}" {{ is_array(old('constituency')) && in_array($const->id, old('constituency')) ? 'selected' : '' }}>
+                                                {{ $const->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback">Please select at least one constituency for AGM.</div>
+>>>>>>> 3e1e6a40921ecc474287b43b7318a85b0f881cbd
                                 </div>
                             </div>
 
                             <div class="text-center mt-4">
+                                <a href="{{ route('admin.masters.users.index') }}" class="btn btn-secondary me-2">Cancel</a>
                                 <button type="submit" class="btn btn-primary px-4"><i class="fa fa-save me-1"></i> Submit</button>
                             </div>
                         </form>
@@ -169,9 +217,36 @@
                 }
             }
         });
+
+        function updateJurisdictionFields() {
+            const selectedRole = $('#role').val();
+            const corpCol = $('#corporationCol');
+            const constCol = $('#constituencyCol');
+            const corpSelect = $('#corporation');
+            const constSelect = $('#constituency');
+
+            if (selectedRole === 'dgm') {
+                corpCol.show();
+                corpSelect.prop('required', true);
+                constCol.hide();
+                constSelect.prop('required', false);
+            } else if (selectedRole === 'agm') {
+                constCol.show();
+                constSelect.prop('required', true);
+                corpCol.hide();
+                corpSelect.prop('required', false);
+            } else {
+                corpCol.hide();
+                corpSelect.prop('required', false);
+                constCol.hide();
+                constSelect.prop('required', false);
+            }
+        }
+
+        $('#role').on('change', updateJurisdictionFields);
+        updateJurisdictionFields(); // Initial call
     });
 
-    // Bootstrap validation inline code
     (function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
@@ -181,19 +256,6 @@
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
-                    } else {
-                        event.preventDefault();
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'User created successfully!',
-                            confirmButtonColor: '#198754'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = "{{ route('masters.users.index') }}";
-                            }
-                        });
                     }
                     form.classList.add('was-validated')
                 }, false)

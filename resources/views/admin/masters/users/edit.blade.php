@@ -52,11 +52,11 @@
             <div class="col-12 col-sm-6">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{{ url('admin/dashboard') }}">
+                        <a href="{{ route('admin.dashboard') }}">
                             <i class="bi bi-house"></i>
                         </a>
                     </li>
-                    <li class="breadcrumb-item"><a href="{{ route('masters.users.index') ?? '#' }}">Users</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.masters.users.index') }}">Users</a></li>
                     <li class="breadcrumb-item active">Edit User</li>
                 </ol>
             </div>
@@ -67,58 +67,91 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-           
+            <div class="col-sm-12 col-xl-10 offset-xl-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Edit User Details</h4>
+                    <a href="{{ route('admin.masters.users.index') }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
+                </div>
 
                 <div class="card">
                     <div class="card-body">
-                        <!-- Replace $user->id with actual variable when available -->
-                        <form id="userEditForm" action="#" method="POST" class="needs-validation" novalidate>
-                         
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-4">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @php
+                            $userRole = old('role', $user->roles->first()?->name ?? 'admin');
+                            $userCorpIds = (array) old('corporation', $user->corporation_ids ?? []);
+                            $userConstIds = (array) old('constituency', $user->constituency_ids ?? []);
+                        @endphp
+
+                        <form id="userEditForm" action="{{ route('admin.masters.users.update', $user->id) }}" method="POST" class="needs-validation" novalidate>
+                            @csrf
+                            @method('PUT')
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold" for="name">Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name ?? '') }}" placeholder="Enter Name" required>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" placeholder="Enter Name" required>
                                     <div class="invalid-feedback">Please enter the name.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold" for="phone">Phone Number <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-                                    <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
+                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $user->mobile_number) }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
+                                    <div class="invalid-feedback">Please enter the phone number.</div>
                                 </div>
                             </div>
 
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-bold" for="email">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email ?? '') }}" placeholder="Enter Email" required>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" placeholder="Enter Email" required>
                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-bold" for="password">Password</label>
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep unchanged">
+                                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Leave blank to keep unchanged">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                                        <option value="" disabled>Select Role</option>
+                                        <option value="agm" {{ $userRole == 'agm' ? 'selected' : '' }}>AGM (Additional General Manager)</option>
+                                        <option value="dgm" {{ $userRole == 'dgm' ? 'selected' : '' }}>DGM (Deputy General Manager)</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a user role.</div>
                                 </div>
                             </div>
                             
+                            <!-- Dynamic Jurisdiction Scoping Row -->
                             <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold" for="corporation">Corporation <span class="text-danger">*</span></label>
-                                    <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple" required>
-                                        <!-- Add 'selected' condition based on $user data -->
-                                        <option value="West">West</option>
-                                        <option value="Central">Central</option>
-                                        <option value="North">North</option>
+                                <div class="col-md-6" id="corporationCol" style="display: none;">
+                                    <label class="form-label fw-bold" for="corporation">Corporation (DGM Jurisdiction) <span class="text-danger">*</span></label>
+                                    <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple">
+                                        @foreach($corporations as $corp)
+                                            <option value="{{ $corp->id }}" {{ in_array($corp->id, $userCorpIds) ? 'selected' : '' }}>
+                                                {{ $corp->name }}
+                                            </option>
+                                        @endforeach
                                     </select>
-                                    <div class="invalid-feedback">Please select at least one corporation.</div>
+                                    <div class="invalid-feedback">Please select at least one corporation for DGM.</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold" for="constituency">Constituency <span class="text-danger">*</span></label>
-                                    <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple" required>
-                                        <!-- Add 'selected' condition based on $user data -->
-                                        <option value="1">Constituency 1</option>
-                                        <option value="2">Constituency 2</option>
+                                <div class="col-md-6" id="constituencyCol" style="display: none;">
+                                    <label class="form-label fw-bold" for="constituency">Constituency (AGM Jurisdiction) <span class="text-danger">*</span></label>
+                                    <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple">
+                                        @foreach($constituencies as $const)
+                                            <option value="{{ $const->id }}" {{ in_array($const->id, $userConstIds) ? 'selected' : '' }}>
+                                                {{ $const->name }}
+                                            </option>
+                                        @endforeach
                                     </select>
-                                    <div class="invalid-feedback">Please select at least one constituency.</div>
+                                    <div class="invalid-feedback">Please select at least one constituency for AGM.</div>
                                 </div>
                             </div>
 
@@ -135,7 +168,8 @@
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary px-4"><i class="fa fa-save me-1"></i> Update</button>
+                                <a href="{{ route('admin.masters.users.index') }}" class="btn btn-secondary me-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4"><i class="fa fa-save me-1"></i> Update User</button>
                             </div>
                         </form>
                     </div>
@@ -170,9 +204,36 @@
                 }
             }
         });
+
+        function updateJurisdictionFields() {
+            const selectedRole = $('#role').val();
+            const corpCol = $('#corporationCol');
+            const constCol = $('#constituencyCol');
+            const corpSelect = $('#corporation');
+            const constSelect = $('#constituency');
+
+            if (selectedRole === 'dgm') {
+                corpCol.show();
+                corpSelect.prop('required', true);
+                constCol.hide();
+                constSelect.prop('required', false);
+            } else if (selectedRole === 'agm') {
+                constCol.show();
+                constSelect.prop('required', true);
+                corpCol.hide();
+                corpSelect.prop('required', false);
+            } else {
+                corpCol.hide();
+                corpSelect.prop('required', false);
+                constCol.hide();
+                constSelect.prop('required', false);
+            }
+        }
+
+        $('#role').on('change', updateJurisdictionFields);
+        updateJurisdictionFields(); // Initial call
     });
 
-    // Bootstrap validation inline code
     (function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
@@ -182,19 +243,6 @@
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
-                    } else {
-                        event.preventDefault();
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'User updated successfully!',
-                            confirmButtonColor: '#198754'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = "{{ route('masters.users.index') }}";
-                            }
-                        });
                     }
                     form.classList.add('was-validated')
                 }, false)

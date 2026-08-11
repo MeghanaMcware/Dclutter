@@ -1,7 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Citizen\CitizenRequestController;
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\AdminRequestController;
+use App\Http\Controllers\Admin\AdminVehicleController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubcategoryController;
+use App\Http\Controllers\Vehicle\VehicleAuthController;
+use App\Http\Controllers\Vehicle\VehicleDashboardController;
+use App\Http\Controllers\Vehicle\VehicleRequestController;
 
+/*
+|--------------------------------------------------------------------------
+| Public / Citizen Portal Routes
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return view('frontend.home');
 });
@@ -22,7 +36,43 @@ Route::view('/registration', 'vehiclepwa.auth.registration');
 | DCLUTTER Driver PWA Routes (All 10 Screens)
 |--------------------------------------------------------------------------
 */
-Route::prefix('driver')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Auth Routes
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+
+    // Requests Management
+    Route::prefix('requests')->name('requests.')->group(function () {
+        Route::get('/', [AdminRequestController::class, 'index'])->name('index');
+        Route::get('/{id}', [AdminRequestController::class, 'show'])->name('show');
+    });
+
+    // Masters Management (Categories & Subcategories)
+    Route::prefix('masters')->name('masters.')->group(function () {
+        Route::resource('categories', CategoryController::class);
+        Route::patch('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+
+        Route::resource('subcategories', SubcategoryController::class);
+        Route::patch('subcategories/{subcategory}/toggle-status', [SubcategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
+    });
+
+    // Vehicles Resource Routes
+    Route::patch('vehicles/{id}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggle-status');
+    Route::resource('vehicles', AdminVehicleController::class);
+});
+
+/*
+|--------------------------------------------------------------------------
+| DCLUTTER Driver / Vehicle PWA Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('driver')->name('driver.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('driver.login');
     });
@@ -139,11 +189,11 @@ Route::get('/users/index', function () {
 Route::get('/users/edit', function () {
         return view('admin.masters.users.edit');
     })->name('masters.users.edit');
-
+Route::get('/users/show', function () {
+        return view('admin.masters.users.show');
+    })->name('masters.users.show');
 Route::get('/users/create', function () {
         return view('admin.masters.users.create');
     })->name('masters.users.create');
-
-    Route::get('/users/show', function () {
-    return view('admin.masters.users.view');
-})->name('masters.users.show');
+})->name('vehicle.login.submit');
+Route::match(['get', 'post'], '/vehicle/login-submit', [VehicleAuthController::class, 'login'])->name('vehicle.login.submit');

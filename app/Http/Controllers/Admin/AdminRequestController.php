@@ -16,7 +16,8 @@ class AdminRequestController extends Controller
      */
     public function index(Request $request)
     {
-        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle']);
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
+            ->forUserJurisdiction();
 
         // Status Filter
         if ($request->filled('status')) {

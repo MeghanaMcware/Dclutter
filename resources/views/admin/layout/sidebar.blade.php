@@ -48,6 +48,7 @@
             </a>
           </li>
 
+          @if(!auth()->check() || !auth()->user()->hasAnyRole(['agm', 'dgm']))
           <li class="sidebar-list">
             <a class="sidebar-link sidebar-title {{ request()->routeIs('admin.masters.*') ? 'active' : '' }}" href="javascript:void(0);">
               <i data-feather="sliders"></i>
@@ -64,8 +65,14 @@
                   Sub Category
                 </a>
               </li>
+              <li>
+                <a class="{{ request()->routeIs('admin.masters.users.*') ? 'active' : '' }}" href="{{ route('admin.masters.users.index') }}">
+                  Users
+                </a>
+              </li>
             </ul>
           </li>
+          @endif
 
         </ul>
       </div>
