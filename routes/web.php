@@ -123,3 +123,17 @@ Route::prefix('admin/masters')->name('admin.masters.')->group(function () {
     Route::patch('subcategories/{subcategory}/toggle-status', [SubcategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
 });
   
+
+
+Route::get('/users/index', function () {
+        return view('admin.masters.users.index');
+    })->name('masters.users.index');
+Route::get('/users/edit', function () {
+        return view('admin.masters.users.edit');
+    })->name('masters.users.edit');
+Route::get('/users/show', function () {
+        return view('admin.masters.users.show');
+    })->name('masters.users.show');
+Route::get('/users/create', function () {
+        return view('admin.masters.users.create');
+    })->name('masters.users.create');
