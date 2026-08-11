@@ -16,7 +16,7 @@
                             <i class="bi bi-house"></i>
                         </a>
                     </li>
-                    <li class="breadcrumb-item"><a href="{{ route('masters.users.index') ?? '#' }}">Users</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('masters.users.index') }}">Users</a></li>
                     <li class="breadcrumb-item active">View User</li>
                 </ol>
             </div>
@@ -27,11 +27,7 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-8 offset-xl-2">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">User Details</h4>
-                    <a href="{{ route('masters.users.index') ?? '#' }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
-                </div>
+           
 
                 <div class="card">
                     <div class="card-body">

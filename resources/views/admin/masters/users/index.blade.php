@@ -52,8 +52,8 @@
                                         <td>john@example.com</td>
                                         <td>1234567890</td>
                                         <td>
-                                            <a href="{{ route('masters.users.show')  }}" class="btn btn-info btn-sm" title="View"><i class="fa fa-eye"></i></a>
-                                            <a href="{{ route('masters.users.edit')  }}" class="btn btn-warning btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
+                                            <a href="{{ route('users/show')  }}" class="btn btn-info btn-sm" title="View"><i class="fa fa-eye"></i></a>
+                                            <a href="{{ route('users/edit')  }}" class="btn btn-warning btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
                                             
                                         </td>
                                     </tr>

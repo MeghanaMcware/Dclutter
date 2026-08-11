@@ -7,7 +7,6 @@
     /* Select2 Alignment & Validation Fixes */
     .select2-container {
         width: 100% !important;
-        display: block;
     }
     .select2-container .select2-selection--multiple {
         min-height: 38px !important;
@@ -68,18 +67,13 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-8 offset-xl-2">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Edit User</h4>
-                    <a href="{{ route('masters.users.index') ?? '#' }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
-                </div>
+           
 
                 <div class="card">
                     <div class="card-body">
                         <!-- Replace $user->id with actual variable when available -->
                         <form id="userEditForm" action="#" method="POST" class="needs-validation" novalidate>
-                            @csrf
-                            @method('PUT')
+                         
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -89,8 +83,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold" for="phone">Phone Number <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}" placeholder="Enter Phone Number" required>
-                                    <div class="invalid-feedback">Please enter the phone number.</div>
+                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                                    <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
 
@@ -111,8 +105,9 @@
                                     <label class="form-label fw-bold" for="corporation">Corporation <span class="text-danger">*</span></label>
                                     <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple" required>
                                         <!-- Add 'selected' condition based on $user data -->
-                                        <option value="1">Corporation 1</option>
-                                        <option value="2">Corporation 2</option>
+                                        <option value="West">West</option>
+                                        <option value="Central">Central</option>
+                                        <option value="North">North</option>
                                     </select>
                                     <div class="invalid-feedback">Please select at least one corporation.</div>
                                 </div>
@@ -124,6 +119,18 @@
                                         <option value="2">Constituency 2</option>
                                     </select>
                                     <div class="invalid-feedback">Please select at least one constituency.</div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="role" name="role" required>
+                                        <option value="" disabled selected>Select Role</option>
+                                        <option value="DGM">DGM</option>
+                                        <option value="AGM">AGM</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a role.</div>
                                 </div>
                             </div>
 
@@ -143,11 +150,25 @@
 <script>
     $(document).ready(function() {
         $('.select2').select2({
-            placeholder: "Select Corporation"
+            placeholder: "Select Corporation",
+            closeOnSelect: true
         });
         $('.select2-search').select2({
             placeholder: "Search Constituency",
-            allowClear: true
+            allowClear: true,
+            closeOnSelect: true
+        });
+
+        // Prevent opening if all options are already selected
+        $('.select2, .select2-search').on('select2:opening', function (e) {
+            var $select = $(this);
+            // check if it is a multiple select
+            if ($select.prop('multiple')) {
+                var availableOptions = $select.find('option').not(':selected').not('[value=""]').length;
+                if (availableOptions === 0) {
+                    e.preventDefault();
+                }
+            }
         });
     });
 

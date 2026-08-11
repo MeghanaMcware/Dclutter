@@ -87,28 +87,37 @@ Route::match(['get', 'post'], '/vehicle/login-submit', function () {
 })->name('vehicle.login.submit');
 
 use App\Http\Controllers\Admin\AdminRequestController;
+use App\Http\Controllers\Admin\AdminAuthController;
+
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 Route::get('/admin/requests', [AdminRequestController::class, 'index'])->name('admin.requests.index');
 Route::get('/admin/requests/{id}', [AdminRequestController::class, 'show'])->name('admin.requests.show');
 
 Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
-});
+})->name('admin.dashboard');
 
 // Admin Vehicle Routes
-
-    Route::get('/vehicles', function () {
+Route::prefix('admin/vehicles')->name('admin.vehicles.')->group(function () {
+    Route::get('/', function () {
         return view('admin.vehicles.index');
-    });
-    Route::get('/vehicles/create', function () {
+    })->name('index');
+    
+    Route::get('/create', function () {
         return view('admin.vehicles.create');
-    });
-    Route::get('vehicles/view', function () {
+    })->name('create');
+    
+    Route::get('/view', function () {
         return view('admin.vehicles.show');
-    });
-    Route::get('vehicles/edit', function () {
+    })->name('show');
+    
+    Route::get('/edit', function () {
         return view('admin.vehicles.edit');
-    });
+    })->name('edit');
+});
 
 
 use App\Http\Controllers\Admin\CategoryController;
@@ -123,3 +132,18 @@ Route::prefix('admin/masters')->name('admin.masters.')->group(function () {
     Route::patch('subcategories/{subcategory}/toggle-status', [SubcategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
 });
   
+
+Route::get('/users/index', function () {
+        return view('admin.masters.users.index');
+    })->name('masters.users.index');
+Route::get('/users/edit', function () {
+        return view('admin.masters.users.edit');
+    })->name('masters.users.edit');
+
+Route::get('/users/create', function () {
+        return view('admin.masters.users.create');
+    })->name('masters.users.create');
+
+    Route::get('/users/show', function () {
+    return view('admin.masters.users.view');
+})->name('masters.users.show');
