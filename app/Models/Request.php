@@ -135,19 +135,40 @@ class Request extends Model
     }
 
     /**
-     * Scope to filter requests within a user's assigned jurisdiction (Ward / Constituency).
+     * Scope to filter requests within a user's assigned jurisdiction (DGM Corporation / AGM Constituency / Ward).
      */
-    public function scopeForUserJurisdiction($query, User $user)
+    public function scopeForUserJurisdiction($query, ?User $user = null)
     {
-        if (!empty($user->ward_ids)) {
-            return $query->whereIn('ward_id', (array)$user->ward_ids);
+        $user = $user ?? auth()->user();
+
+        if (!$user) {
+            return $query;
         }
-        if (!empty($user->constituency_ids)) {
-            return $query->whereIn('constituency_id', (array)$user->constituency_ids);
+
+        // DGM Scoping: Filter by assigned Corporations
+        if ($user->hasRole('dgm') || (!empty($user->corporation_ids) && is_array($user->corporation_ids))) {
+            $corpIds = array_filter(array_map('intval', (array)$user->corporation_ids));
+            if (!empty($corpIds)) {
+                return $query->whereIn('corporation_id', $corpIds);
+            }
         }
-        if (!empty($user->corporation_ids)) {
-            return $query->whereIn('corporation_id', (array)$user->corporation_ids);
+
+        // AGM Scoping: Filter by assigned Constituencies
+        if ($user->hasRole('agm') || (!empty($user->constituency_ids) && is_array($user->constituency_ids))) {
+            $constIds = array_filter(array_map('intval', (array)$user->constituency_ids));
+            if (!empty($constIds)) {
+                return $query->whereIn('constituency_id', $constIds);
+            }
         }
+
+        // Ward Scoping
+        if (!empty($user->ward_ids) && is_array($user->ward_ids)) {
+            $wardIds = array_filter(array_map('intval', (array)$user->ward_ids));
+            if (!empty($wardIds)) {
+                return $query->whereIn('ward_id', $wardIds);
+            }
+        }
+
         return $query;
     }
 }
