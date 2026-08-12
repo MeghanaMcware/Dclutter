@@ -322,13 +322,9 @@
                                                 <a href="{{ route('admin.requests.show', $req->id) }}" class="btn btn-primary" title="View">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <button type="button"
-        class="btn btn-success edit-request"
-        title="Assign Vehicle">
-
-    <i class="fa fa-edit"></i>
-
-</button>
+                                                <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="{{ $req->id }}" data-request-number="{{ $req->request_number }}" title="Assign Vehicle">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -418,13 +414,16 @@
                     </label>
 
 
-                    <select id="assignVehicleSelect"
-                            class="form-select">
-
-                        <option value="">
-                            Search and select vehicle
-                        </option>
-
+                    <select id="assignVehicleSelect" class="form-select">
+                        <option value="" selected disabled>Search and select vehicle</option>
+                        @foreach($vehicles as $vehicle)
+                            <option value="{{ $vehicle->id }}" 
+                                    data-number="{{ $vehicle->vehicle_number }}" 
+                                    data-type="{{ $vehicle->vehicle_type ?? 'Garbage Truck' }}" 
+                                    data-driver="{{ $vehicle->driver_name ?? $vehicle->owner?->name ?? 'N/A' }}">
+                                {{ $vehicle->vehicle_number }} - {{ $vehicle->vehicle_type ?? 'Garbage Truck' }} (Driver: {{ $vehicle->driver_name ?? $vehicle->owner?->name ?? 'N/A' }})
+                            </option>
+                        @endforeach
                     </select>
 
 
@@ -655,67 +654,18 @@
 
 
         /* =========================================================
-   STATIC VEHICLE DATA
+   REGISTERED VEHICLE DATA (DYNAMIC FROM DATABASE)
 ========================================================= */
 
 const vehicles = [
-
+    @foreach($vehicles as $vehicle)
     {
-        id: 1,
-        number: 'KA-01-AB-1234',
-        type: 'Garbage Collection Truck',
-        driver: 'Ramesh Kumar'
+        id: {{ $vehicle->id }},
+        number: '{{ addslashes($vehicle->vehicle_number) }}',
+        type: '{{ addslashes($vehicle->vehicle_type ?? "Garbage Truck") }}',
+        driver: '{{ addslashes($vehicle->driver_name ?? $vehicle->owner?->name ?? "N/A") }}'
     },
-
-    {
-        id: 2,
-        number: 'KA-02-CD-5678',
-        type: 'Mini Garbage Truck',
-        driver: 'Suresh Kumar'
-    },
-
-    {
-        id: 3,
-        number: 'KA-03-EF-9012',
-        type: 'Waste Collection Vehicle',
-        driver: 'Manoj Kumar'
-    },
-
-    {
-        id: 4,
-        number: 'KA-04-GH-3456',
-        type: 'Compactor Truck',
-        driver: 'Arun Kumar'
-    },
-
-    {
-        id: 5,
-        number: 'KA-05-IJ-7890',
-        type: 'Mini Truck',
-        driver: 'Vijay Kumar'
-    },
-
-    {
-        id: 6,
-        number: 'KA-06-KL-1122',
-        type: 'Garbage Collection Truck',
-        driver: 'Mahesh Kumar'
-    },
-
-    {
-        id: 7,
-        number: 'KA-07-MN-3344',
-        type: 'Waste Collection Truck',
-        driver: 'Prakash Kumar'
-    },
-
-    {
-        id: 8,
-        number: 'KA-08-OP-5566',
-        type: 'Mini Collection Vehicle',
-        driver: 'Ganesh Kumar'
-    }
-
+    @endforeach
 ];
 
 
@@ -730,32 +680,18 @@ let currentRequestRow = null;
    LOAD VEHICLES INTO SEARCHABLE DROPDOWN
 ========================================================= */
 
-function loadVehicleDropdown() {
+/* =========================================================
+   LOAD VEHICLES INTO SEARCHABLE DROPDOWN
+========================================================= */
 
+function loadVehicleDropdown() {
     const $select = $('#assignVehicleSelect');
 
-
-    /*
-     * Destroy previous Select2 instance
-     */
-
     if ($select.hasClass('select2-hidden-accessible')) {
-
         $select.select2('destroy');
-
     }
 
-
-    /*
-     * Clear options
-     */
-
     $select.empty();
-
-
-    /*
-     * Placeholder
-     */
 
     $select.append(
         new Option(
@@ -766,390 +702,140 @@ function loadVehicleDropdown() {
         )
     );
 
-
-    /*
-     * Add vehicles
-     */
-
     vehicles.forEach(function(vehicle) {
-
         const option = new Option(
-
-            vehicle.number +
-            ' - ' +
-            vehicle.type,
-
+            vehicle.number + ' - ' + vehicle.type,
             vehicle.id,
-
             false,
             false
-
         );
 
-
-        $(option).attr(
-            'data-number',
-            vehicle.number
-        );
-
-        $(option).attr(
-            'data-driver',
-            vehicle.driver
-        );
-
-        $(option).attr(
-            'data-type',
-            vehicle.type
-        );
-
+        $(option).attr('data-number', vehicle.number);
+        $(option).attr('data-driver', vehicle.driver);
+        $(option).attr('data-type', vehicle.type);
 
         $select.append(option);
-
     });
-
-
-    /*
-     * Initialize Select2
-     */
 
     $select.select2({
-
         dropdownParent: $('#assignVehicleModal'),
-
         width: '100%',
-
         placeholder: 'Search and select vehicle',
-
         allowClear: true,
-
         minimumResultsForSearch: 0
-
     });
-
 }
-
 
 /* =========================================================
    EDIT BUTTON CLICK
-   IMPORTANT:
-   Delegated event works with AJAX DataTable rows also.
 ========================================================= */
 
-$('#admin-waste-requests-table tbody').on(
-    'click',
-    '.edit-request',
-    function(e) {
+$(document).on('click', '.edit-request', function(e) {
+    e.preventDefault();
+    currentRequestRow = $(this).closest('tr');
 
-        e.preventDefault();
+    let requestId = $(this).attr('data-request-number') || currentRequestRow.find('td:first').text().trim();
+    let dbId = $(this).attr('data-db-id') || currentRequestRow.find('a[href*="/admin/requests/"]').attr('href').split('/').pop();
 
+    $('#assignRequestId').val(requestId);
+    currentRequestRow.attr('data-db-id', dbId);
 
-        /*
-         * Get clicked row
-         */
+    $('#vehicleError').hide();
+    $('#vehicleInfoBox').hide();
+    $('#selectedVehicleNumber').text('');
+    $('#selectedVehicleDetails').text('');
 
-        currentRequestRow =
-            $(this).closest('tr');
-
-
-        /*
-         * Get Request ID
-         */
-
-        let requestId =
-            currentRequestRow
-                .find('td:first')
-                .text()
-                .trim();
-
-
-        /*
-         * Set Request ID in modal
-         */
-
-        $('#assignRequestId')
-            .val(requestId);
-
-
-        /*
-         * Reset previous selection
-         */
-
-        $('#vehicleError')
-            .hide();
-
-
-        $('#vehicleInfoBox')
-            .hide();
-
-
-        $('#selectedVehicleNumber')
-            .text('');
-
-
-        $('#selectedVehicleDetails')
-            .text('');
-
-
-        /*
-         * Load vehicle dropdown
-         */
-
-        loadVehicleDropdown();
-
-
-        /*
-         * Open Bootstrap Modal
-         */
-
-        $('#assignVehicleModal')
-            .modal('show');
-
-    }
-);
-
+    loadVehicleDropdown();
+    $('#assignVehicleModal').modal('show');
+});
 
 /* =========================================================
    VEHICLE SELECTION
 ========================================================= */
 
-$('#assignVehicleSelect').on(
-    'change',
-    function() {
+$('#assignVehicleSelect').on('change', function() {
+    const vehicleId = $(this).val();
 
-        const vehicleId =
-            $(this).val();
-
-
-        /*
-         * Nothing selected
-         */
-
-        if (!vehicleId) {
-
-            $('#vehicleInfoBox')
-                .hide();
-
-            return;
-
-        }
-
-
-        /*
-         * Find vehicle
-         */
-
-        const vehicle =
-            vehicles.find(function(item) {
-
-                return item.id == vehicleId;
-
-            });
-
-
-        if (!vehicle) {
-
-            return;
-
-        }
-
-
-        /*
-         * Display selected vehicle
-         */
-
-        $('#selectedVehicleNumber')
-            .text(vehicle.number);
-
-
-        $('#selectedVehicleDetails')
-            .text(
-                vehicle.type +
-                ' | Driver: ' +
-                vehicle.driver
-            );
-
-
-        $('#vehicleInfoBox')
-            .slideDown(150);
-
-
-        $('#vehicleError')
-            .hide();
-
+    if (!vehicleId) {
+        $('#vehicleInfoBox').hide();
+        return;
     }
-);
 
+    const vehicle = vehicles.find(function(item) {
+        return item.id == vehicleId;
+    });
+
+    if (!vehicle) return;
+
+    $('#selectedVehicleNumber').text(vehicle.number);
+    $('#selectedVehicleDetails').text(vehicle.type + ' | Driver: ' + vehicle.driver);
+    $('#vehicleInfoBox').slideDown(150);
+    $('#vehicleError').hide();
+});
 
 /* =========================================================
-   ASSIGN VEHICLE BUTTON
+   ASSIGN VEHICLE BUTTON SUBMIT
 ========================================================= */
 
-$('#assignVehicleSubmit').on(
-    'click',
-    function() {
+$('#assignVehicleSubmit').on('click', function() {
+    const vehicleId = $('#assignVehicleSelect').val();
 
-        /*
-         * Get selected vehicle
-         */
-
-        const vehicleId =
-            $('#assignVehicleSelect')
-                .val();
-
-
-        /*
-         * Validation
-         */
-
-        if (!vehicleId) {
-
-            $('#vehicleError')
-                .show();
-
-            return;
-
-        }
-
-
-        /*
-         * Find selected vehicle
-         */
-
-        const vehicle =
-            vehicles.find(function(item) {
-
-                return item.id == vehicleId;
-
-            });
-
-
-        if (!vehicle) {
-
-            return;
-
-        }
-
-
-        /*
-         * Make sure row exists
-         */
-
-        if (
-            !currentRequestRow ||
-            !currentRequestRow.length
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-         * CHANGE STATUS TO ASSIGNED
-         */
-
-        const statusHtml =
-
-            '<span class="status-badge status-assigned">' +
-                'Assigned' +
-            '</span>';
-
-
-        currentRequestRow
-            .find('td')
-            .eq(6)
-            .html(statusHtml);
-
-
-        /*
-         * Also update DataTable row
-         * so status remains after redraw.
-         */
-
-        if (
-            $.fn.DataTable.isDataTable(
-                '#admin-waste-requests-table'
-            )
-        ) {
-
-            const dataTable =
-                $('#admin-waste-requests-table')
-                    .DataTable();
-
-
-            const data =
-                dataTable
-                    .row(currentRequestRow)
-                    .data();
-
-
-            if (data) {
-
-                data[6] = statusHtml;
-
-                dataTable
-                    .row(currentRequestRow)
-                    .data(data)
-                    .draw(false);
-
-            }
-
-        }
-
-
-        /*
-         * Close modal
-         */
-
-        $('#assignVehicleModal')
-            .modal('hide');
-
-
-        /*
-         * SUCCESS SWEETALERT
-         */
-
-        Swal.fire({
-
-            icon: 'success',
-
-            title: 'Vehicle Assigned Successfully!',
-
-            html:
-                'Vehicle <strong>' +
-                vehicle.number +
-                '</strong> has been assigned to request <strong>' +
-                $('#assignRequestId').val() +
-                '</strong>.',
-
-            confirmButtonText: 'OK',
-
-            confirmButtonColor: '#0d6efd'
-
-        }).then(function(result) {
-
-            /*
-             * After clicking OK
-             */
-
-            if (result.isConfirmed) {
-
-                /*
-                 * FRONTEND ONLY
-                 *
-                 * We don't reload the page because
-                 * the status would return to the
-                 * original static/AJAX data.
-                 */
-
-                currentRequestRow = null;
-
-            }
-
-        });
-
+    if (!vehicleId) {
+        $('#vehicleError').show();
+        return;
     }
-);
+
+    const vehicle = vehicles.find(function(item) {
+        return item.id == vehicleId;
+    });
+
+    if (!vehicle || !currentRequestRow) return;
+
+    const dbRequestId = currentRequestRow.attr('data-db-id') || currentRequestRow.find('.edit-request').attr('data-db-id') || currentRequestRow.find('a[href*="/admin/requests/"]').attr('href').split('/').pop();
+
+    $.ajax({
+        url: '/admin/requests/' + dbRequestId + '/assign-vehicle',
+        type: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',
+            vehicle_id: vehicleId
+        },
+        success: function(response) {
+            const statusHtml = '<span class="status-badge status-assigned">Assigned</span>';
+            currentRequestRow.find('td').eq(6).html(statusHtml);
+
+            if ($.fn.DataTable.isDataTable('#admin-waste-requests-table')) {
+                const dataTable = $('#admin-waste-requests-table').DataTable();
+                const data = dataTable.row(currentRequestRow).data();
+                if (data) {
+                    data[6] = statusHtml;
+                    dataTable.row(currentRequestRow).data(data).draw(false);
+                }
+            }
+
+            $('#assignVehicleModal').modal('hide');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Vehicle Assigned Successfully!',
+                html: 'Vehicle <strong>' + vehicle.number + '</strong> has been assigned to request <strong>' + $('#assignRequestId').val() + '</strong>.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#0d6efd'
+            });
+        },
+        error: function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Assignment Failed',
+                text: 'Failed to assign vehicle. Please try again.',
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    });
+});
+
+
+
 
 
 /* =========================================================

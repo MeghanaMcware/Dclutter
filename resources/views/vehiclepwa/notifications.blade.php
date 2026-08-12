@@ -33,66 +33,33 @@
             <a href="#" class="pill-item active">All</a>
             <a href="#" class="pill-item">Trips</a>
             <a href="#" class="pill-item">Alerts</a>
-            <a href="#" class="pill-item">System</a>
         </div>
 
         <!-- Today Section -->
-        <div class="group-label">Today</div>
+        <div class="group-label">Assigned Pickups & Alerts</div>
 
-        <div class="notif-card">
-            <div class="notif-icon">
-                <i class="fa-solid fa-truck-fast"></i>
-            </div>
-            <div class="notif-content">
-                <div class="notif-title-row">
-                    <h4>New Trip Assigned</h4>
-                    <span>11:15 AM</span>
+        @php
+            $assignedNotifs = \App\Models\Request::whereIn('status', ['assigned', 'picked_up'])->latest()->get();
+        @endphp
+
+        @forelse($assignedNotifs as $req)
+            <div class="notif-card">
+                <div class="notif-icon {{ $req->status == 'picked_up' ? '' : 'route' }}">
+                    <i class="fa-solid {{ $req->status == 'picked_up' ? 'fa-circle-check' : 'fa-truck-fast' }}"></i>
                 </div>
-                <p class="notif-desc">Trip TRP-2025-05-24-02 has been assigned to you.</p>
-            </div>
-        </div>
-
-        <div class="notif-card">
-            <div class="notif-icon route">
-                <i class="fa-solid fa-route"></i>
-            </div>
-            <div class="notif-content">
-                <div class="notif-title-row">
-                    <h4>Route Updated</h4>
-                    <span>10:45 AM</span>
+                <div class="notif-content">
+                    <div class="notif-title-row">
+                        <h4>{{ $req->status == 'picked_up' ? 'Pickup Completed' : 'Pickup Assigned' }}</h4>
+                        <span>{{ $req->updated_at->format('h:i A') }}</span>
+                    </div>
+                    <p class="notif-desc">Request {{ $req->request_number }} ({{ $req->applicant_name }}) at {{ $req->house_no }}, {{ Str::limit($req->address, 25) }}.</p>
                 </div>
-                <p class="notif-desc">Route for Trip TRP-2025-05-24-02 has been updated.</p>
             </div>
-        </div>
-
-        <div class="notif-card">
-            <div class="notif-icon warn">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+        @empty
+            <div class="notif-card justify-content-center text-center py-3">
+                <p class="notif-desc">No new notifications for your vehicle today.</p>
             </div>
-            <div class="notif-content">
-                <div class="notif-title-row">
-                    <h4>Maintenance Alert</h4>
-                    <span>09:30 AM</span>
-                </div>
-                <p class="notif-desc">Vehicle KA01AB1234 service is due on 26 May 2025.</p>
-            </div>
-        </div>
-
-        <!-- Yesterday Section -->
-        <div class="group-label">Yesterday</div>
-
-        <div class="notif-card">
-            <div class="notif-icon">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div class="notif-content">
-                <div class="notif-title-row">
-                    <h4>Trip Completed</h4>
-                    <span>06:25 PM</span>
-                </div>
-                <p class="notif-desc">Trip TRP-2025-05-23-02 has been completed.</p>
-            </div>
-        </div>
+        @endforelse
 
     </div>
 @endsection

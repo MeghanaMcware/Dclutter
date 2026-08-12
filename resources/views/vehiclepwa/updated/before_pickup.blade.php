@@ -36,7 +36,28 @@
         <!-- Form Section -->
         <!-- Before Pickup Form -->
         <div id="beforeFormSection">
-            <h5 class="fw-bold text-dark mb-3 px-1">Step 1: Arrived at Location</h5>
+            <h5 class="fw-bold text-dark mb-2 px-1">Step 1: Arrived at Location</h5>
+
+            @if($wasteRequest)
+            <div class="d-flex align-items-center justify-content-between p-3 mb-3 bg-white rounded-3 border shadow-sm">
+                <div>
+                    <strong class="text-dark d-block" style="font-size: 13px;">#{{ $wasteRequest->request_number }}</strong>
+                    <span class="text-muted d-block" style="font-size: 11px;">{{ $wasteRequest->house_no }}, {{ Str::limit($wasteRequest->address, 22) }}</span>
+                </div>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ $wasteRequest->latitude ?? '' }},{{ $wasteRequest->longitude ?? '' }}" target="_blank" class="btn btn-sm btn-outline-success fw-bold py-1.5 px-3 rounded-2">
+                    <i class="fa-solid fa-diamond-turn-right me-1"></i> Get Directions
+                </a>
+            </div>
+            @endif
+
+            @if(isset($dayInfo) && !$dayInfo['allowed'])
+            <div class="alert alert-warning border-warning d-flex align-items-center gap-2 mb-3 rounded-3" style="font-size: 13px;">
+                <i class="fa-solid fa-triangle-exclamation text-warning font-18"></i>
+                <div>
+                    <strong>Pickups restricted:</strong> Collections are permitted on <strong>{{ $dayInfo['allowed_day'] }}s</strong> only. (Today is {{ $dayInfo['today_day'] }} IST).
+                </div>
+            </div>
+            @endif
 
             <div class="form-card mb-4">
                 <form id="beforeStatusForm">
@@ -248,16 +269,51 @@
             beforePhotoInput.disabled = true;
             approxWeightInput.disabled = true;
 
-            // Save to local storage for demo purposes if needed
-            if (selectedFilesArray['before'].length > 0) {
-                const readerBefore = new FileReader();
-                readerBefore.onload = (e) => localStorage.setItem('recentBeforeImg', e.target.result);
-                readerBefore.readAsDataURL(selectedFilesArray['before'][0]);
-            }
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('approx_weight_kg', approxWeightInput.value);
+            formData.append('latitude', currentLat);
+            formData.append('longitude', lngInput.value);
 
-            setTimeout(() => {
-                window.location.href = "after_pickup";
-            }, 1000);
+            selectedFilesArray['before'].forEach(file => {
+                formData.append('before_photos[]', file);
+            });
+
+            const reqId = '{{ $wasteRequest->id ?? 1 }}';
+
+            fetch('/vehicle/before-pickup/' + reqId, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    window.location.href = data.next_url || '/vehicle/after-pickup/' + reqId;
+                } else {
+                    saveBeforeBtn.disabled = false;
+                    saveBeforeBtn.innerHTML = '<i class="fa-solid fa-camera"></i> <span>Save Before Details</span>';
+                    
+                    let errMsg = data.message || 'Failed to save details.';
+                    if (data.errors) {
+                        errMsg = Object.values(data.errors).flat().join('<br>');
+                    }
+                    Swal.fire({
+                        title: 'Notice',
+                        html: errMsg,
+                        icon: 'warning',
+                        confirmButtonColor: '#0e7a43'
+                    });
+                }
+            })
+            .catch(err => {
+                saveBeforeBtn.disabled = false;
+                saveBeforeBtn.innerHTML = '<i class="fa-solid fa-camera"></i> <span>Save Before Details</span>';
+                Swal.fire('Error', 'An unexpected network error occurred.', 'error');
+            });
         }
     }
 </script>

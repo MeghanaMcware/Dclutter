@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Request as WasteRequest;
 use App\Models\Corporation;
 use App\Models\Constituency;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -78,8 +79,9 @@ class AdminRequestController extends Controller
 
         $corporations = Corporation::with('constituencies')->orderBy('name')->get();
         $constituencies = Constituency::orderBy('name')->get();
+        $vehicles = Vehicle::with('owner')->where('status', 1)->get();
 
-        return view('admin.requests.index', compact('requests', 'corporations', 'constituencies'));
+        return view('admin.requests.index', compact('requests', 'corporations', 'constituencies', 'vehicles'));
     }
 
     /**
@@ -92,6 +94,65 @@ class AdminRequestController extends Controller
             ->orWhere('request_number', $id)
             ->firstOrFail();
 
-        return view('admin.requests.show', compact('wasteRequest'));
+        $vehicles = Vehicle::with('owner')->where('status', 1)->get();
+
+        return view('admin.requests.show', compact('wasteRequest', 'vehicles'));
+    }
+
+    /**
+     * Assign or re-assign a vehicle to a waste request.
+     */
+    public function assignVehicle(Request $request, $id)
+    {
+        $request->validate([
+            'vehicle_id' => 'required|exists:vehicles,id',
+        ]);
+
+        $wasteRequest = WasteRequest::findOrFail($id);
+        $wasteRequest->vehicle_id = $request->vehicle_id;
+        $wasteRequest->assigned_at = now();
+        if ($wasteRequest->status === 'pending') {
+            $wasteRequest->status = 'assigned';
+        }
+        $wasteRequest->save();
+
+        $wasteRequest->load('vehicle.owner');
+        if ($wasteRequest->vehicle) {
+            $driverName = $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Driver';
+            $driverPhone = $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number ?? '9999999999';
+            $vehicleNo = $wasteRequest->vehicle->vehicle_number;
+
+            try {
+                $wa = app(\App\Services\WhatsAppService::class);
+                // 1. Notify Driver
+                $wa->sendVehicleAssignmentToDriver(
+                    $driverPhone,
+                    $driverName,
+                    $vehicleNo,
+                    $wasteRequest->request_number,
+                    $wasteRequest->address
+                );
+                // 2. Notify Citizen User
+                $wa->sendVehicleAssignmentToUser(
+                    $wasteRequest->mobile_number,
+                    $wasteRequest->applicant_name,
+                    $wasteRequest->request_number,
+                    $vehicleNo,
+                    $driverName,
+                    $driverPhone
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('WhatsApp Assignment Notification Exception: ' . $e->getMessage());
+            }
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehicle assigned successfully to request #' . $wasteRequest->request_number,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Vehicle assigned successfully to request #' . $wasteRequest->request_number);
     }
 }

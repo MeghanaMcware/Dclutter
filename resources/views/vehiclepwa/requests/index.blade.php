@@ -328,9 +328,9 @@
                 <input type="text" id="unified-search" placeholder="Search ref, area, ward...">
             </div>
             <select id="unified-filter" class="filter-select">
-                <option value="all" selected>All Items</option>
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
+                <option value="all" selected>All Statuses</option>
+                <option value="assigned">Assigned</option>
+                <option value="picked_up">Picked Up</option>
             </select>
         </div>
 
@@ -416,14 +416,25 @@
                                 <strong class="text-dark" id="modalSubCategory">Cots, Sofas</strong>
                             </div>
                         </div>
+                    <!-- Before / After Pickup Photos Section -->
+                    <div id="modalImagesContainer" class="mt-3 pt-3 border-top" style="display: none;">
+                        <label class="small text-muted font-weight-bold text-uppercase d-block mb-2">Pickup Photos</label>
+                        <div id="modalBeforePhotosWrapper" class="mb-2" style="display: none;">
+                            <span class="badge bg-primary mb-1">Before Pickup Photos</span>
+                            <div id="modalBeforePhotosList" class="d-flex gap-2 overflow-auto py-1"></div>
+                        </div>
+                        <div id="modalAfterPhotosWrapper" style="display: none;">
+                            <span class="badge bg-success mb-1">After Pickup Photos</span>
+                            <div id="modalAfterPhotosList" class="d-flex gap-2 overflow-auto py-1"></div>
+                        </div>
                     </div>
 
                     <div class="d-flex gap-2 mt-4" id="modalActionButtons">
                         <a id="modalDirectionsBtn" href="#" target="_blank" class="btn btn-get-directions w-50 d-flex align-items-center justify-content-center py-2">
                             <i class="fa-solid fa-diamond-turn-right me-1"></i> Directions
                         </a>
-                        <a href="{{ route('driver.update_status') }}" class="btn btn-view-card w-50 d-flex align-items-center justify-content-center py-2">
-                            <i class="fa-solid fa-camera me-1"></i> Update
+                        <a id="modalPickupActionBtn" href="#" class="btn btn-view-card w-50 d-flex align-items-center justify-content-center py-2">
+                            <i class="fa-solid fa-camera me-1"></i> <span id="modalPickupActionText">Before Pickup</span>
                         </a>
                     </div>
                 </div>
@@ -435,59 +446,29 @@
 @section('script')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Frontend-only demo data. Replace this array with an API response when backend integration is needed.
         const allRequestData = [
+            @foreach($assignedRequests as $req)
             {
-                id: 4177,
-                ref: 'DCL-2025-000123',
-                status: 'PENDING',
-                category: 'Furniture',
-                subCategory: 'Cots, Sofas',
-                applicant: 'Ramesh Kumar',
-                mobile: '9876543210',
-                date: '09-Aug-2026',
-                houseNo: '#123',
-                ward: 'Ward 150',
-                constituency: 'Bommanahalli',
-                pincode: '560102',
-                location: 'BTM Layout 2nd Stage, Bengaluru',
-                lat: 12.9166,
-                lng: 77.6101
+                id: {{ $req->id }},
+                ref: '{{ $req->request_number }}',
+                status: '{{ strtoupper($req->status) }}',
+                beforePickupDone: {{ (!empty($req->before_pickup_images) || !empty($req->approx_weight_kg)) ? 'true' : 'false' }},
+                beforePhotos: {!! json_encode(array_map(function($img) { return Str::startsWith($img, 'http') ? $img : asset('storage/' . $img); }, $req->before_pickup_images ?? [])) !!},
+                afterPhotos: {!! json_encode(array_map(function($img) { return Str::startsWith($img, 'http') ? $img : asset('storage/' . $img); }, $req->picked_up_images ?? [])) !!},
+                category: '{{ is_array($req->category_ids) ? implode(", ", $req->category_ids) : ($req->category_ids ?? "N/A") }}',
+                subCategory: '{{ is_array($req->subcategory_ids) ? implode(", ", $req->subcategory_ids) : ($req->subcategory_ids ?? "N/A") }}',
+                applicant: '{{ addslashes($req->applicant_name) }}',
+                mobile: '{{ $req->mobile_number }}',
+                date: '{{ $req->created_at->format("d-M-Y") }}',
+                houseNo: '{{ addslashes($req->house_no) }}',
+                ward: '{{ $req->ward?->name ?? "Ward" }}',
+                constituency: '{{ $req->constituency?->name ?? "Constituency" }}',
+                pincode: '{{ $req->pincode }}',
+                location: '{{ addslashes($req->address) }}',
+                lat: {{ $req->latitude ?? 12.9716 }},
+                lng: {{ $req->longitude ?? 77.5946 }}
             },
-            {
-                id: 4178,
-                ref: 'DCL-2025-000124',
-                status: 'PENDING',
-                category: 'Electronics',
-                subCategory: 'Laptops, Mobile Phones',
-                applicant: 'AE Spot Officer - Ward 174',
-                mobile: '9123456780',
-                date: '16-Aug-2026',
-                houseNo: 'Opp. Park',
-                ward: 'Ward 174',
-                constituency: 'HSR Layout',
-                pincode: '560102',
-                location: 'Silk Board Flyover Dump Site',
-                lat: 12.9172,
-                lng: 77.6228
-            },
-            {
-                id: 4179,
-                ref: 'DCL-2025-000125',
-                status: 'ACCEPTED',
-                category: 'Mattresses & Cushions',
-                subCategory: 'Double Mattress',
-                applicant: 'Suresh Reddy (Commercial Complex)',
-                mobile: '9988776655',
-                date: '23-Aug-2026',
-                houseNo: '#45, Ground Floor',
-                ward: 'Ward 151',
-                constituency: 'Koramangala',
-                pincode: '560034',
-                location: 'Koramangala 5th Block',
-                lat: 12.9352,
-                lng: 77.6245
-            }
+            @endforeach
         ];
         let mapInstance = null;
         let mapMarkers = [];
@@ -597,10 +578,80 @@
             document.getElementById('modalCategory').innerText = item.category;
             document.getElementById('modalSubCategory').innerText = item.subCategory;
             
+            // Dynamic Modal Status Badge
+            const statusBadgeElem = document.getElementById('modalStatusBadge');
+            if (statusBadgeElem) {
+                if (item.status === 'PICKED_UP') {
+                    statusBadgeElem.className = 'badge bg-success text-white py-1 px-2 font-12';
+                    statusBadgeElem.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> PICKED UP';
+                } else if (item.status === 'ASSIGNED') {
+                    statusBadgeElem.className = 'badge bg-primary text-white py-1 px-2 font-12';
+                    statusBadgeElem.innerHTML = '<i class="fa-solid fa-truck-fast me-1"></i> ASSIGNED';
+                } else {
+                    statusBadgeElem.className = 'badge-status-pending font-12';
+                    statusBadgeElem.innerHTML = '<i class="fa-regular fa-clock me-1"></i> ' + item.status;
+                }
+            }
+
+            // Dynamic Before / After Photos Preview
+            const imagesContainer = document.getElementById('modalImagesContainer');
+            const beforeWrapper = document.getElementById('modalBeforePhotosWrapper');
+            const beforeList = document.getElementById('modalBeforePhotosList');
+            const afterWrapper = document.getElementById('modalAfterPhotosWrapper');
+            const afterList = document.getElementById('modalAfterPhotosList');
+
+            let hasPhotos = false;
+            if (item.beforePhotos && item.beforePhotos.length > 0) {
+                hasPhotos = true;
+                beforeWrapper.style.display = 'block';
+                beforeList.innerHTML = item.beforePhotos.map(url => `
+                    <a href="${url}" target="_blank">
+                        <img src="${url}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </a>
+                `).join('');
+            } else {
+                beforeWrapper.style.display = 'none';
+            }
+
+            if (item.afterPhotos && item.afterPhotos.length > 0) {
+                hasPhotos = true;
+                afterWrapper.style.display = 'block';
+                afterList.innerHTML = item.afterPhotos.map(url => `
+                    <a href="${url}" target="_blank">
+                        <img src="${url}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </a>
+                `).join('');
+            } else {
+                afterWrapper.style.display = 'none';
+            }
+
+            if (imagesContainer) {
+                imagesContainer.style.display = hasPhotos ? 'block' : 'none';
+            }
+
             // Set Directions Link
             const directionsBtn = document.getElementById('modalDirectionsBtn');
             if (directionsBtn) {
                 directionsBtn.href = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+            }
+
+            // Set Pickup Action Button (Before Pickup vs After Pickup vs Completed)
+            const pickupBtn = document.getElementById('modalPickupActionBtn');
+            const pickupBtnText = document.getElementById('modalPickupActionText');
+            if (pickupBtn && pickupBtnText) {
+                if (item.status === 'PICKED_UP') {
+                    pickupBtnText.innerText = 'Picked Up';
+                    pickupBtn.href = '#';
+                    pickupBtn.className = 'btn btn-secondary w-50 d-flex align-items-center justify-content-center py-2 disabled';
+                } else if (item.beforePickupDone) {
+                    pickupBtnText.innerText = 'After Pickup';
+                    pickupBtn.href = '/vehicle/after-pickup/' + item.id;
+                    pickupBtn.className = 'btn btn-primary w-50 d-flex align-items-center justify-content-center py-2';
+                } else {
+                    pickupBtnText.innerText = 'Before Pickup';
+                    pickupBtn.href = '/vehicle/before-pickup/' + item.id;
+                    pickupBtn.className = 'btn btn-success w-50 d-flex align-items-center justify-content-center py-2';
+                }
             }
 
             const modal = new bootstrap.Modal(document.getElementById('requestDetailModal'));
@@ -610,10 +661,9 @@
         function renderRequestCards() {
             const cardsContainer = document.getElementById('cards-container');
             cardsContainer.innerHTML = allRequestData.map((item, index) => {
-                const isPending = item.status === 'PENDING';
-                const statusBadge = isPending
-                    ? '<span class="badge-status-pending"><i class="fa-regular fa-clock"></i> PENDING</span>'
-                    : `<span class="badge-status-accepted"><i class="fa-solid fa-circle-check"></i> ${item.status}</span>`;
+                const statusBadge = item.status === 'PICKED_UP'
+                    ? '<span class="badge bg-success py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-circle-check"></i> PICKED UP</span>'
+                    : '<span class="badge bg-primary py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-truck-fast"></i> ASSIGNED</span>';
                 const searchText = `${item.ref} ${item.applicant} ${item.location} ${item.category} ${item.status}`.toLowerCase();
 
                 return `
@@ -630,7 +680,6 @@
                         <hr class="card-divider">
                         <div class="d-flex justify-content-between align-items-end">
                             <div>
-
                                 <div class="card-info-item">
                                     <i class="fa-solid fa-recycle text-success"></i>
                                     <span class="card-info-label">Category:</span>
