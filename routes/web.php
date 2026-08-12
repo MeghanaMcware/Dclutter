@@ -66,6 +66,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Vehicles Resource Routes
     Route::patch('vehicles/{id}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggle-status');
     Route::resource('vehicles', AdminVehicleController::class);
+
+
 });
 
 /*
