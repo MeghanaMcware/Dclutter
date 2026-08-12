@@ -7,7 +7,6 @@
     /* Select2 Alignment & Validation Fixes */
     .select2-container {
         width: 100% !important;
-        display: block;
     }
     .select2-container .select2-selection--multiple {
         min-height: 38px !important;
@@ -156,6 +155,18 @@
                                 </div>
                             </div>
 
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="role" name="role" required>
+                                        <option value="" disabled selected>Select Role</option>
+                                        <option value="DGM">DGM</option>
+                                        <option value="AGM">AGM</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a role.</div>
+                                </div>
+                            </div>
+
                             <div class="text-center mt-4">
                                 <a href="{{ route('admin.masters.users.index') }}" class="btn btn-secondary me-2">Cancel</a>
                                 <button type="submit" class="btn btn-primary px-4"><i class="fa fa-save me-1"></i> Update User</button>
@@ -173,11 +184,25 @@
 <script>
     $(document).ready(function() {
         $('.select2').select2({
-            placeholder: "Select Corporation"
+            placeholder: "Select Corporation",
+            closeOnSelect: true
         });
         $('.select2-search').select2({
             placeholder: "Search Constituency",
-            allowClear: true
+            allowClear: true,
+            closeOnSelect: true
+        });
+
+        // Prevent opening if all options are already selected
+        $('.select2, .select2-search').on('select2:opening', function (e) {
+            var $select = $(this);
+            // check if it is a multiple select
+            if ($select.prop('multiple')) {
+                var availableOptions = $select.find('option').not(':selected').not('[value=""]').length;
+                if (availableOptions === 0) {
+                    e.preventDefault();
+                }
+            }
         });
 
         function updateJurisdictionFields() {

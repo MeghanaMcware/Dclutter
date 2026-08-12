@@ -7,7 +7,6 @@
     /* Select2 Alignment & Validation Fixes */
     .select2-container {
         width: 100% !important;
-        display: block;
     }
     .select2-container .select2-selection--multiple {
         min-height: 38px !important;
@@ -92,7 +91,11 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold" for="phone">Phone Number <span class="text-danger">*</span></label>
+<<<<<<< HEAD
+                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+=======
                                     <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Enter 10-digit Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
+>>>>>>> 3e1e6a40921ecc474287b43b7318a85b0f881cbd
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
@@ -121,6 +124,37 @@
                             
                             <!-- Dynamic Jurisdiction Scoping Row -->
                             <div class="row mb-3">
+<<<<<<< HEAD
+                              <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="constituency">Corporation </label>
+                                    <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple" >
+                                        <!-- Populate options from database in controller -->
+                                        <option value="1">West</option>
+                                        <option value="2">North</option>
+                                    </select>
+                                   
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="constituency">Constituency </label>
+                                    <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple" >
+                                        <!-- Populate options from database in controller -->
+                                        <option value="1">Constituency 1</option>
+                                        <option value="2">Constituency 2</option>
+                                    </select>
+                                   
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="role" name="role" required>
+                                        <option value="" disabled selected>Select Role</option>
+                                        <option value="DGM">DGM</option>
+                                        <option value="AGM">AGM</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a role.</div>
+=======
                                 <div class="col-md-6" id="corporationCol" style="display: none;">
                                     <label class="form-label fw-bold" for="corporation">Corporation (DGM Jurisdiction) <span class="text-danger">*</span></label>
                                     <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple">
@@ -142,6 +176,7 @@
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback">Please select at least one constituency for AGM.</div>
+>>>>>>> 3e1e6a40921ecc474287b43b7318a85b0f881cbd
                                 </div>
                             </div>
 
@@ -162,11 +197,25 @@
 <script>
     $(document).ready(function() {
         $('.select2').select2({
-            placeholder: "Select Corporation"
+            placeholder: "Select Corporation",
+            closeOnSelect: true
         });
         $('.select2-search').select2({
             placeholder: "Search Constituency",
-            allowClear: true
+            allowClear: true,
+            closeOnSelect: true
+        });
+
+        // Prevent opening if all options are already selected
+        $('.select2, .select2-search').on('select2:opening', function (e) {
+            var $select = $(this);
+            // check if it is a multiple select
+            if ($select.prop('multiple')) {
+                var availableOptions = $select.find('option').not(':selected').not('[value=""]').length;
+                if (availableOptions === 0) {
+                    e.preventDefault();
+                }
+            }
         });
 
         function updateJurisdictionFields() {

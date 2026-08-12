@@ -104,4 +104,60 @@ Route::get('/requests', function () {
 });
 
 // Vehicle login submit fallback route
+Route::match(['get', 'post'], '/vehicle/login-submit', function () {
+    return redirect()->route('driver.dashboard');
+})->name('vehicle.login.submit');
+
+use App\Http\Controllers\Admin\AdminRequestController;
+
+Route::get('/admin/requests', [AdminRequestController::class, 'index'])->name('admin.requests.index');
+Route::get('/admin/requests/{id}', [AdminRequestController::class, 'show'])->name('admin.requests.show');
+
+Route::get('/admin/dashboard', function () {
+    return view('admin.dashboard');
+});
+
+// Admin Vehicle Routes
+
+    Route::get('/vehicles', function () {
+        return view('admin.vehicles.index');
+    });
+    Route::get('/vehicles/create', function () {
+        return view('admin.vehicles.create');
+    });
+    Route::get('vehicles/view', function () {
+        return view('admin.vehicles.show');
+    });
+    Route::get('vehicles/edit', function () {
+        return view('admin.vehicles.edit');
+    });
+
+
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubcategoryController;
+
+// Admin Masters Resource Routes
+Route::prefix('admin/masters')->name('admin.masters.')->group(function () {
+    Route::resource('categories', CategoryController::class);
+    Route::patch('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+
+    Route::resource('subcategories', SubcategoryController::class);
+    Route::patch('subcategories/{subcategory}/toggle-status', [SubcategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
+});
+  
+
+
+Route::get('/users/index', function () {
+        return view('admin.masters.users.index');
+    })->name('masters.users.index');
+Route::get('/users/edit', function () {
+        return view('admin.masters.users.edit');
+    })->name('masters.users.edit');
+Route::get('/users/show', function () {
+        return view('admin.masters.users.show');
+    })->name('masters.users.show');
+Route::get('/users/create', function () {
+        return view('admin.masters.users.create');
+    })->name('masters.users.create');
+})->name('vehicle.login.submit');
 Route::match(['get', 'post'], '/vehicle/login-submit', [VehicleAuthController::class, 'login'])->name('vehicle.login.submit');
