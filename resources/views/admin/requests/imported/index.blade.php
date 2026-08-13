@@ -75,7 +75,7 @@
         color: white;
     }
     
-    table.dataTable thead th {
+    table.dataTable thead th, table thead th {
         font-size: 12px;
         color: #6c757d;
         font-weight: 600;
@@ -83,12 +83,38 @@
         border-bottom: 2px solid #eaebf0;
         padding: 12px 10px;
     }
-    table.dataTable tbody td {
+    table.dataTable tbody td, table tbody td {
         font-size: 13px;
         color: #212529;
         vertical-align: middle;
         padding: 12px 10px;
         border-bottom: 1px solid #eaebf0;
+    }
+
+    /* Custom Bootstrap 5 Pagination Fixes */
+    .pagination-wrapper nav svg {
+        width: 16px;
+        height: 16px;
+    }
+    .pagination {
+        margin-bottom: 0 !important;
+        gap: 3px;
+    }
+    .pagination .page-item .page-link {
+        color: #0d6efd;
+        border-radius: 5px !important;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #ffffff;
+    }
+    .pagination .page-item.disabled .page-link {
+        color: #94a3b8;
     }
 </style>
 @endsection
@@ -98,7 +124,10 @@
     <div class="row">
         <!-- Main Content Section -->
         <div class="col-sm-12">
-            <h4 class="mb-3 font-weight-bold" style="color: #1e293b; font-weight: 700;">Imported Requests</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Imported Requests</h4>
+                <span class="badge bg-primary fs-6 px-3 py-2">Total: {{ number_format($totalCount) }} Records</span>
+            </div>
             
             <div class="card" style="border: 1px solid #eaebf0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border-radius: 8px;">
                 <div class="card-body p-4">
@@ -145,9 +174,9 @@
                         </div>
                     </form>
 
-                    <!-- Table Data with Unique ID admin-imported-requests-table -->
+                    <!-- Table Data -->
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped text-center align-middle datatables" id="admin-imported-requests-table">
+                        <table class="table table-bordered table-striped text-center align-middle" id="admin-imported-requests-table">
                             <thead>
                                 <tr>
                                     <th class="text-start">Request ID</th>
@@ -203,11 +232,15 @@
                         </table>
                     </div>
 
-                    @if(method_exists($importedRequests, 'hasPages') && $importedRequests->hasPages())
-                        <div class="mt-3">
-                            {{ $importedRequests->withQueryString()->links() }}
+                    <!-- Clean Bootstrap 5 Server-Side Pagination Bar -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div class="small text-muted font-13">
+                            Showing <strong>{{ $importedRequests->firstItem() ?? 0 }}</strong> to <strong>{{ $importedRequests->lastItem() ?? 0 }}</strong> of <strong>{{ number_format($importedRequests->total()) }}</strong> entries
                         </div>
-                    @endif
+                        <div class="pagination-wrapper">
+                            {{ $importedRequests->withQueryString()->links('pagination::bootstrap-5') }}
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -218,18 +251,6 @@
 
 @section('script')
 <script>
-$(document).ready(function() {
-    if ($('#admin-imported-requests-table').length) {
-        $('#admin-imported-requests-table').DataTable({
-            pageLength: 10,
-            ordering: true,
-            searching: true,
-            lengthChange: true,
-            responsive: true
-        });
-    }
-});
-
 function exportTableToCSV(filename) {
     let csv = [];
     let rows = document.querySelectorAll("#admin-imported-requests-table tr");

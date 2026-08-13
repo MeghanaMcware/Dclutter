@@ -47,7 +47,7 @@ class AdminImportedRequestController extends Controller
             $query->where('status', strtolower($request->status));
         }
 
-        $importedRequests = $query->orderBy('id', 'asc')->get();
+        $importedRequests = $query->orderBy('id', 'asc')->paginate(20);
         $totalCount = LegacyPickupRequest::count();
 
         return view('admin.requests.imported.index', compact('importedRequests', 'corporations', 'constituencies', 'totalCount'));
