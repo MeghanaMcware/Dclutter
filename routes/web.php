@@ -64,6 +64,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Vehicles Resource Routes
     Route::patch('vehicles/{id}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggle-status');
     Route::resource('vehicles', AdminVehicleController::class);
+<<<<<<< HEAD
+
+
+
+
+    Route::get('/masters/dump/create', function () {
+    return view('admin.masters.dump.create');
+})->name('masters.dump.create');
+
+Route::get('/masters/dump/edit', function () {
+    return view('admin.masters.dump.edit');
+})->name('masters.dump.edit');
+
+Route::get('/masters/dump/index', function () {
+    return view('admin.masters.dump.index');
+})->name('masters.dump.index');
+
+Route::get('/masters/dump/show', function () {
+    return view('admin.masters.dump.show');
+})->name('masters.dump.show');
+
+
+
+=======
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 });
 
 /*
@@ -95,6 +120,19 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     Route::get('/profile', [VehiclePwaController::class, 'profile'])->name('profile_settings');
     Route::get('/notifications', [VehiclePwaController::class, 'notifications'])->name('notifications');
 
+<<<<<<< HEAD
+    Route::get('/requests', [VehicleRequestController::class, 'index'])->name('requests');
+    Route::get('/route', [VehicleRequestController::class, 'route'])->name('route');
+    Route::get('/stop-details', [VehicleRequestController::class, 'stopDetails'])->name('stop_details');
+    Route::get('/collect-waste', [VehicleRequestController::class, 'collectWaste'])->name('collect_waste');
+    Route::get('/after_pickup', [VehicleRequestController::class, 'afterPickup'])->name('after_pickup');
+    Route::get('/update-status', [VehicleRequestController::class, 'updateStatus'])->name('update_status');
+
+    Route::view('/vehicle/dumpform', 'vehiclepwa.dumpform')
+    ->name('vehicle.dumpform');
+
+
+=======
     // Step 1: Before Pickup
     Route::get('/before-pickup/{id?}', [VehiclePwaController::class, 'beforePickup'])->name('before_pickup');
     Route::post('/before-pickup/{id}', [VehiclePwaController::class, 'storeBeforePickup'])->name('store_before_pickup');
@@ -102,4 +140,5 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     // Step 2: After Pickup
     Route::get('/after-pickup/{id?}', [VehiclePwaController::class, 'afterPickup'])->name('after_pickup');
     Route::post('/after-pickup/{id}', [VehiclePwaController::class, 'storeAfterPickup'])->name('store_after_pickup');
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 });
