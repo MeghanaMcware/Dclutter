@@ -8,10 +8,8 @@
     <a href="{{ route('vehicle.trip_progress') }}" class="{{ request()->routeIs('vehicle.trip_progress*') || request()->routeIs('vehicle.update_status') || request()->routeIs('vehicle.trip_summary') ? 'active' : '' }}">
         <i class="fa-solid fa-truck"></i>Trips
     </a>
-    <a href="{{ route('driver.route') }}" class="{{ request()->routeIs('driver.route*') || request()->routeIs('driver.stop_details') || request()->routeIs('driver.collect_waste') ? 'active' : '' }}">
+    <a href="{{ route('vehicle.dump') }}" class="{{ request()->routeIs('vehicle.dump*') || request()->routeIs('vehicle.dumpform*') ? 'active' : '' }}">
         <i class="fa-solid fa-dumpster"></i>Dump
-    <a href="{{ route('vehicle.route') }}" class="{{ request()->routeIs('vehicle.route*') || request()->routeIs('vehicle.stop_details') || request()->routeIs('vehicle.collect_waste') ? 'active' : '' }}">
-        <i class="fa-solid fa-map-location-dot"></i>Map
     </a>
     <a href="{{ route('vehicle.profile_settings') }}" class="{{ request()->routeIs('vehicle.profile_settings*') ? 'active' : '' }}">
         <i class="fa-solid fa-user"></i>Profile

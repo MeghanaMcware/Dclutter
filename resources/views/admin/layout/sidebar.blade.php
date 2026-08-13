@@ -35,6 +35,13 @@
           </li>
 
           <li class="sidebar-list">
+            <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('admin.imported-requests.*') ? 'active' : '' }}" href="{{ route('admin.imported-requests.index') }}">
+              <i data-feather="file-text"></i>
+              <span>Imported Requests</span>
+            </a>
+          </li>
+
+          <li class="sidebar-list">
             <a class="sidebar-link sidebar-title link-nav" href="#map">
               <i data-feather="map-pin"></i>
               <span>GIS Overview Map</span>
@@ -68,6 +75,11 @@
               <li>
                 <a class="{{ request()->routeIs('admin.masters.users.*') ? 'active' : '' }}" href="{{ route('admin.masters.users.index') }}">
                   Users
+                </a>
+              </li>
+              <li>
+                <a class="{{ request()->routeIs('admin.masters.plants.*') ? 'active' : '' }}" href="{{ route('admin.masters.plants.index') }}">
+                  Plant Locations
                 </a>
               </li>
             </ul>
