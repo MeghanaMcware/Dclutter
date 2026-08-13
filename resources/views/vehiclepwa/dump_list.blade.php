@@ -56,6 +56,15 @@
         border-radius: 20px;
     }
 
+    .status-badge-dumped {
+        background: #e2e8f0;
+        color: #475569;
+        font-weight: 800;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
     .info-row {
         font-size: 13px;
         color: #334155;
@@ -91,6 +100,13 @@
         background: var(--primary-brand-dark);
         color: #ffffff;
     }
+
+    .btn-dump-disabled {
+        background: #94a3b8 !important;
+        color: #ffffff !important;
+        cursor: not-allowed;
+        opacity: 0.85;
+    }
 </style>
 @endsection
 
@@ -104,15 +120,25 @@
     </div>
 
     @forelse($dumpRequests as $req)
+        @php
+            $isDumped = in_array(strtolower($req->status), ['completed', 'dumped']);
+        @endphp
         <div class="dump-card">
             <div class="req-header">
                 <span class="req-badge">
                     <i class="fa-solid fa-recycle me-1"></i>
                     {{ $req->request_number ?? ('REQ-' . str_pad($req->id, 5, '0', STR_PAD_LEFT)) }}
                 </span>
-                <span class="status-badge-picked">
-                    <i class="fa-solid fa-circle-check me-1"></i> Picked Up
-                </span>
+
+                @if($isDumped)
+                    <span class="status-badge-dumped">
+                        <i class="fa-solid fa-check-double me-1 text-secondary"></i> DUMPED
+                    </span>
+                @else
+                    <span class="status-badge-picked">
+                        <i class="fa-solid fa-circle-check me-1"></i> Picked Up
+                    </span>
+                @endif
             </div>
 
             <div class="info-row">
@@ -135,10 +161,17 @@
                 </div>
             @endif
 
-            <a href="{{ route('vehicle.dumpform', ['pickup_id' => ($req->request_number ?? ('REQ-' . str_pad($req->id, 5, '0', STR_PAD_LEFT))), 'id' => $req->id]) }}" class="btn-dump-action">
-                <i class="fa-solid fa-truck-ramp-box"></i>
-                Dump
-            </a>
+            @if($isDumped)
+                <button type="button" class="btn-dump-action btn-dump-disabled" disabled>
+                    <i class="fa-solid fa-circle-check"></i>
+                    Already Dumped
+                </button>
+            @else
+                <a href="{{ route('vehicle.dumpform', ['pickup_id' => ($req->request_number ?? ('REQ-' . str_pad($req->id, 5, '0', STR_PAD_LEFT))), 'id' => $req->id]) }}" class="btn-dump-action">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                    Dump
+                </a>
+            @endif
         </div>
     @empty
         <div class="text-center py-5">

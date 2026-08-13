@@ -44,6 +44,8 @@ class Request extends Model
         'picked_up_at',
         'dump_id',
         'remarks',
+        'not_available_reason',
+        'not_available_at',
     ];
 
     protected $casts = [
@@ -56,6 +58,7 @@ class Request extends Model
         'preferred_pickup_date' => 'date',
         'assigned_at' => 'datetime',
         'picked_up_at' => 'datetime',
+        'not_available_at' => 'datetime',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'before_pickup_latitude' => 'decimal:8',
@@ -178,5 +181,10 @@ class Request extends Model
         }
 
         return $query;
+    }
+
+    public function dumpRecord(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Dump::class, 'request_id')->latestOfMany();
     }
 }

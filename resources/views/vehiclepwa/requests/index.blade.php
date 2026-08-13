@@ -526,7 +526,7 @@
             Directions
         </a>
 
-        <div class="w-50" style="margin-top:8px;">
+        <div class="w-50" id="pickupAvailabilityContainer" style="margin-top:8px;">
           <select id="pickupAvailability"
         class="modal-availability-select">
                 <option value="">Select Availability</option>
@@ -815,6 +815,8 @@
         function setupAvailabilityControls(item) {
 
     const availabilitySelect = document.getElementById('pickupAvailability');
+    const availabilityContainer = document.getElementById('pickupAvailabilityContainer');
+    const directionsBtn = document.getElementById('modalDirectionsBtn');
     const notAvailableSection = document.getElementById('notAvailableSection');
     const notAvailableReason = document.getElementById('notAvailableReason');
     const notAvailableSubmitBtn = document.getElementById('notAvailableSubmitBtn');
@@ -828,6 +830,23 @@
     notAvailableSection.style.display = 'none';
     availablePickupSection.style.display = 'none';
     notAvailableSubmitBtn.disabled = true;
+
+    // Check status: Only show availability dropdown for ASSIGNED / pending requests
+    const isAlreadyPickedUp = (item.status === 'PICKED_UP' || item.status === 'COMPLETED' || item.status === 'DUMPED' || item.status === 'NOT_AVAILABLE' || item.pickedUpDone);
+
+    if (isAlreadyPickedUp) {
+        if (availabilityContainer) availabilityContainer.style.display = 'none';
+        if (directionsBtn) {
+            directionsBtn.classList.remove('w-50');
+            directionsBtn.classList.add('w-100');
+        }
+    } else {
+        if (availabilityContainer) availabilityContainer.style.display = 'block';
+        if (directionsBtn) {
+            directionsBtn.classList.remove('w-100');
+            directionsBtn.classList.add('w-50');
+        }
+    }
 
     // Availability selection
     availabilitySelect.onchange = function () {
@@ -864,28 +883,47 @@
 
     // Not Available Submit
     notAvailableSubmitBtn.onclick = function () {
-
         const reason = notAvailableReason.value;
+        if (!reason) return;
 
-        if (!reason) {
-            return;
-        }
+        const reasonText = notAvailableReason.options[notAvailableReason.selectedIndex].text;
 
-        /*
-         * FRONTEND ONLY FOR NOW
-         *
-         * This does NOT change your existing backend.
-         * Replace this section later when the backend endpoint
-         * for unavailable complaints is available.
-         */
+        notAvailableSubmitBtn.disabled = true;
+        notAvailableSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
-        const reasonText =
-            notAvailableReason.options[
-                notAvailableReason.selectedIndex
-            ].text;
-
-        alert('Selected: ' + reasonText);
-
+        fetch('/vehicle/not-available/' + item.id, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                reason: reasonText
+            })
+        })
+        .then(async res => {
+            const data = await res.json();
+            if (res.ok && data.success) {
+                Swal.fire({
+                    title: 'Status Updated!',
+                    text: 'Request marked as Waste Not Available.',
+                    icon: 'info',
+                    confirmButtonColor: '#0e7a43'
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                notAvailableSubmitBtn.disabled = false;
+                notAvailableSubmitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit';
+                Swal.fire('Notice', data.message || 'Failed to update status.', 'warning');
+            }
+        })
+        .catch(err => {
+            notAvailableSubmitBtn.disabled = false;
+            notAvailableSubmitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit';
+            Swal.fire('Error', 'An unexpected error occurred.', 'error');
+        });
     };
 }
 

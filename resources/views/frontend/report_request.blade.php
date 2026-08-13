@@ -1086,8 +1086,11 @@ function renderSubcategories() {
                 
                 const iconSpan = document.createElement('span');
                 iconSpan.className = 'category-icon';
-                if (subcatIcon.startsWith('fa-') || subcatIcon.startsWith('fa')) {
+                if (subcatIcon && (subcatIcon.startsWith('fa-') || subcatIcon.startsWith('fa '))) {
                     iconSpan.innerHTML = `<i class="fa-solid ${subcatIcon}"></i>`;
+                } else if (subcatIcon) {
+                    const imgSrc = (subcatIcon.startsWith('http') || subcatIcon.startsWith('/')) ? subcatIcon : `/storage/${subcatIcon}`;
+                    iconSpan.innerHTML = `<img src="${imgSrc}" alt="${subcatName}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fa-solid fa-tag\\'></i>';">`;
                 } else {
                     iconSpan.innerHTML = `<i class="fa-solid fa-tag"></i>`;
                 }

@@ -180,6 +180,34 @@ class VehiclePwaController extends Controller
     }
 
     /**
+     * Store Not Available status for a pickup request (Reason submission only).
+     */
+    public function storeNotAvailable(Request $request, $id)
+    {
+        $wasteRequest = WasteRequest::findOrFail($id);
+
+        $request->validate([
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $wasteRequest->status = 'not_available';
+        $wasteRequest->not_available_reason = $request->reason;
+        $wasteRequest->not_available_at = now();
+        $wasteRequest->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated: Waste Not Available.',
+                'redirect_url' => route('vehicle.trip_progress'),
+            ]);
+        }
+
+        return redirect()->route('vehicle.trip_progress')
+            ->with('info', 'Status updated: Waste Not Available.');
+    }
+
+    /**
      * Step 2: After Pickup screen.
      */
     public function afterPickup(Request $request, $id = null)
@@ -352,19 +380,16 @@ class VehiclePwaController extends Controller
     {
         $vehicleId = $this->getDriverVehicleId();
 
-        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
-            ->where('status', 'picked_up');
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle', 'dumpRecord'])
+            ->whereIn('status', ['picked_up', 'completed', 'dumped']);
 
         if ($vehicleId) {
             $query->where('vehicle_id', $vehicleId);
         }
 
-        $dumpRequests = $query->latest('picked_up_at')->get();
-
-        if ($dumpRequests->isEmpty()) {
-            $dumpRequests = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
-                ->take(5)->get();
-        }
+        $dumpRequests = $query->latest('picked_up_at')->get()->sortBy(function ($req) {
+            return in_array(strtolower($req->status), ['completed', 'dumped']) ? 1 : 0;
+        });
 
         return view('vehiclepwa.dump_list', compact('dumpRequests'));
     }
@@ -375,7 +400,24 @@ class VehiclePwaController extends Controller
     public function dumpForm(Request $request)
     {
         $reqId = $request->query('id') ?? $request->query('request_id');
-        $wasteRequest = $reqId ? WasteRequest::find($reqId) : WasteRequest::where('status', 'picked_up')->first();
+        $pickupId = $request->query('pickup_id');
+
+        $wasteRequest = null;
+        if ($reqId) {
+            $wasteRequest = WasteRequest::find($reqId);
+        } elseif ($pickupId) {
+            $wasteRequest = WasteRequest::where('request_number', $pickupId)->first();
+        }
+
+        if (!$wasteRequest) {
+            $wasteRequest = WasteRequest::where('status', 'picked_up')->first();
+        }
+
+        // If request is already dumped or completed, block access and redirect back
+        if ($wasteRequest && in_array(strtolower($wasteRequest->status), ['completed', 'dumped'])) {
+            return redirect()->route('vehicle.dump')->with('warning', 'This waste request has already been dumped.');
+        }
+
         $plants = \App\Models\Plant::orderBy('name')->get();
 
         return view('vehiclepwa.dumpform', compact('wasteRequest', 'plants'));
@@ -396,7 +438,21 @@ class VehiclePwaController extends Controller
             'dump_photos.*' => 'image|max:10240',
         ]);
 
+        // Match request by request_id OR pickup_id (request_number)
+        $wasteRequest = null;
+        if ($request->filled('request_id')) {
+            $wasteRequest = WasteRequest::find($request->request_id);
+        } elseif ($request->filled('pickup_id')) {
+            $wasteRequest = WasteRequest::where('request_number', $request->pickup_id)->first();
+        }
+
         $vehicleId = $this->getDriverVehicleId();
+        if (!$vehicleId && $wasteRequest) {
+            $vehicleId = $wasteRequest->vehicle_id;
+        }
+        if (!$vehicleId) {
+            $vehicleId = \App\Models\Vehicle::first()?->id ?? 1;
+        }
 
         $dumpImages = [];
         if ($request->hasFile('dump_photos')) {
@@ -406,24 +462,27 @@ class VehiclePwaController extends Controller
             }
         }
 
+        if ($wasteRequest) {
+            if (in_array(strtolower($wasteRequest->status), ['completed', 'dumped'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This waste request has already been dumped.',
+                ], 422);
+            }
+            $wasteRequest->status = 'dumped';
+            $wasteRequest->save();
+        }
+
         $dump = \App\Models\Dump::create([
             'vehicle_id' => $vehicleId,
-            'request_id' => $request->request_id,
-            'pickup_number' => $request->pickup_id,
+            'request_id' => $wasteRequest?->id ?? $request->request_id,
+            'pickup_number' => $request->pickup_id ?? $wasteRequest?->request_number,
             'plant_name' => $request->dump_location,
             'dump_images' => $dumpImages,
             'dump_latitude' => $request->latitude,
             'dump_longitude' => $request->longitude,
             'dumped_at' => now(),
         ]);
-
-        if ($request->request_id) {
-            $wasteRequest = WasteRequest::find($request->request_id);
-            if ($wasteRequest) {
-                $wasteRequest->status = 'completed';
-                $wasteRequest->save();
-            }
-        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([

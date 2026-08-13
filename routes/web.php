@@ -112,6 +112,7 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     // Step 1: Before Pickup
     Route::get('/before-pickup/{id?}', [VehiclePwaController::class, 'beforePickup'])->name('before_pickup');
     Route::post('/before-pickup/{id}', [VehiclePwaController::class, 'storeBeforePickup'])->name('store_before_pickup');
+    Route::post('/not-available/{id}', [VehiclePwaController::class, 'storeNotAvailable'])->name('store_not_available');
 
     // Step 2: After Pickup
     Route::get('/after-pickup/{id?}', [VehiclePwaController::class, 'afterPickup'])->name('after_pickup');

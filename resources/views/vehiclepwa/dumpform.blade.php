@@ -347,13 +347,12 @@
             }
         })
         .catch(err => {
+            console.error(err);
             Swal.fire({
-                icon: 'success',
-                title: 'Dump Submitted Successfully!',
-                text: 'Waste for Pickup ID ' + pickupId + ' has been recorded.',
-                confirmButtonColor: '#0e7a43'
-            }).then(() => {
-                window.location.href = "{{ route('vehicle.dump') }}";
+                icon: 'error',
+                title: 'Submission Error',
+                text: 'An error occurred while recording your dump submission. Please try again.',
+                confirmButtonColor: '#dc3545'
             });
         });
     });

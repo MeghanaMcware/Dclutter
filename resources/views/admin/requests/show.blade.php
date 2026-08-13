@@ -166,8 +166,19 @@
                                 <div class="detail-value">
                                     @if(is_array($wasteRequest->subcategory_ids) && count($wasteRequest->subcategory_ids) > 0)
                                         @foreach($wasteRequest->subcategory_ids as $subcat)
-                                            <span class="badge bg-secondary me-1 mb-1" style="font-size: 12px; font-weight: 500;">
-                                                {{ Str::contains($subcat, ': ') ? explode(': ', $subcat)[1] : $subcat }}
+                                            @php
+                                                $subcatName = Str::contains($subcat, ': ') ? explode(': ', $subcat)[1] : $subcat;
+                                                $subModel = \App\Models\Subcategory::where('name', $subcatName)->first();
+                                            @endphp
+                                            <span class="badge bg-secondary me-1 mb-1 d-inline-flex align-items-center gap-1" style="font-size: 12px; font-weight: 500;">
+                                                @if($subModel && $subModel->icon)
+                                                    @if(str_starts_with($subModel->icon, 'fa-') || str_starts_with($subModel->icon, 'fa '))
+                                                        <i class="fa-solid {{ $subModel->icon }}"></i>
+                                                    @else
+                                                        <img src="{{ str_starts_with($subModel->icon, 'http') || str_starts_with($subModel->icon, '/') ? $subModel->icon : asset('storage/' . $subModel->icon) }}" alt="{{ $subcatName }}" width="16" height="16" class="rounded object-fit-cover" onerror="this.style.display='none'">
+                                                    @endif
+                                                @endif
+                                                {{ $subcatName }}
                                             </span>
                                         @endforeach
                                     @else
