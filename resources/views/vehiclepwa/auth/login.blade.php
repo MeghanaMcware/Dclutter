@@ -453,7 +453,7 @@
 
               
 
-                <form method="GET" action="{{ route('driver.dashboard') }}" id="loginForm" onsubmit="event.preventDefault(); window.location.href='{{ route('driver.dashboard') }}';">
+                <form method="POST" action="{{ route('vehicle.login.submit') }}" id="loginForm" onsubmit="event.preventDefault(); window.location.href='{{ route('vehicle.dashboard') }}';">
                 
 
                     <!-- Mobile Login Mode -->

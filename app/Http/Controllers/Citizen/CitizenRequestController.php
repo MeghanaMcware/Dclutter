@@ -102,6 +102,17 @@ class CitizenRequestController extends Controller
             'status' => 'pending',
         ]);
 
+        // Trigger WhatsApp Notification
+        try {
+            app(\App\Services\WhatsAppService::class)->sendRegistrationConfirmation(
+                $wasteRequest->mobile_number,
+                $wasteRequest->applicant_name,
+                $wasteRequest->request_number
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('WhatsApp Registration Notification Exception: ' . $e->getMessage());
+        }
+
         return redirect()->route('citizen.success', ['id' => $wasteRequest->request_number]);
     }
 

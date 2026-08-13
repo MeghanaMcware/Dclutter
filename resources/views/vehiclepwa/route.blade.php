@@ -37,6 +37,7 @@
         transition: all 0.2s ease;
     }
 
+<<<<<<< HEAD
     .search-box-wrap input:focus {
         border-color: var(--primary-brand);
         box-shadow: 0 0 0 3px rgba(14, 122, 67, 0.08);
@@ -173,23 +174,94 @@
         margin-bottom: 0;
     }
 </style>
+=======
+        /* Custom Map Route Markers */
+        .custom-map-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .route-marker-green {
+            background-color: #0f763b;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 800;
+            font-size: 11px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .route-marker-blue {
+            background-color: #2563eb;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.4);
+        }
+
+        /* Leaflet popup customization */
+        .leaflet-popup-content-wrapper { border-radius: 12px; padding: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+        .badge-cwd-id { background-color: #e2e8f0; color: #334155; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+        .btn-get-directions { display: inline-flex; align-items: center; gap: 4px; background: #0f763b; color: #fff; text-decoration: none; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; margin-top: 6px; }
+        .btn-get-directions:hover { color: #fff; background: #0b592c; }
+    </style>
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 @endsection
 
 
 @section('content')
 
+<<<<<<< HEAD
 <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
 
     {{-- SEARCH--}}
     <div class="search-box-wrap">
+=======
+        <!-- Trip Details Card -->
+        <div class="trip-info-card">
+            <div class="trip-header-row">
+                <div>
+                    <span style="font-size: 11px; color:#64748b; font-weight:600;">Trip ID</span>
+                    <h3>TRP-{{ date('Y-m-d') }}-01</h3>
+                    <p>{{ date('h:i A') }} Active Route</p>
+                </div>
+                <span class="badge-in-progress">In Progress</span>
+            </div>
+
+            <div class="stats-summary-row">
+                <span>{{ $assignedRequests->count() }} Pickup Stops Assigned</span>
+                <a href="{{ route('vehicle.stop_details') }}">View List</a>
+            </div>
+        </div>
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 
         <i class="fa-solid fa-magnifying-glass"></i>
 
+<<<<<<< HEAD
         <input
             type="text"
             id="pickup-search"
             placeholder="Search by Pickup ID, Category or Sub Category..."
             autocomplete="off">
+=======
+        <!-- Start Navigation Button -->
+        @if($assignedRequests->count() > 0)
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assignedRequests->first()->latitude ?? 12.9716 }},{{ $assignedRequests->first()->longitude ?? 77.5946 }}" target="_blank" class="btn-end-trip">
+                <i class="fa-solid fa-location-arrow"></i>
+                <span>Start Turn-by-Turn Navigation</span>
+            </a>
+        @else
+            <a href="{{ route('vehicle.requests') }}" class="btn-end-trip">
+                <i class="fa-solid fa-list-check"></i>
+                <span>View Assigned Requests</span>
+            </a>
+        @endif
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 
     </div>
 
@@ -217,9 +289,32 @@
 
 
 @section('script')
+<<<<<<< HEAD
 
 <script>
     /*  STATIC PICKUP DATA */
+=======
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const allRequestData = [
+                @foreach($assignedRequests as $req)
+                {
+                    id: {{ $req->id }},
+                    ref: '{{ $req->request_number }}',
+                    applicant: '{{ addslashes($req->applicant_name) }}',
+                    category: '{{ is_array($req->category_ids) ? implode(", ", $req->category_ids) : ($req->category_ids ?? "N/A") }}',
+                    subCategory: '{{ is_array($req->subcategory_ids) ? implode(", ", $req->subcategory_ids) : ($req->subcategory_ids ?? "N/A") }}',
+                    location: '{{ addslashes($req->address) }}',
+                    lat: {{ $req->latitude ?? 12.9716 }},
+                    lng: {{ $req->longitude ?? 77.5946 }}
+                },
+                @endforeach
+            ];
+
+            const centerLat = allRequestData.length ? allRequestData[0].lat : 12.9716;
+            const centerLng = allRequestData.length ? allRequestData[0].lng : 77.5946;
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 
     const allPickupData = [
 
@@ -271,7 +366,13 @@
             location: 'Koramangala 5th Block'
         }
 
+<<<<<<< HEAD
     ];
+=======
+            allRequestData.forEach((item, index) => {
+                const markerNumber = index + 1;
+                const iconHtml = `<div class="route-marker-green">${markerNumber}</div>`;
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
 
 
     /* RENDER PICKUP CARDS */

@@ -321,7 +321,7 @@
                     <small>Assigned Vehicle</small>
                     <b>
                         @if($wasteRequest->vehicle)
-                            {{ $wasteRequest->vehicle->registration_number }}
+                            {{ $wasteRequest->vehicle->vehicle_number }}
                         @else
                             Pending Assignment
                         @endif
@@ -330,8 +330,11 @@
                 <div>
                     <small>Driver Details</small>
                     <b>
-                        @if($wasteRequest->vehicle?->driver)
-                            {{ $wasteRequest->vehicle->driver->name }} ({{ $wasteRequest->vehicle->driver->mobile }})
+                        @if($wasteRequest->vehicle)
+                            {{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }}
+                            @if($wasteRequest->vehicle->driver_phone || $wasteRequest->vehicle->owner?->mobile_number)
+                                ({{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number }})
+                            @endif
                         @else
                             Not Assigned
                         @endif

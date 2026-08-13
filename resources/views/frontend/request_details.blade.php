@@ -278,7 +278,7 @@
                         <b>Assigned to Vehicle</b>
                         <small>
                             @if($wasteRequest->vehicle)
-                                {{ $wasteRequest->vehicle->registration_number }} ({{ $wasteRequest->vehicle->driver?->name ?? 'Driver' }})
+                                {{ $wasteRequest->vehicle->vehicle_number }} ({{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }})
                             @else
                                 Pending vehicle assignment
                             @endif

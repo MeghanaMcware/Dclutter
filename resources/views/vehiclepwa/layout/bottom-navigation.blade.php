@@ -1,17 +1,22 @@
 <div class="bottom-nav">
-    <a href="{{ route('driver.dashboard') }}" class="{{ request()->routeIs('driver.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('vehicle.dashboard') }}" class="{{ request()->routeIs('vehicle.dashboard') ? 'active' : '' }}">
         <i class="fa-solid fa-house"></i>Home
     </a>
-    <a href="{{ route('driver.requests') }}" class="{{ request()->routeIs('driver.requests*') ? 'active' : '' }}">
+    <a href="{{ route('vehicle.requests') }}" class="{{ request()->routeIs('vehicle.requests*') ? 'active' : '' }}">
         <i class="fa-solid fa-list-check"></i>Requests
     </a>
-    <a href="{{ route('driver.trip_progress') }}" class="{{ request()->routeIs('driver.trip_progress*') || request()->routeIs('driver.update_status') || request()->routeIs('driver.trip_summary') ? 'active' : '' }}">
+    <a href="{{ route('vehicle.trip_progress') }}" class="{{ request()->routeIs('vehicle.trip_progress*') || request()->routeIs('vehicle.update_status') || request()->routeIs('vehicle.trip_summary') ? 'active' : '' }}">
         <i class="fa-solid fa-truck"></i>Trips
     </a>
+<<<<<<< HEAD
     <a href="{{ route('driver.route') }}" class="{{ request()->routeIs('driver.route*') || request()->routeIs('driver.stop_details') || request()->routeIs('driver.collect_waste') ? 'active' : '' }}">
         <i class="fa-solid fa-dumpster"></i>Dump
+=======
+    <a href="{{ route('vehicle.route') }}" class="{{ request()->routeIs('vehicle.route*') || request()->routeIs('vehicle.stop_details') || request()->routeIs('vehicle.collect_waste') ? 'active' : '' }}">
+        <i class="fa-solid fa-map-location-dot"></i>Map
+>>>>>>> babb5b76a934b6036e746621f3d8b97585e98391
     </a>
-    <a href="{{ route('driver.profile_settings') }}" class="{{ request()->routeIs('driver.profile_settings*') ? 'active' : '' }}">
+    <a href="{{ route('vehicle.profile_settings') }}" class="{{ request()->routeIs('vehicle.profile_settings*') ? 'active' : '' }}">
         <i class="fa-solid fa-user"></i>Profile
     </a>
 </div>
