@@ -287,6 +287,82 @@
             color: #ffffff !important;
         }
 
+
+/* Availability Controls */
+.modal-availability-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.modal-availability-select,
+.modal-reason-select {
+    width: 100%;
+    height: 38px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 3px 5px 3px;
+    box-shadow: none;
+}
+
+.modal-availability-select:focus,
+.modal-reason-select:focus {
+    border-color: var(--primary-brand);
+    box-shadow: 0 0 0 2px rgba(14, 122, 67, 0.08);
+    outline: none;
+}
+
+.modal-reason-section {
+    margin-top: 10px;
+}
+
+.modal-reason-label {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 5px;
+}
+
+.modal-submit-btn {
+    width: 100%;
+    height: 38px;
+    margin-top: 10px;
+    border: 1.5px solid var(--primary-brand);
+    border-radius: 8px;
+    background-color: var(--primary-brand);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-submit-btn:hover:not(:disabled) {
+    background-color: var(--primary-brand-dark);
+    color: #ffffff;
+}
+
+.modal-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+
+
+
+
+
         /* Map styling */
         #requests-map {
             height: 440px;
@@ -429,14 +505,85 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 mt-4" id="modalActionButtons">
+                    <!-- <div class="d-flex gap-2 mt-4" id="modalActionButtons">
                         <a id="modalDirectionsBtn" href="#" target="_blank" class="btn btn-get-directions w-50 d-flex align-items-center justify-content-center py-2">
                             <i class="fa-solid fa-diamond-turn-right me-1"></i> Directions
                         </a>
                         <a id="modalPickupActionBtn" href="#" class="btn btn-view-card w-50 d-flex align-items-center justify-content-center py-2">
                             <i class="fa-solid fa-camera me-1"></i> <span id="modalPickupActionText">Before Pickup</span>
                         </a>
-                    </div>
+                    </div> -->
+                    <div class="mt-4" id="modalActionButtons">
+
+    <!-- Directions + Availability -->
+    <div class="d-flex gap-2">
+        
+        <a id="modalDirectionsBtn"
+           href="#"
+           target="_blank"
+           class="btn btn-get-directions w-50 d-flex align-items-center justify-content-center py-2">
+            <i class="fa-solid fa-diamond-turn-right me-1"></i>
+            Directions
+        </a>
+
+        <div class="w-50" style="margin-top:8px;">
+          <select id="pickupAvailability"
+        class="modal-availability-select">
+                <option value="">Select Availability</option>
+                <option value="available">Available</option>
+                <option value="not_available">Not Available</option>
+            </select>
+        </div>
+
+    </div>
+
+    <!-- Not Available Reason -->
+    <div id="notAvailableSection" class="mt-3" style="display: none;">
+
+        <label class="modal-reason-label d-block">
+            Reason
+        </label>
+
+       <select id="notAvailableReason"
+        class="modal-reason-select">
+
+            <option value="">Select Reason</option>
+            <option value="door_closed">Door Closed</option>
+            <option value="call_not_attended">Call Not Attended</option>
+            <option value="not_ready_today">Not Ready Today</option>
+            <option value="asking_next_date">Asking for Next Date</option>
+
+        </select>
+<button type="button"
+        id="notAvailableSubmitBtn"
+        class="modal-submit-btn"
+        disabled>
+    <i class="fa-solid fa-paper-plane"></i>
+    Submit
+</button>
+
+    </div>
+
+    <!-- Available / Existing Before Pickup Action -->
+    <div id="availablePickupSection" class="mt-3" style="display: none;">
+
+        <a id="modalPickupActionBtn"
+           href="#"
+           class="btn btn-success w-100 d-flex align-items-center justify-content-center py-2">
+
+            <i class="fa-solid fa-camera me-1"></i>
+            <span id="modalPickupActionText">Before Pickup</span>
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+
+
                 </div>
             </div>
         </div>
@@ -654,9 +801,97 @@
                 }
             }
 
+             // NEW: Initialize Availability dropdown
+            setupAvailabilityControls(item);
+
+
             const modal = new bootstrap.Modal(document.getElementById('requestDetailModal'));
             modal.show();
         }
+
+        
+
+
+        function setupAvailabilityControls(item) {
+
+    const availabilitySelect = document.getElementById('pickupAvailability');
+    const notAvailableSection = document.getElementById('notAvailableSection');
+    const notAvailableReason = document.getElementById('notAvailableReason');
+    const notAvailableSubmitBtn = document.getElementById('notAvailableSubmitBtn');
+    const availablePickupSection = document.getElementById('availablePickupSection');
+
+    if (!availabilitySelect) return;
+
+    // Reset every time modal opens
+    availabilitySelect.value = '';
+    notAvailableReason.value = '';
+    notAvailableSection.style.display = 'none';
+    availablePickupSection.style.display = 'none';
+    notAvailableSubmitBtn.disabled = true;
+
+    // Availability selection
+    availabilitySelect.onchange = function () {
+
+        if (this.value === 'available') {
+
+            // Show existing Before Pickup functionality
+            availablePickupSection.style.display = 'block';
+
+            // Hide not available section
+            notAvailableSection.style.display = 'none';
+
+        } else if (this.value === 'not_available') {
+
+            // Show reason dropdown
+            notAvailableSection.style.display = 'block';
+
+            // Hide Before Pickup
+            availablePickupSection.style.display = 'none';
+
+        } else {
+
+            notAvailableSection.style.display = 'none';
+            availablePickupSection.style.display = 'none';
+        }
+    };
+
+    // Enable Submit only after reason is selected
+    notAvailableReason.onchange = function () {
+
+        notAvailableSubmitBtn.disabled = this.value === '';
+
+    };
+
+    // Not Available Submit
+    notAvailableSubmitBtn.onclick = function () {
+
+        const reason = notAvailableReason.value;
+
+        if (!reason) {
+            return;
+        }
+
+        /*
+         * FRONTEND ONLY FOR NOW
+         *
+         * This does NOT change your existing backend.
+         * Replace this section later when the backend endpoint
+         * for unavailable complaints is available.
+         */
+
+        const reasonText =
+            notAvailableReason.options[
+                notAvailableReason.selectedIndex
+            ].text;
+
+        alert('Selected: ' + reasonText);
+
+    };
+}
+
+
+
+
 
         function renderRequestCards() {
             const cardsContainer = document.getElementById('cards-container');
