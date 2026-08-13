@@ -344,4 +344,95 @@ class VehiclePwaController extends Controller
     {
         return view('vehiclepwa.notifications');
     }
+
+    /**
+     * Dump List Index for Driver PWA.
+     */
+    public function dumpList(Request $request)
+    {
+        $vehicleId = $this->getDriverVehicleId();
+
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
+            ->where('status', 'picked_up');
+
+        if ($vehicleId) {
+            $query->where('vehicle_id', $vehicleId);
+        }
+
+        $dumpRequests = $query->latest('picked_up_at')->get();
+
+        if ($dumpRequests->isEmpty()) {
+            $dumpRequests = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
+                ->take(5)->get();
+        }
+
+        return view('vehiclepwa.dump_list', compact('dumpRequests'));
+    }
+
+    /**
+     * Dump Form for Driver PWA.
+     */
+    public function dumpForm(Request $request)
+    {
+        $reqId = $request->query('id') ?? $request->query('request_id');
+        $wasteRequest = $reqId ? WasteRequest::find($reqId) : WasteRequest::where('status', 'picked_up')->first();
+        $plants = \App\Models\Plant::orderBy('name')->get();
+
+        return view('vehiclepwa.dumpform', compact('wasteRequest', 'plants'));
+    }
+
+    /**
+     * Store Dump Form submission into dumps table.
+     */
+    public function storeDump(Request $request)
+    {
+        $request->validate([
+            'dump_location' => 'required|string',
+            'pickup_id' => 'nullable|string',
+            'request_id' => 'nullable|exists:requests,id',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'dump_photos' => 'nullable|array',
+            'dump_photos.*' => 'image|max:10240',
+        ]);
+
+        $vehicleId = $this->getDriverVehicleId();
+
+        $dumpImages = [];
+        if ($request->hasFile('dump_photos')) {
+            foreach ($request->file('dump_photos') as $file) {
+                $path = $file->store('dumps', 'public');
+                $dumpImages[] = $path;
+            }
+        }
+
+        $dump = \App\Models\Dump::create([
+            'vehicle_id' => $vehicleId,
+            'request_id' => $request->request_id,
+            'pickup_number' => $request->pickup_id,
+            'plant_name' => $request->dump_location,
+            'dump_images' => $dumpImages,
+            'dump_latitude' => $request->latitude,
+            'dump_longitude' => $request->longitude,
+            'dumped_at' => now(),
+        ]);
+
+        if ($request->request_id) {
+            $wasteRequest = WasteRequest::find($request->request_id);
+            if ($wasteRequest) {
+                $wasteRequest->status = 'completed';
+                $wasteRequest->save();
+            }
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Dump submitted successfully.',
+                'redirect_url' => route('vehicle.dump'),
+            ]);
+        }
+
+        return redirect()->route('vehicle.dump')->with('success', 'Dump submitted successfully.');
+    }
 }

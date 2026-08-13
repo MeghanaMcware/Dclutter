@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // Starts from 1 continuously
             $table->unsignedBigInteger('excel_id')->nullable()->index();
             $table->string('applicant_name')->nullable();
-            $table->string('mobile_number', 20)->nullable()->index();
+            $table->string('mobile_number')->nullable()->index();
             $table->text('address')->nullable();
             $table->string('corporation_name')->nullable();
             $table->string('division_name')->nullable();

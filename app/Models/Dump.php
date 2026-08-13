@@ -12,8 +12,11 @@ class Dump extends Model
     use HasFactory;
 
     protected $table = 'dumps';
+
     protected $fillable = [
         'vehicle_id',
+        'request_id',
+        'pickup_number',
         'plant_name',
         'dump_weight',
         'dump_images',
@@ -40,10 +43,10 @@ class Dump extends Model
     }
 
     /**
-     * Requests unloaded in this dump event.
+     * Request unloaded in this dump event.
      */
-    public function requests(): HasMany
+    public function request(): BelongsTo
     {
-        return $this->hasMany(Request::class, 'dump_id');
+        return $this->belongsTo(Request::class, 'request_id');
     }
 }
