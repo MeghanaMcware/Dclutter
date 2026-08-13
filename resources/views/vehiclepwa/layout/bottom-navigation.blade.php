@@ -9,7 +9,7 @@
         <i class="fa-solid fa-truck"></i>Trips
     </a>
     <a href="{{ route('driver.route') }}" class="{{ request()->routeIs('driver.route*') || request()->routeIs('driver.stop_details') || request()->routeIs('driver.collect_waste') ? 'active' : '' }}">
-        <i class="fa-solid fa-map-location-dot"></i>Map
+        <i class="fa-solid fa-dumpster"></i>Dump
     </a>
     <a href="{{ route('driver.profile_settings') }}" class="{{ request()->routeIs('driver.profile_settings*') ? 'active' : '' }}">
         <i class="fa-solid fa-user"></i>Profile

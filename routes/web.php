@@ -68,6 +68,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('vehicles', AdminVehicleController::class);
 
 
+
+
+    Route::get('/masters/dump/create', function () {
+    return view('admin.masters.dump.create');
+})->name('masters.dump.create');
+
+Route::get('/masters/dump/edit', function () {
+    return view('admin.masters.dump.edit');
+})->name('masters.dump.edit');
+
+Route::get('/masters/dump/index', function () {
+    return view('admin.masters.dump.index');
+})->name('masters.dump.index');
+
+Route::get('/masters/dump/show', function () {
+    return view('admin.masters.dump.show');
+})->name('masters.dump.show');
+
+
+
 });
 
 /*
@@ -99,6 +119,11 @@ Route::prefix('driver')->name('driver.')->group(function () {
     Route::get('/collect-waste', [VehicleRequestController::class, 'collectWaste'])->name('collect_waste');
     Route::get('/after_pickup', [VehicleRequestController::class, 'afterPickup'])->name('after_pickup');
     Route::get('/update-status', [VehicleRequestController::class, 'updateStatus'])->name('update_status');
+
+    Route::view('/vehicle/dumpform', 'vehiclepwa.dumpform')
+    ->name('vehicle.dumpform');
+
+
 });
 
 Route::get('/requests', function () {
