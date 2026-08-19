@@ -603,6 +603,43 @@ textarea.is-invalid ~ .invalid-feedback,
         display: block;
     }
 }
+
+
+
+/* =========================================================
+   DECLARATION CHECKBOX
+========================================================= */
+
+.declaration-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 12px 14px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.declaration-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    accent-color: var(--green);
+}
+
+.declaration-checkbox label {
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 18px;
+    cursor: pointer;
+}
 </style>
 
 @section('content')
@@ -644,7 +681,7 @@ textarea.is-invalid ~ .invalid-feedback,
                     <div class="category-intro">
                         <div>
                             <h2>Choose items for pickup</h2>
-                            <p class="subtitle">Select one or more categories for your pickup request.</p>
+                            <p class="subtitle">Choose the old furniture and used household items you want to give for pickup. You can select one or more categories.</p>
                         </div>
                         <span class="category-count" id="selected-category-count">0 selected</span>
                     </div>
@@ -708,13 +745,106 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter full applicant name.</div>
                     </div>
 
+                    
                     <!-- Mobile Number -->
-                    <div>
-                        <label>Mobile Number <span class="req">*</span></label>
-                        <input type="tel" id="mobileInput" name="mobile_number" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Registered Mobile Number" maxlength="10" pattern="[0-9]{10}">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a valid 10-digit mobile number.</div>
-                    </div>
+<div>
+    <label>Mobile Number <span class="req">*</span></label>
 
+    <div style="display:flex; gap:8px;">
+        <input
+            type="tel"
+            id="mobileInput"
+            name="mobile_number"
+            required
+            oninput="validateMobileAndShowOtp()"
+            placeholder="Registered Mobile Number"
+            maxlength="10"
+            pattern="[0-9]{10}"
+            style="flex:1;"
+        >
+
+        <button
+            type="button"
+            id="sendOtpBtn"
+            class="btn-ui"
+            onclick="sendWhatsAppOTP()"
+            style="display:none; white-space:nowrap; padding:8px 14px;"
+        >
+            Send OTP
+        </button>
+    </div>
+
+    <div
+        class="invalid-feedback"
+        id="mobileError"
+        style="color:#dc3545 !important; display:none;"
+    >
+        Please enter a valid 10-digit mobile number.
+    </div>
+
+    <!-- OTP Section -->
+    <div
+        id="otpSection"
+        style="
+            display:none;
+            margin-top:12px;
+            padding:12px;
+            background:#f8faf9;
+            border:1px solid var(--line);
+            border-radius:8px;
+        "
+    >
+
+        <div
+            style="
+                color:var(--green);
+                font-size:13px;
+                font-weight:700;
+                margin-bottom:8px;
+            "
+        >
+            <i class="bi bi-whatsapp"></i>
+            OTP sent to your WhatsApp number.
+        </div>
+
+        <div style="display:flex; gap:8px;">
+
+            <input
+                type="text"
+                id="otpInput"
+                maxlength="6"
+                inputmode="numeric"
+                placeholder="Enter 6-digit OTP"
+                style="flex:1;"
+            >
+
+            <button
+                type="button"
+                class="btn-ui"
+                id="verifyOtpBtn"
+                onclick="verifyWhatsAppOTP()"
+                style="white-space:nowrap; padding:8px 14px;"
+            >
+                Verify OTP
+            </button>
+
+        </div>
+
+        <div
+            id="otpMessage"
+            style="
+                display:none;
+                margin-top:7px;
+                font-size:12px;
+                font-weight:600;
+            "
+        ></div>
+
+    </div>
+
+</div>
+
+<div id="otpProtectedFields" style="display:contents;">
                     <!-- Image Upload -->
                     <div class="wide">
                         <label>Upload Waste Images <span class="req">*</span></label>
@@ -769,6 +899,13 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter house number.</div>
                     </div>
 
+                    <!-- Floor No -->
+                    <div>
+                        <label>Floor No <span class="req">*</span></label>
+                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. #123" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
+                    </div>
+
                     <!-- Ward (Readonly - Auto-Mapped from GPS) -->
                     <div>
                         <label>Ward (Auto-Mapped from Map Pin) <span class="req">*</span></label>
@@ -802,6 +939,8 @@ textarea.is-invalid ~ .invalid-feedback,
                         <input type="text" id="pincodeInput" name="pincode" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a valid 6-digit pincode.</div>
                     </div>
+
+</div>
                 </div>
 
                 <div class="d-flex gap-3 mt-4">
@@ -831,7 +970,7 @@ textarea.is-invalid ~ .invalid-feedback,
                         <i class="bi bi-info-circle-fill"></i> Note:
                     </div>
                     <div style="font-size: 13px; color: #2b3930;">
-                        All Waste should be dismantled & should be available on the ground floor.
+                       All Bulky Waste shall be dismantled & should be kept in the ground floor for the pickup failing which the waste shall not be picked up and Request shall be closed.
                     </div>
                 </div>
                 
@@ -902,18 +1041,38 @@ textarea.is-invalid ~ .invalid-feedback,
                             <i class="bi bi-info-circle-fill"></i> Note:
                         </div>
                         <div style="font-size: 13px; color: #2b3930;">
-                            All Waste should be dismantled & should be available on the ground floor.
-                        </div>
+All Bulky Waste shall be dismantled & should be kept in the ground floor for the pickup failing which the waste shall not be picked up and Request shall be closed.                        </div>
                     </div>
+
+<div class="declaration-checkbox">
+    <input
+        type="checkbox"
+        id="agree"
+        onchange="document.getElementById('submitBtn').disabled = !this.checked"
+    >
+
+    <label for="agree">
+        I agree to dismantel the bulk waste and placed for pickup at Ground Floor.
+    </label>
+</div>
+
+
                 </div>
 
                 <div class="d-flex gap-3 mt-4">
                     <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(3)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="submit" class="btn-ui continue-btn mt-0" style="width: 70%;">
-                        <i class="bi bi-check-circle-fill"></i> Submit D-Clutter Request
-                    </button>
+                   <button
+    type="submit"
+    id="submitBtn"
+    class="btn-ui continue-btn mt-0"
+    style="width: 70%;"
+    disabled
+>
+    <i class="bi bi-check-circle-fill"></i>
+    Submit D-Clutter Request
+</button>
                 </div>
             </div>
 
@@ -1597,5 +1756,235 @@ function handleFormSubmit(event) {
         showLoader('Submitting D-Clutter request...');
     }
 }
+
+
+
+
+/* =========================================================
+   OTP PROTECTION
+========================================================= */
+
+let otpVerified = false;
+
+
+/* ---------------------------------------------------------
+   FIELDS THAT REQUIRE OTP VERIFICATION
+--------------------------------------------------------- */
+
+const otpProtectedFieldIds = [
+    'wasteImagesInput',
+    'addressInput',
+    'mapSearchInput',
+    'houseNoInput',
+    'floorNoInput',
+    'wardDisplayInput',
+    'constituencyInput',
+    'corporationInput',
+    'landmarkInput',
+    'pincodeInput'
+];
+
+
+/* ---------------------------------------------------------
+   LOCK ALL FIELDS INITIALLY
+--------------------------------------------------------- */
+
+function lockOtpProtectedFields() {
+
+    otpProtectedFieldIds.forEach(function(id) {
+
+        const field = document.getElementById(id);
+
+        if (field) {
+            field.disabled = true;
+        }
+
+    });
+
+    // Disable buttons related to location/map
+    document.querySelectorAll(
+        '.btn-fetch-loc'
+    ).forEach(function(button) {
+        button.disabled = true;
+    });
+
+}
+
+
+/* ---------------------------------------------------------
+   UNLOCK AFTER OTP VERIFICATION
+--------------------------------------------------------- */
+
+function unlockOtpProtectedFields() {
+
+    otpProtectedFieldIds.forEach(function(id) {
+
+        const field = document.getElementById(id);
+
+        if (field) {
+            field.disabled = false;
+        }
+
+    });
+
+    document.querySelectorAll(
+        '.btn-fetch-loc'
+    ).forEach(function(button) {
+        button.disabled = false;
+    });
+
+    otpVerified = true;
+
+}
+
+
+/* ---------------------------------------------------------
+   CHECK MOBILE NUMBER
+--------------------------------------------------------- */
+
+function validateMobileAndShowOtp() {
+
+    const mobile =
+        document.getElementById('mobileInput').value.trim();
+
+    const sendOtpBtn =
+        document.getElementById('sendOtpBtn');
+
+    const mobileError =
+        document.getElementById('mobileError');
+
+    // Only numbers
+    document.getElementById('mobileInput').value =
+        mobile.replace(/\D/g, '').substring(0, 10);
+
+    if (/^[0-9]{10}$/.test(
+        document.getElementById('mobileInput').value
+    )) {
+
+        sendOtpBtn.style.display = 'block';
+        mobileError.style.display = 'none';
+
+    } else {
+
+        sendOtpBtn.style.display = 'none';
+        mobileError.style.display = 'none';
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   SEND WHATSAPP OTP
+--------------------------------------------------------- */
+
+function sendWhatsAppOTP() {
+
+    const mobile =
+        document.getElementById('mobileInput').value.trim();
+
+    if (!/^[0-9]{10}$/.test(mobile)) {
+
+        document.getElementById('mobileError').style.display =
+            'block';
+
+        return;
+    }
+
+    const sendBtn =
+        document.getElementById('sendOtpBtn');
+
+    const otpSection =
+        document.getElementById('otpSection');
+
+    /*
+     * IMPORTANT:
+     * Replace this section with your Laravel AJAX request
+     * when WhatsApp OTP backend is connected.
+     */
+
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = 'Sending...';
+
+    setTimeout(function() {
+
+        otpSection.style.display = 'block';
+
+        sendBtn.innerHTML = 'OTP Sent';
+
+        document.getElementById('otpInput').focus();
+
+    }, 800);
+
+}
+
+
+/* ---------------------------------------------------------
+   VERIFY WHATSAPP OTP
+--------------------------------------------------------- */
+
+function verifyWhatsAppOTP() {
+
+    const otp =
+        document.getElementById('otpInput').value.trim();
+
+    const message =
+        document.getElementById('otpMessage');
+
+    if (!/^[0-9]{6}$/.test(otp)) {
+
+        message.style.display = 'block';
+        message.style.color = '#dc3545';
+
+        message.innerHTML =
+            'Please enter a valid 6-digit OTP.';
+
+        return;
+    }
+
+    /*
+     * TEMPORARY FRONTEND DEMO
+     *
+     * Replace this with Laravel OTP verification.
+     */
+
+    const verifyBtn =
+        document.getElementById('verifyOtpBtn');
+
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = 'Verifying...';
+
+    setTimeout(function() {
+
+        otpVerified = true;
+
+        message.style.display = 'block';
+        message.style.color = '#198754';
+
+        message.innerHTML =
+            '<i class="bi bi-check-circle-fill"></i> ' +
+            'Mobile number verified successfully.';
+
+        verifyBtn.innerHTML = 'Verified';
+        verifyBtn.disabled = true;
+
+        document.getElementById('otpInput').disabled = true;
+
+        unlockOtpProtectedFields();
+
+    }, 700);
+
+}
+
+
+/* ---------------------------------------------------------
+   INITIAL LOCK
+--------------------------------------------------------- */
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    lockOtpProtectedFields();
+
+});
 </script>
 @endsection
