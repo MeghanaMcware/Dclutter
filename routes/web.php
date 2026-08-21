@@ -20,7 +20,7 @@ Route::get('/', function () {
     return view('frontend.home');
 });
 
-use App\Http\Controllers\Citizen\CitizenRequestController;
+
 
 Route::get('/report-request', [CitizenRequestController::class, 'create'])->name('citizen.report');
 Route::post('/report-request', [CitizenRequestController::class, 'store'])->name('citizen.report.store');
@@ -78,52 +78,52 @@ Route::prefix('driver')->name('driver.')->group(function () {
     });
     Route::get('/showcase', function () {
         return view('vehiclepwa.showcase');
-    })->name('driver.showcase');
+    })->name('showcase');
     Route::get('/login', function () {
         return view('vehiclepwa.auth.login');
-    })->name('driver.login');
+    })->name('login');
 
 
     Route::get('/registration', function () {
         return view('vehiclepwa.auth.registration');
-    })->name('auth.registration');
+    })->name('registration');
 
     Route::get('/register', function () {
         return view('vehiclepwa.register');
-    })->name('driver.register');
+    })->name('register');
     Route::get('/dashboard', function () {
         return view('vehiclepwa.dashboard');
-    })->name('driver.dashboard');
+    })->name('dashboard');
     Route::get('/route', function () {
         return view('vehiclepwa.route');
-    })->name('driver.route');
+    })->name('route');
     Route::get('/stop-details', function () {
         return view('vehiclepwa.stop_details');
-    })->name('driver.stop_details');
+    })->name('stop_details');
     Route::get('/collect-waste', function () {
         return view('vehiclepwa.collect_waste');
-    })->name('driver.collect_waste');
+    })->name('collect_waste');
     Route::get('/after_pickup', function () {
         return view('vehiclepwa.updated.after_pickup');
-    })->name('driver.after_pickup');
+    })->name('after_pickup');
     Route::get('/before_pickup', function () {
         return view('vehiclepwa.updated.before_pickup');
-    })->name('driver.before_pickup');
+    })->name('before_pickup');
     Route::get('/trip-progress', function () {
         return view('vehiclepwa.trip_progress');
-    })->name('driver.trip_progress');
+    })->name('trip_progress');
     Route::get('/trip-summary', function () {
         return view('vehiclepwa.trip_summary');
-    })->name('driver.trip_summary');
+    })->name('trip_summary');
     Route::get('/requests', function () {
         return view('vehiclepwa.requests.index');
-    })->name('driver.requests');
+    })->name('requests');
     Route::get('/notifications', function () {
         return view('vehiclepwa.notifications');
-    })->name('driver.notifications');
+    })->name('notifications');
     Route::get('/profile', function () {
         return view('vehiclepwa.profile_settings');
-    })->name('driver.profile_settings');
+    })->name('profile_settings');
     
 });
 
@@ -136,8 +136,8 @@ Route::match(['get', 'post'], '/vehicle/login-submit', function () {
     return redirect()->route('driver.dashboard');
 })->name('vehicle.login.submit');
 
-use App\Http\Controllers\Admin\AdminRequestController;
-use App\Http\Controllers\Admin\AdminAuthController;
+
+
 
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
@@ -170,8 +170,7 @@ Route::prefix('admin/vehicles')->name('admin.vehicles.')->group(function () {
 });
 
 
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\SubcategoryController;
+
 
 // Admin Masters Resource Routes
 Route::prefix('admin/masters')->name('admin.masters.')->group(function () {
@@ -183,17 +182,25 @@ Route::prefix('admin/masters')->name('admin.masters.')->group(function () {
 });
   
 
-Route::get('/users/index', function () {
+    Route::get('/users/index', function () {
         return view('admin.masters.users.index');
-    })->name('masters.users.index');
-Route::get('/users/edit', function () {
+    })->name('admin.masters.users.index');
+    Route::get('/users/edit', function () {
         return view('admin.masters.users.edit');
-    })->name('masters.users.edit');
-Route::get('/users/show', function () {
-        return view('admin.masters.users.show');
-    })->name('masters.users.show');
-Route::get('/users/create', function () {
+    })->name('admin.masters.users.edit');
+    Route::get('/users/show', function () {
+        return view('admin.masters.users.view');
+    })->name('admin.masters.users.show');
+    Route::get('/users/create', function () {
         return view('admin.masters.users.create');
-    })->name('masters.users.create');
-})->name('vehicle.login.submit');
+    })->name('admin.masters.users.create');
+    Route::post('/users', function () {
+        return redirect()->route('admin.masters.users.index');
+    })->name('admin.masters.users.store');
+    Route::put('/users/{id}', function () {
+        return redirect()->route('admin.masters.users.index');
+    })->name('admin.masters.users.update');
+    Route::delete('/users/{id}', function () {
+        return redirect()->route('admin.masters.users.index');
+    })->name('admin.masters.users.destroy');
 Route::match(['get', 'post'], '/vehicle/login-submit', [VehicleAuthController::class, 'login'])->name('vehicle.login.submit');
