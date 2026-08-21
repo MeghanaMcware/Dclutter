@@ -22,14 +22,18 @@ class Request extends Model
         'subcategory_ids',
         'waste_images',
         'picked_up_images',
+        'before_pickup_images',
+        'approx_weight_kg',
         'house_no',
         'address',
         'landmark',
         'pincode',
         'latitude',
         'longitude',
-        'picked_up_latitude',
-        'picked_up_longitude',
+        'before_pickup_latitude',
+        'before_pickup_longitude',
+        'after_pickup_latitude',
+        'after_pickup_longitude',
         'corporation_id',
         'constituency_id',
         'ward_id',
@@ -40,6 +44,8 @@ class Request extends Model
         'picked_up_at',
         'dump_id',
         'remarks',
+        'not_available_reason',
+        'not_available_at',
     ];
 
     protected $casts = [
@@ -47,13 +53,18 @@ class Request extends Model
         'subcategory_ids' => 'array',
         'waste_images' => 'array',
         'picked_up_images' => 'array',
+        'before_pickup_images' => 'array',
+        'approx_weight_kg' => 'decimal:2',
         'preferred_pickup_date' => 'date',
         'assigned_at' => 'datetime',
         'picked_up_at' => 'datetime',
+        'not_available_at' => 'datetime',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
-        'picked_up_latitude' => 'decimal:8',
-        'picked_up_longitude' => 'decimal:8',
+        'before_pickup_latitude' => 'decimal:8',
+        'before_pickup_longitude' => 'decimal:8',
+        'after_pickup_latitude' => 'decimal:8',
+        'after_pickup_longitude' => 'decimal:8',
     ];
 
     /**
@@ -170,5 +181,10 @@ class Request extends Model
         }
 
         return $query;
+    }
+
+    public function dumpRecord(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Dump::class, 'request_id')->latestOfMany();
     }
 }

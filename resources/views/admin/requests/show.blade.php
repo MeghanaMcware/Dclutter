@@ -122,13 +122,21 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="detail-label">Assigned Vehicle</div>
-                                <div class="detail-value">
+                                <div class="detail-value d-flex align-items-center gap-2">
                                     @if($wasteRequest->vehicle)
-                                        <i class="fa fa-truck text-primary me-1"></i>
-                                        {{ $wasteRequest->vehicle->registration_number }}
-                                        ({{ $wasteRequest->vehicle->driver?->name ?? 'Driver' }})
+                                        <span class="fw-bold text-primary">
+                                            <i class="fa fa-truck me-1"></i>
+                                            {{ $wasteRequest->vehicle->vehicle_number }}
+                                            ({{ $wasteRequest->vehicle->driver_name ?? 'Driver' }})
+                                        </span>
+                                        <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" style="font-size: 11px;">
+                                            Change
+                                        </button>
                                     @else
-                                        <span class="text-muted fw-normal">Not Assigned Yet</span>
+                                        <span class="text-muted fw-normal me-2">Not Assigned Yet</span>
+                                        <button type="button" class="btn btn-sm btn-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" style="font-size: 12px;">
+                                            <i class="fa fa-plus me-1"></i> Assign Vehicle
+                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -158,8 +166,19 @@
                                 <div class="detail-value">
                                     @if(is_array($wasteRequest->subcategory_ids) && count($wasteRequest->subcategory_ids) > 0)
                                         @foreach($wasteRequest->subcategory_ids as $subcat)
-                                            <span class="badge bg-secondary me-1 mb-1" style="font-size: 12px; font-weight: 500;">
-                                                {{ Str::contains($subcat, ': ') ? explode(': ', $subcat)[1] : $subcat }}
+                                            @php
+                                                $subcatName = Str::contains($subcat, ': ') ? explode(': ', $subcat)[1] : $subcat;
+                                                $subModel = \App\Models\Subcategory::where('name', $subcatName)->first();
+                                            @endphp
+                                            <span class="badge bg-secondary me-1 mb-1 d-inline-flex align-items-center gap-1" style="font-size: 12px; font-weight: 500;">
+                                                @if($subModel && $subModel->icon)
+                                                    @if(str_starts_with($subModel->icon, 'fa-') || str_starts_with($subModel->icon, 'fa '))
+                                                        <i class="fa-solid {{ $subModel->icon }}"></i>
+                                                    @else
+                                                        <img src="{{ str_starts_with($subModel->icon, 'http') || str_starts_with($subModel->icon, '/') ? $subModel->icon : asset('storage/' . $subModel->icon) }}" alt="{{ $subcatName }}" width="16" height="16" class="rounded object-fit-cover" onerror="this.style.display='none'">
+                                                    @endif
+                                                @endif
+                                                {{ $subcatName }}
                                             </span>
                                         @endforeach
                                     @else
@@ -259,6 +278,51 @@
                             </div>
                         @endif
 
+                        <!-- Driver Pickup Details & Photos -->
+                        <h5 class="section-title mt-4">Driver Before Pickup (Step 1)</h5>
+                        @if($wasteRequest->approx_weight_kg)
+                            <div class="alert alert-info py-2 px-3 mb-2" style="font-size: 13px;">
+                                <strong>Estimated Weight:</strong> {{ $wasteRequest->approx_weight_kg }} kg
+                            </div>
+                        @endif
+                        @if(is_array($wasteRequest->before_pickup_images) && count($wasteRequest->before_pickup_images) > 0)
+                            @foreach($wasteRequest->before_pickup_images as $bIndex => $bPath)
+                                <div class="waste-img-card text-center p-2 mb-2">
+                                    <img src="{{ Str::startsWith($bPath, 'http') ? $bPath : asset('storage/' . $bPath) }}" 
+                                         alt="Before Pickup {{ $bIndex + 1 }}" 
+                                         class="waste-img-preview rounded mb-2"
+                                         onerror="this.src='https://placehold.co/400x300?text=Before+Pickup'">
+                                    <a href="{{ Str::startsWith($bPath, 'http') ? $bPath : asset('storage/' . $bPath) }}" target="_blank" class="btn btn-sm btn-outline-info w-100">
+                                        <i class="fa fa-expand me-1"></i> View Before Photo {{ $bIndex + 1 }}
+                                    </a>
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="text-muted small">No before-pickup photos uploaded yet.</p>
+                        @endif
+
+                        <h5 class="section-title mt-4">Driver After Pickup (Step 2)</h5>
+                        @if($wasteRequest->picked_up_at)
+                            <div class="alert alert-success py-2 px-3 mb-2" style="font-size: 13px;">
+                                <strong>Picked Up At:</strong> {{ $wasteRequest->picked_up_at->format('d M Y, h:i A') }}
+                            </div>
+                        @endif
+                        @if(is_array($wasteRequest->picked_up_images) && count($wasteRequest->picked_up_images) > 0)
+                            @foreach($wasteRequest->picked_up_images as $aIndex => $aPath)
+                                <div class="waste-img-card text-center p-2 mb-2">
+                                    <img src="{{ Str::startsWith($aPath, 'http') ? $aPath : asset('storage/' . $aPath) }}" 
+                                         alt="After Pickup {{ $aIndex + 1 }}" 
+                                         class="waste-img-preview rounded mb-2"
+                                         onerror="this.src='https://placehold.co/400x300?text=After+Pickup'">
+                                    <a href="{{ Str::startsWith($aPath, 'http') ? $aPath : asset('storage/' . $aPath) }}" target="_blank" class="btn btn-sm btn-outline-success w-100">
+                                        <i class="fa fa-expand me-1"></i> View After Photo {{ $aIndex + 1 }}
+                                    </a>
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="text-muted small">No after-pickup photos uploaded yet.</p>
+                        @endif
+
                         <div class="mt-4 pt-3 border-top">
                             <a href="{{ route('admin.requests.index') }}" class="btn btn-secondary w-100">
                                 <i class="bi bi-arrow-left me-1"></i> Back to All Requests
@@ -267,6 +331,40 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Vehicle Modal -->
+<div class="modal fade" id="assignVehicleModal" tabindex="-1" aria-labelledby="assignVehicleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('admin.requests.assign-vehicle', $wasteRequest->id) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="assignVehicleModalLabel">
+                        <i class="fa fa-truck text-primary me-2"></i> Assign Vehicle to Request #{{ $wasteRequest->request_number }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="vehicle_id">Select Vehicle <span class="text-danger">*</span></label>
+                        <select class="form-select" id="vehicle_id" name="vehicle_id" required>
+                            <option value="" disabled selected>-- Choose Available Vehicle --</option>
+                            @foreach($vehicles as $vehicle)
+                                <option value="{{ $vehicle->id }}" {{ $wasteRequest->vehicle_id == $vehicle->id ? 'selected' : '' }}>
+                                    {{ $vehicle->vehicle_number }} - {{ $vehicle->vehicle_type ?? 'Truck' }} (Driver: {{ $vehicle->driver_name ?? $vehicle->owner?->name ?? 'N/A' }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save me-1"></i> Assign Vehicle</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

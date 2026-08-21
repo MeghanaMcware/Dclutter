@@ -44,8 +44,8 @@
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
                 <div class="profile-text">
-                    <h3>Mahesh Kumar</h3>
-                    <p>Driver ID: DRV1024</p>
+                    <h3>{{ Auth::user()->name ?? 'Driver Account' }}</h3>
+                    <p>Mobile: {{ Auth::user()->mobile_number ?? 'N/A' }}</p>
                 </div>
             </div>
             <div class="status-badge">
@@ -56,54 +56,57 @@
         <!-- 4 Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="num">12</div>
-                <div class="label">Total pickups</div>
+                <div class="num">{{ $pickedUpCount }}</div>
+                <div class="label">Total Pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">35</div>
-                <div class="label">Today pickups</div>
+                <div class="num">{{ $assignedCount + $pickedUpCount }}</div>
+                <div class="label">Today Assigned</div>
             </div>
             <div class="stat-card">
-                <div class="num">5</div>
-                <div class="label">Pending pickups</div>
+                <div class="num">{{ $assignedCount }}</div>
+                <div class="label">Pending Pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">1.2 Ton</div>
-                <div class="label">Waste Collected(Approx.)</div>
+                <div class="num">{{ number_format(\App\Models\Request::where('status', 'picked_up')->sum('approx_weight_kg'), 1) }} kg</div>
+                <div class="label">Waste Collected</div>
             </div>
         </div>
 
         <div class="text-center mb-3">
-            <a href="{{ route('driver.requests') }}" class="btn btn-success btn-sm w-100 py-2 fw-bold" style="background-color: var(--primary-green); border: none; border-radius: 10px;">
-                <i class="fas fa-route me-1"></i> View Route
+            <a href="{{ route('vehicle.requests') }}" class="btn btn-success btn-sm w-100 py-2 fw-bold" style="background-color: var(--primary-green); border: none; border-radius: 10px;">
+                <i class="fas fa-route me-1"></i> View Route & Requests
             </a>
         </div>
 
         <!-- Today's Schedule -->
         <div class="section-header">
-            <h4>Today's Schedule</h4>
-            <a href="#">View All</a>
+            <h4>Today's Assigned Pickups</h4>
+            <a href="{{ route('vehicle.requests') }}">View All</a>
         </div>
 
-        <div class="schedule-item">
-            <div>
-                <div class="trip-code"><i class="fa-regular fa-clock me-1 text-success"></i> Trip ID: TRP-2025-05-24-01</div>
-                <div class="trip-time">6:00 AM - 11:00 AM</div>
+        @forelse($recentRequests as $req)
+            <div class="schedule-item">
+                <div>
+                    <div class="trip-code">
+                        <i class="fa-regular fa-clock me-1 {{ $req->status == 'picked_up' ? 'text-success' : 'text-primary' }}"></i>
+                        {{ $req->request_number }} - {{ $req->house_no }}
+                    </div>
+                    <div class="trip-time">{{ Str::limit($req->address, 30) }}</div>
+                </div>
+                <span class="{{ $req->status == 'picked_up' ? 'badge-in-progress' : 'badge-upcoming' }}">
+                    {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                </span>
             </div>
-            <span class="badge-in-progress">In Progress</span>
-        </div>
-
-        <div class="schedule-item">
-            <div>
-                <div class="trip-code"><i class="fa-regular fa-clock me-1 text-muted"></i> Trip ID: TRP-2025-05-24-02</div>
-                <div class="trip-time">11:30 AM - 4:00 PM</div>
+        @empty
+            <div class="schedule-item text-center py-3">
+                <p class="text-muted small mb-0 w-100">No active assigned pickups for today.</p>
             </div>
-            <span class="badge-upcoming">Upcoming</span>
-        </div>
+        @endforelse
 
         <!-- Start Next Trip Action -->
-        <a href="{{ route('driver.route') }}" class="btn-end-trip mt-3">
-            <span>Start Next Trip</span>
+        <a href="{{ route('vehicle.route') }}" class="btn-end-trip mt-3">
+            <span>View Live Route Map</span>
             <i class="fa-solid fa-arrow-right"></i>
         </a>
 

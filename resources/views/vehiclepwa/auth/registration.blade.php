@@ -531,7 +531,7 @@ document.querySelectorAll('input[type="file"][data-compress]').forEach(input => 
         
         // Mock successful registration and redirect
         setTimeout(() => {
-            window.location.href = "{{ route('driver.login') }}";
+            window.location.href = "{{ route('vehicle.login') }}";
         }, 1500);
     });
 

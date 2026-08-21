@@ -31,7 +31,28 @@
     <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
         
         <div id="afterFormSection">
-            <h5 class="fw-bold text-dark mb-3 px-1">Step 2: After Pickup</h5>
+            <h5 class="fw-bold text-dark mb-2 px-1">Step 2: After Pickup</h5>
+
+            @if($wasteRequest)
+            <div class="d-flex align-items-center justify-content-between p-3 mb-3 bg-white rounded-3 border shadow-sm">
+                <div>
+                    <strong class="text-dark d-block" style="font-size: 13px;">#{{ $wasteRequest->request_number }}</strong>
+                    <span class="text-muted d-block" style="font-size: 11px;">{{ $wasteRequest->house_no }}, {{ Str::limit($wasteRequest->address, 22) }}</span>
+                </div>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ $wasteRequest->latitude ?? '' }},{{ $wasteRequest->longitude ?? '' }}" target="_blank" class="btn btn-sm btn-outline-success fw-bold py-1.5 px-3 rounded-2">
+                    <i class="fa-solid fa-diamond-turn-right me-1"></i> Get Directions
+                </a>
+            </div>
+            @endif
+
+            @if(isset($dayInfo) && !$dayInfo['allowed'])
+            <div class="alert alert-warning border-warning d-flex align-items-center gap-2 mb-3 rounded-3" style="font-size: 13px;">
+                <i class="fa-solid fa-triangle-exclamation text-warning font-18"></i>
+                <div>
+                    <strong>Pickups restricted:</strong> Collections are permitted on <strong>{{ $dayInfo['allowed_day'] }}s</strong> only. (Today is {{ $dayInfo['today_day'] }} IST).
+                </div>
+            </div>
+            @endif
 
             <div class="form-card">
                 <form id="statusUpdateForm">
@@ -71,7 +92,7 @@
             <h2 class="success-title">Collection Completed!</h2>
             <p class="success-sub">You have successfully completed the collection.</p>
             
-            <a href="{{ route('driver.trip_summary') }}" class="btn-end-trip mt-5">
+            <a href="{{ route('vehicle.trip_summary') }}" class="btn-end-trip mt-5">
                 <span>View Trip Summary</span>
             </a>
         </div>
@@ -251,17 +272,58 @@
 
         if (!isValid) return;
 
-        // Simulate API call
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
         loader.style.display = 'flex';
 
-        setTimeout(() => {
+        const formData = new FormData();
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('latitude', currentLat);
+        formData.append('longitude', lngInput.value);
+
+        selectedFilesArray['after'].forEach(file => {
+            formData.append('after_photos[]', file);
+        });
+
+        const reqId = '{{ $wasteRequest->id ?? 1 }}';
+
+        fetch('/vehicle/after-pickup/' + reqId, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(async res => {
+            const data = await res.json();
             loader.style.display = 'none';
-            formSection.style.display = 'none';
-            successSection.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 1500);
+            if (res.ok && data.success) {
+                formSection.style.display = 'none';
+                successSection.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Final Update</span>';
+                
+                let errMsg = data.message || 'Failed to submit final update.';
+                if (data.errors) {
+                    errMsg = Object.values(data.errors).flat().join('<br>');
+                }
+                Swal.fire({
+                    title: 'Notice',
+                    html: errMsg,
+                    icon: 'warning',
+                    confirmButtonColor: '#0e7a43'
+                });
+            }
+        })
+        .catch(err => {
+            loader.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Final Update</span>';
+            Swal.fire('Error', 'An unexpected network error occurred.', 'error');
+        });
     }
 </script>
 @endsection
