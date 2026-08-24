@@ -118,3 +118,42 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     Route::get('/after-pickup/{id?}', [VehiclePwaController::class, 'afterPickup'])->name('after_pickup');
     Route::post('/after-pickup/{id}', [VehiclePwaController::class, 'storeAfterPickup'])->name('store_after_pickup');
 });
+
+/*
+|--------------------------------------------------------------------------
+| DCLUTTER User PWA Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('user')->name('user.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('user.login');
+    });
+    
+    // Auth Routes
+    Route::view('/login', 'userpwa.auth.login')->name('login');
+
+    // Dashboard & Features
+    Route::get('/dashboard', function () {
+        return view('userpwa.dashboard');
+    })->name('dashboard');
+
+    Route::get('/report-request', function () {
+        return view('userpwa.report_request');
+    })->name('report');
+
+    Route::get('/track-request', function () {
+        return view('userpwa.track.index');
+    })->name('track');
+
+    Route::get('/request-details', function () {
+        return view('userpwa.track.show');
+    })->name('details');
+
+    Route::get('/request-edit', function () {
+        return view('userpwa.track.edit');
+    })->name('edit');
+
+    Route::get('/profile', function () {
+        return view('userpwa.profile');
+    })->name('profile');
+});
