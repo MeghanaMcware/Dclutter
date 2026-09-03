@@ -54,9 +54,9 @@
     <div class="page-content">
         @yield('content')
 
-        <div class="footer" >
-                @include('vehiclepwa.layout.footer')
-            </div>
+        <div class="footer">
+            @include('userpwa.layout.footer')
+        </div>
     </div>
  
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

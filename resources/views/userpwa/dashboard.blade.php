@@ -14,7 +14,7 @@
     }
 
     .hero-section {
-        padding: 24px 24px 16px;
+           padding: 10px 20px 16px;
         position: relative;
         overflow: hidden;
         background: linear-gradient(180deg, rgba(230,244,255,0.4) 0%, rgba(255,255,255,0) 100%);
@@ -201,7 +201,7 @@
         </div>
         
         <div class="hero-illustration">
-            <img src="{{ asset('frontendwebsite/img/hero-truck.png') }}" alt="Bengaluru Clean Streets Illustration">
+            <img src="{{ asset('frontendwebsite/img/hero-truck-new.png') }}" alt="Bengaluru Clean Streets Illustration">
         </div>
     </div>
 

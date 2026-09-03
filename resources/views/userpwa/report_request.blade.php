@@ -17,7 +17,7 @@
 .request-ui {
     max-width: 1080px;
     margin: 0 auto;
-    padding: 30px 20px 50px;
+    padding: 25px 10px 15px;
     color: var(--ink);
     font-family: 'Inter', sans-serif;
 }
@@ -48,7 +48,7 @@
 .card-ui {
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 24px;
+    padding: 10px;
     background: #ffffff;
     box-shadow: 0 2px 12px rgba(23, 50, 32, 0.04);
 }
