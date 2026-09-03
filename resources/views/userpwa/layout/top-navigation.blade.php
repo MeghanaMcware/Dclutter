@@ -1,11 +1,12 @@
 <div class="app-header">
-    <h1>
-        @if(!request()->routeIs('user.dashboard'))
-        <a href="javascript:history.back()"><i class="fa-solid fa-arrow-left"></i></a>
-        @endif
-        @yield('heading', 'D-Clutter Portal')
-    </h1>
-    <a href="#" style="color: #fff;"><i class="fa-solid fa-bell font-16"></i></a>
+    <div class="header-logo">
+        <img src="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}" alt="Logo" class="logo-img">
+        <div class="logo-text">
+            <strong>DCLUTTER</strong>
+            <span>BENGALURU'S CLEAN STREETS</span>
+        </div>
+    </div>
+    <a href="#" class="menu-btn"><i class="fa-solid fa-bars"></i></a>
 </div>
 
 <style>
@@ -17,39 +18,53 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
-        padding: 0 20px;
-        background: #0e7a43;
-        border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+        padding: 0 16px;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         max-width: 420px;
         margin: 0 auto;
         left: 0;
         right: 0;
     }
 
-    .app-header h1 {
+    .header-logo {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 0;
-        color: #fff;
+        gap: 8px;
+    }
+
+    .logo-img {
+        height: 32px;
+        width: auto;
+    }
+
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+    .logo-text strong {
+        color: #0e7a43;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    .logo-text span {
+        color: #64748b;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    .menu-btn {
+        color: #333 !important;
         font-size: 20px;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-
-    .app-header h1 a,
-    .app-header > a {
-        color: #fff !important;
         text-decoration: none;
-    }
-
-    .app-header > a {
         display: grid;
         width: 36px;
         height: 36px;
         place-items: center;
-        border-radius: 50%;
     }
 </style>

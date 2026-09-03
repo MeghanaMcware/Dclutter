@@ -5,113 +5,316 @@
 
 @section('style')
 <style>
-    .track-container { padding: 20px; }
-    .search-box {
-        background: #fff; padding: 24px; border-radius: 16px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 24px;
+    body {
+        background-color: #f8fafc;
     }
-    .form-label { font-weight: 600; font-size: 14px; color: #334155; margin-bottom: 12px; }
-    .form-control { border-radius: 12px; padding: 12px 16px; border: 1px solid #cbd5e1; font-size: 15px; }
-    .form-control:focus { border-color: #0e7a43; box-shadow: 0 0 0 3px rgba(14, 122, 67, 0.1); }
-    .btn-search {
-        background: #0e7a43; color: #fff; border-radius: 12px; padding: 12px;
-        font-weight: 600; width: 100%; border: none; margin-top: 16px;
+    .track-container { 
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 24px;
     }
-    .status-card {
-        background: #fff; border-radius: 16px; padding: 20px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 16px;
-        border-left: 4px solid #3b82f6;
-    }
-    .req-id { font-size: 14px; color: #1e293b; font-weight: 800; margin-bottom: 4px; }
-    .req-date { font-size: 12px; color: #64748b; margin-bottom: 12px; }
-    .badge-status {
-        padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;
-        background: #e0f2fe; color: #0369a1;
-    }
-    .driver-box {
-        background: #f8fafc; border-radius: 12px; padding: 12px;
-        margin-top: 16px; display: flex; align-items: center; gap: 12px;
-    }
-    .driver-icon {
-        width: 40px; height: 40px; background: #e0f2fe; color: #0369a1;
-        border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
-    }
-    .driver-details p { margin: 0; font-size: 13px; color: #1e293b; font-weight: 700; }
-    .driver-details small { color: #64748b; font-size: 11px; }
     
-    .timeline { margin-top: 16px; position: relative; padding-left: 20px; }
-    .timeline::before {
-        content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px;
-        width: 2px; background: #e2e8f0;
+    .search-wrapper {
+        background: #ffffff;
+        padding: 16px 20px 0;
     }
-    .timeline-item { position: relative; margin-bottom: 16px; }
-    .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-item::before {
-        content: ''; position: absolute; left: -19px; top: 4px;
-        width: 10px; height: 10px; border-radius: 50%;
-        background: #cbd5e1; border: 2px solid #fff;
+    
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 4px 12px;
+        border: 1px solid #e2e8f0;
     }
-    .timeline-item.active::before { background: #0e7a43; box-shadow: 0 0 0 3px rgba(14,122,67,0.2); }
-    .timeline-item p { margin: 0; font-size: 13px; font-weight: 700; color: #1e293b; }
-    .timeline-item small { color: #64748b; font-size: 11px; }
+    
+    .search-box input {
+        border: none;
+        background: transparent;
+        padding: 10px 8px;
+        font-size: 14px;
+        color: #334155;
+        width: 100%;
+        outline: none;
+    }
+    
+    .search-box input::placeholder {
+        color: #94a3b8;
+    }
+    
+    .search-box i {
+        color: #64748b;
+        font-size: 16px;
+    }
+    
+    .tabs-wrapper {
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .tab-item {
+        padding: 16px 4px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        text-decoration: none;
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .tab-item.active {
+        color: #0e7a43;
+    }
+    
+    .tab-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #0e7a43;
+        border-radius: 3px 3px 0 0;
+    }
+    
+    .requests-list {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .request-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-header-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 16px 12px;
+    }
+    
+    .req-id {
+        font-size: 16px;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    .badge-inprogress {
+        background-color: #fff7ed;
+        color: #ea580c;
+    }
+    
+    .badge-completed {
+        background-color: #f0fdf4;
+        color: #16a34a;
+    }
+    
+    .card-body-main {
+        padding: 0 16px 16px;
+    }
+    
+    .category-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 12px;
+    }
+    
+    .details-row {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .info-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 12px;
+        color: #475569;
+        line-height: 1.5;
+    }
+    
+    .info-item i {
+        color: #94a3b8;
+        font-size: 14px;
+        margin-top: 2px;
+    }
+    
+    .thumb-column {
+        width: 80px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background-color: #f1f5f9;
+    }
+    
+    .thumb-column img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .card-footer-main {
+        padding: 14px 16px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    
+    .card-footer-main i {
+        color: #94a3b8;
+    }
 </style>
 @endsection
 
 @section('content')
 <div class="track-container">
-    <div class="search-box">
-        <label class="form-label">Enter Request ID or Mobile No.</label>
-        <div class="input-group mb-2">
-            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-hashtag text-primary"></i></span>
-            <input type="text" class="form-control border-start-0 ps-0" placeholder="#REQ-123456" value="REQ-2026-000018">
+    <div class="search-wrapper">
+        <div class="search-box">
+            <input type="text" placeholder="Search by Request ID">
+            <i class="fa-solid fa-magnifying-glass"></i>
         </div>
-        <button type="button" class="btn-search">Track Status</button>
+    </div>
+    
+    <div class="tabs-wrapper" id="status-tabs">
+        <a href="javascript:void(0)" class="tab-item active" data-filter="all">All</a>
+        <a href="javascript:void(0)" class="tab-item" data-filter="inprogress">In Progress</a>
+        <a href="javascript:void(0)" class="tab-item" data-filter="completed">Completed</a>
+        <a href="javascript:void(0)" class="tab-item" data-filter="closed">Closed</a>
     </div>
 
-    <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1e293b;">Tracking Result</h4>
-    
-    <div class="status-card">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-            <div class="req-id">#REQ-2026-000018</div>
-            <span class="badge-status">Assigned</span>
-        </div>
-        <div class="req-date">Requested on: 19 Aug 2026, 04:03 AM</div>
-        
-        <div class="timeline">
-            <div class="timeline-item active">
-                <p>Request Submitted</p>
-                <small>19 Aug 2026, 04:03 AM</small>
+    <div class="requests-list" id="requests-container">
+        <!-- Card 1 -->
+        <div class="request-card" data-status="inprogress">
+            <div class="card-header-main">
+                <div class="req-id">#DCL-2025-001256</div>
+                <div class="badge-status badge-inprogress">In Progress</div>
             </div>
-            <div class="timeline-item active">
-                <p>Verified</p>
-                <small>Verified by BBMP Team</small>
+            
+            <div class="card-body-main">
+                <div class="category-title">Unmanned Debris</div>
+                <div class="details-row">
+                    <div class="info-column">
+                        <div class="info-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>12th Cross, BTM Layout 2nd Stage,<br>Bengaluru, Karnataka - 560076</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span>23 May 2025, 10:30 AM</span>
+                        </div>
+                    </div>
+                    <div class="thumb-column">
+                        <img src="{{ asset('frontendwebsite/img/debris-thumb.jpg') }}" alt="Debris Thumbnail">
+                    </div>
+                </div>
             </div>
-            <div class="timeline-item active">
-                <p>Assigned to Vehicle</p>
-                <small>Vehicle has been assigned</small>
-            </div>
-            <div class="timeline-item">
-                <p>Picked Up</p>
-                <small>Pending Pickup</small>
-            </div>
-            <div class="timeline-item">
-                <p>Disposed & Dumped</p>
-                <small>Pending completion</small>
-            </div>
-        </div>
-
-        <div class="driver-box">
-            <div class="driver-icon"><i class="fa-solid fa-truck"></i></div>
-            <div class="driver-details">
-                <p>suprith</p>
-                <small>KA07S7242 | 9999999999</small>
-            </div>
+            
+            <a href="{{ route('user.details') }}" class="card-footer-main">
+                <span>View Details</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
         </div>
 
-        <div class="d-flex gap-2 mt-4">
-            <a href="{{ route('user.details') }}" class="btn btn-outline-success flex-fill" style="border-radius: 10px; font-weight: 600;">View Details</a>
-            <!-- <a href="{{ route('user.edit') }}" class="btn btn-outline-primary flex-fill" style="border-radius: 10px; font-weight: 600;">Edit Request</a> -->
+        <!-- Card 2 -->
+        <div class="request-card" data-status="completed">
+            <div class="card-header-main">
+                <div class="req-id">#DCL-2025-001124</div>
+                <div class="badge-status badge-completed">Completed</div>
+            </div>
+            
+            <div class="card-body-main">
+                <div class="category-title">Overflowing Bin</div>
+                <div class="details-row">
+                    <div class="info-column">
+                        <div class="info-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Jayanagar 4th Block,<br>Bengaluru, Karnataka - 560011</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span>22 May 2025, 07:30 PM</span>
+                        </div>
+                    </div>
+                    <div class="thumb-column">
+                        <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Bin Thumbnail">
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{{ route('user.details') }}" class="card-footer-main">
+                <span>View Details</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.tab-item');
+        const cards = document.querySelectorAll('.request-card');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Get filter value
+                const filterValue = this.getAttribute('data-filter');
+                
+                // Show/hide cards based on filter
+                cards.forEach(card => {
+                    if (filterValue === 'all') {
+                        card.style.display = 'flex';
+                    } else {
+                        const status = card.getAttribute('data-status');
+                        if (status === filterValue) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>
 @endsection

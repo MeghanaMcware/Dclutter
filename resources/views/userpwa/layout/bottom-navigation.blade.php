@@ -6,10 +6,10 @@
         <i class="fa-solid fa-camera"></i>Report
     </a>
     <a href="{{ route('user.track') }}" class="{{ request()->routeIs('user.track*') ? 'active' : '' }}">
-        <i class="fa-solid fa-magnifying-glass"></i>Track
+        <i class="fa-solid fa-map-location-dot"></i>Track
     </a>
     <a href="{{ route('user.profile') }}" class="{{ request()->routeIs('user.profile') ? 'active' : '' }}">
-        <i class="fa-solid fa-user"></i>Profile
+        <i class="fa-solid fa-bars"></i>Menu
     </a>
 </div>
 
