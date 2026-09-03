@@ -11,54 +11,82 @@
 }
 
 .request-ui {
-    max-width: 1080px;
+    max-width: auto;
     margin: 0 auto;
-    padding: 30px 20px 50px;
+    padding: 34px 24px 64px;
     color: var(--ink);
     font-family: 'Inter', sans-serif;
 }
 
 .crumb {
-    font-size: 13px;
-    color: #738078;
-    margin-bottom: 18px;
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 20px;
+    padding: 8px 12px 8px 9px;
+    border: 1px solid #dce8e0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f7fcf8, #ffffff);
+    color: #819087;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 12px rgba(23, 50, 32, 0.04);
 }
 
 .crumb a {
-    color: #738078;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .crumb a:hover {
-    color: var(--green);
+    color: var(--green-dark);
+}
+
+.crumb a i {
+    font-size: 14px;
+}
+
+.crumb > i {
+    color: #afbeb4;
+    font-size: 11px;
+}
+
+.crumb-current {
+    color: var(--ink);
+    font-weight: 700;
 }
 
 .request-ui h1 {
-    font-size: 26px;
+    font-size: clamp(26px, 3vw, 36px);
     font-weight: 800;
-    margin: 0 0 22px;
+    letter-spacing: -0.02em;
+    margin: 0 0 24px;
     color: var(--ink);
 }
 
 .card-ui {
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 24px;
-    background: #ffffff;
-    box-shadow: 0 2px 12px rgba(23, 50, 32, 0.04);
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(145deg, #ffffff 0%, #fbfefc 100%);
+    box-shadow: 0 14px 34px rgba(23, 50, 32, 0.07);
 }
 
 /* Track Search Input */
 .search-ui {
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid #d7e5db;
+    border-radius: 12px;
     display: flex;
     gap: 12px;
     background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    margin-bottom: 24px;
+    box-shadow: 0 8px 22px rgba(23, 50, 32, 0.06);
+    margin-bottom: 28px;
 }
 
 .search-ui input {
@@ -68,10 +96,18 @@
     height: 42px;
     padding: 0 14px;
     outline: none;
+    color: var(--ink);
+    background: transparent;
+}
+
+.search-ui:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(8, 125, 69, 0.1), 0 8px 22px rgba(23, 50, 32, 0.06);
 }
 
 .search-ui .btn-ui {
-    padding: 10px 32px;
+    min-width: 112px;
+    padding: 10px 24px;
 }
 
 /* Status Card */
@@ -83,6 +119,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 20px;
 }
 
 .ref {
@@ -225,6 +262,14 @@
 }
 
 @media (max-width: 768px) {
+    .request-ui { padding: 24px 16px 44px; }
+    .card-ui { padding: 20px 16px; border-radius: 14px; }
+    .crumb { margin-bottom: 16px; }
+    .search-ui { gap: 6px; }
+    .search-ui input { min-width: 0; padding: 0 10px; font-size: 13px; }
+    .search-ui .btn-ui { min-width: auto; padding: 10px 16px; }
+    .topline { align-items: flex-start; }
+    .ref { font-size: 16px; }
     .facts { grid-template-columns: 1fr 1fr; }
     .status-flow { overflow-x: auto; justify-content: flex-start; gap: 16px; padding-bottom: 8px; }
     .status-flow::before, .status-flow-line-fill { display: none; }
@@ -233,7 +278,11 @@
 
 @section('content')
 <main class="request-ui">
-    <div class="crumb"><a href="{{ url('/') }}">Home</a> / Track Request</div>
+    <nav class="crumb" aria-label="Breadcrumb">
+        <a href="{{ url('/') }}"><i class="bi bi-house-door-fill" aria-hidden="true"></i><span>Home</span></a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span class="crumb-current" aria-current="page">Track Request</span>
+    </nav>
     <h1>Track Your Request</h1>
 
     <div class="search-ui">

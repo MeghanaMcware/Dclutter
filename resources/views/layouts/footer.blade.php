@@ -2,7 +2,7 @@
     <!-- Top accent bar -->
     <div class="footer-top-bar"></div>
 
-    <div class="container footer-content py-5">
+    <div class="container-fuild footer-content py-5 my-4 ms-4 me-3">
         <div class="row gy-4">
             
             <!-- Column 1: Brand & About -->
@@ -77,8 +77,8 @@
     </div>
 
     <!-- Bottom Copyright Section -->
-    <div class="footer-bottom py-3">
-        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between text-center text-md-start gap-2">
+    <div class="footer-bottom py-3 ">
+        <div class="container-fuild  ms-4 me-3 d-flex flex-column flex-md-row align-items-center justify-content-between text-center text-md-start gap-2">
             <p class="mb-0 copyright-text">
                 © {{ date('Y') }} <strong class="text-white">Greater Bengaluru Authority (GBA)</strong>. All Rights Reserved.
             </p>

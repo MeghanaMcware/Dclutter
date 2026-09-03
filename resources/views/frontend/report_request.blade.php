@@ -11,32 +11,60 @@
 }
 
 .request-ui {
-    max-width: 1080px;
+    max-width: auto;
     margin: 0 auto;
-    padding: 30px 20px 50px;
+    padding: 34px 24px 64px;
     color: var(--ink);
     font-family: 'Inter', sans-serif;
 }
 
 .crumb {
-    font-size: 13px;
-    color: #738078;
-    margin-bottom: 18px;
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 20px;
+    padding: 8px 12px 8px 9px;
+    border: 1px solid #dce8e0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f7fcf8, #ffffff);
+    color: #819087;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 12px rgba(23, 50, 32, 0.04);
 }
 
 .crumb a {
-    color: #738078;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .crumb a:hover {
-    color: var(--green);
+    color: var(--green-dark);
+}
+
+.crumb a i {
+    font-size: 14px;
+}
+
+.crumb > i {
+    color: #afbeb4;
+    font-size: 11px;
+}
+
+.crumb-current {
+    color: var(--ink);
+    font-weight: 700;
 }
 
 .request-ui h1 {
-    font-size: 26px;
+    font-size: clamp(26px, 3vw, 36px);
     font-weight: 800;
+    letter-spacing: -0.02em;
     margin: 0 0 22px;
     color: var(--ink);
 }
@@ -174,7 +202,7 @@
 
 .category-options-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
 }
 
@@ -235,11 +263,36 @@
     transform: scale(1.05);
 }
 
+.item-option::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 19px;
+    height: 19px;
+    border: 2px solid #b8c9bf;
+    border-radius: 50%;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-option:hover::before {
+    border-color: var(--tile-color, var(--green));
+}
+
+.item-option.selected::before {
+    border-color: var(--tile-color, var(--green));
+    background: radial-gradient(circle, var(--tile-color, var(--green)) 0 5px, #ffffff 6px);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color, var(--green)) 12%, transparent);
+}
+
 .item-option-text strong {
     display: block;
     font-size: 12.5px;
     font-weight: 700;
     line-height: 1.25;
+        margin-top: 5px;
     color: #1f2937;
 }
 
@@ -535,7 +588,11 @@ textarea.is-invalid ~ .invalid-feedback,
 
 @section('content')
 <main class="request-ui">
-    <div class="crumb"><a href="{{ url('/') }}">Home</a> / Report Request</div>
+    <nav class="crumb" aria-label="Breadcrumb">
+        <a href="{{ url('/') }}"><i class="bi bi-house-door-fill" aria-hidden="true"></i><span>Home</span></a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span class="crumb-current" aria-current="page">Report Request</span>
+    </nav>
     <h1>Report D-Clutter Waste</h1>
 
     <div class="card-ui">
@@ -612,9 +669,12 @@ textarea.is-invalid ~ .invalid-feedback,
                     <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one item for pickup.
                 </div>
 
-                <button type="button" class="btn-ui continue-btn" onclick="goToStep(2)">
+                <div class="d-flex flex-column align-items-center mt-4 justify-content-center">
+
+                <button type="button" class="btn-ui continue-btn w-auto" onclick="goToStep(2)">
                     Next: Location Details <i class="bi bi-arrow-right"></i>
                 </button>
+</div>
             </div>
 
             <!-- ================= STEP 2: LOCATION ================= -->
@@ -684,11 +744,11 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 mt-4">
-                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(1)" style="width: 30%;">
+                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
+                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(1)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="button" class="btn-ui continue-btn mt-0" onclick="goToStep(3)" style="width: 70%;">
+                    <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(3)" style="width: 70%;">
                         Next: Pickup Day <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>
@@ -715,11 +775,11 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 mt-4">
-                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(2)" style="width: 30%;">
+                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
+                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(2)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="button" class="btn-ui continue-btn mt-0" onclick="goToStep(4)" style="width: 70%;">
+                    <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(4)" style="width: 70%;">
                         Next: Review &amp; Submit <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>
@@ -762,11 +822,11 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 mt-4">
-                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(3)" style="width: 30%;">
+                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
+                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(3)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="submit" class="btn-ui continue-btn mt-0" style="width: 70%;">
+                    <button type="submit" class="btn-ui continue-btn mt-0 w-auto" style="width: 70%;">
                         <i class="bi bi-check-circle-fill"></i> Submit D-Clutter Request
                     </button>
                 </div>
