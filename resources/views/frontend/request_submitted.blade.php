@@ -136,7 +136,7 @@
         <div class="id-box">
             <span>Your Request ID</span>
             <b id="successReqId">
-                <span id="reqIdText">{{ request('id', 'DCL-2025-000123') }}</span>
+                <span id="reqIdText">DCL-2025-000123</span>
                 <button class="copy-btn" onclick="copyReqId()" title="Copy Request ID"><i class="bi bi-copy"></i></button>
             </b>
             <span style="font-size: 11px;">You will receive real-time SMS updates<br>on your registered mobile number.</span>

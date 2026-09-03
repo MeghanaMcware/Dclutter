@@ -155,16 +155,6 @@
     box-shadow: 0 8px 24px rgba(20, 56, 38, 0.08);
 }
 
-.category-card-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 5px;
-    /* background: linear-gradient(90deg, #087d45, #36b56a, #b9e7c7); */
-}
-
 .category-intro {
     display: flex;
     align-items: flex-start;
@@ -370,9 +360,92 @@
 }
 
 .request-ui textarea {
-    height: 80px;
-    padding: 10px 14px;
+    padding-top: 10px;
+    min-height: 80px;
     resize: vertical;
+}
+
+/* Custom File Upload Styles */
+.file-upload-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 0;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.2s ease;
+    height: 42px;
+    position: relative;
+}
+.file-upload-box.is-valid {
+    border-color: var(--green);
+    border-width: 2px;
+    background: #f0fdf4;
+}
+.file-upload-btn {
+    padding: 0 16px;
+    font-weight: 500;
+    color: var(--ink);
+    border-right: 1px solid var(--line);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    background: transparent;
+}
+.file-upload-text {
+    padding: 0 16px;
+    color: var(--muted);
+    font-size: 14px;
+    flex-grow: 1;
+}
+.file-upload-box.is-valid .file-upload-text {
+    color: var(--ink);
+    font-weight: 500;
+}
+.file-upload-check {
+    position: absolute;
+    right: 16px;
+    font-size: 18px;
+    font-weight: bold;
+}
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+}
+.image-preview-item {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    overflow: visible;
+    border: 1px solid var(--line);
+    background: #f8f9fa;
+}
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.image-preview-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4d4f;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2;
 }
 
 .request-ui input:focus, 
@@ -383,7 +456,6 @@
     box-shadow: 0 0 0 3px rgba(8, 125, 69, 0.12);
 }
 
-/* GREEN (Valid) and RED (Invalid) Input Validation Styling */
 .request-ui input.is-valid, 
 .request-ui select.is-valid, 
 .request-ui textarea.is-valid {
@@ -584,6 +656,43 @@ textarea.is-invalid ~ .invalid-feedback,
         display: block;
     }
 }
+
+
+
+/* =========================================================
+   DECLARATION CHECKBOX
+========================================================= */
+
+.declaration-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 12px 14px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.declaration-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    accent-color: var(--green);
+}
+
+.declaration-checkbox label {
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 18px;
+    cursor: pointer;
+}
 </style>
 
 @section('content')
@@ -608,7 +717,20 @@ textarea.is-invalid ~ .invalid-feedback,
             <i class="bi bi-info-circle-fill me-1"></i> Step 1 of 4: Category Select
         </div>
 
-        <form id="cdWasteForm" class="needs-validation" novalidate onsubmit="handleFormSubmit(event)">
+        @if ($errors->any())
+            <div class="alert alert-danger mb-4" role="alert">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form id="cdWasteForm" action="{{ route('citizen.report.store') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate onsubmit="handleFormSubmit(event)">
+            @csrf
+            <input type="hidden" name="latitude" id="latitudeInput" value="12.9716">
+            <input type="hidden" name="longitude" id="longitudeInput" value="77.5946">
             
             <!-- ================= STEP 1: CATEGORY SELECT ================= -->
             <div id="step-1" class="wizard-step">
@@ -616,57 +738,51 @@ textarea.is-invalid ~ .invalid-feedback,
                     <div class="category-intro">
                         <div>
                             <h2>Choose items for pickup</h2>
-                            <p class="subtitle">Select one or more categories for your pickup request.</p>
+                            <p class="subtitle">Choose the old furniture and used household items you want to give for pickup. You can select one or more categories.</p>
                         </div>
                         <span class="category-count" id="selected-category-count">0 selected</span>
                     </div>
 
                     <div class="category-options-grid">
-                        <label class="item-option" style="--tile-color: #0e7a43;">
-                            <input type="checkbox" name="pickup_items" value="Furniture (cots, sofas, chairs)" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-couch"></i></span>
-                            <span class="item-option-text"><strong>Furniture</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #4d7cda;">
-                            <input type="checkbox" name="pickup_items" value="Mattresses and cushions" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-bed"></i></span>
-                            <span class="item-option-text"><strong>Mattresses &amp; Cushions</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #d97706;">
-                            <input type="checkbox" name="pickup_items" value="Old clothes and shoes" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-shirt"></i></span>
-                            <span class="item-option-text"><strong>Clothes &amp; Shoes</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #8b5cf6;">
-                            <input type="checkbox" name="pickup_items" value="Household appliances" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-plug-circle-bolt"></i></span>
-                            <span class="item-option-text"><strong>Appliances</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #0f9bb4;">
-                            <input type="checkbox" name="pickup_items" value="Electronics" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-laptop"></i></span>
-                            <span class="item-option-text"><strong>Electronics</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #b45309;">
-                            <input type="checkbox" name="pickup_items" value="Books and magazines" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-book-open"></i></span>
-                            <span class="item-option-text"><strong>Books &amp; Magazines</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #e05d3b;">
-                            <input type="checkbox" name="pickup_items" value="Toys and games" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-puzzle-piece"></i></span>
-                            <span class="item-option-text"><strong>Toys &amp; Games</strong></span>
-                        </label>
-                        <label class="item-option" style="--tile-color: #64748b;">
-                            <input type="checkbox" name="pickup_items" value="Other" onchange="onCategoryItemChange(this)">
-                            <span class="category-icon"><i class="fa-solid fa-box-open"></i></span>
-                            <span class="item-option-text"><strong>Other Items</strong></span>
-                        </label>
+                        @forelse($categories as $index => $category)
+                            @php
+                                $colors = ['#0e7a43', '#4d7cda', '#d97706', '#8b5cf6', '#0f9bb4', '#b45309', '#e05d3b', '#64748b'];
+                                $tileColor = $colors[$index % count($colors)];
+                            @endphp
+                            <label class="item-option" style="--tile-color: {{ $tileColor }};">
+                                <input type="checkbox" name="pickup_items[]" value="{{ $category->name }}" data-id="{{ $category->id }}" onchange="onCategoryItemChange(this)">
+                                <span class="category-icon">
+                                    @if($category->icon)
+                                        @if(str_starts_with($category->icon, 'fa-') || str_starts_with($category->icon, 'fa'))
+                                            <i class="fa-solid {{ $category->icon }}"></i>
+                                        @else
+                                            <img src="{{ str_starts_with($category->icon, 'http') || str_starts_with($category->icon, '/') ? $category->icon : asset('storage/' . $category->icon) }}" width="24" height="24" class="rounded object-fit-cover" onerror="this.src='https://placehold.co/24x24'">
+                                        @endif
+                                    @else
+                                        <i class="fa-solid fa-box-open"></i>
+                                    @endif
+                                </span>
+                                <span class="item-option-text"><strong>{{ $category->name }}</strong></span>
+                            </label>
+                        @empty
+                            <p class="text-muted col-span-3">No categories active currently.</p>
+                        @endforelse
+                    </div>
+
+                    <!-- Dynamic Subcategory Section -->
+                    <div id="subcategory-section" style="display: none; margin-top: 20px; border-top: 1px solid #dcebe0; padding-top: 16px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px;">Select Subcategory</h3>
+                        <div id="subcategory-container" style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Subcategories will be injected here via JS -->
+                        </div>
                     </div>
                 </div>
 
                 <div id="step1-error" class="error-feedback mb-3" style="display:none; color: #dc3545 !important;">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one item for pickup.
+                </div>
+                <div id="step1-subcat-error" class="error-feedback mb-3" style="display:none; color: #dc3545 !important;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one specific subcategory/detail.
                 </div>
 
                 <div class="d-flex flex-column align-items-center mt-4 justify-content-center">
@@ -682,7 +798,131 @@ textarea.is-invalid ~ .invalid-feedback,
                 <div class="step-header">Pickup Location Details</div>
 
                 <div class="grid-ui">
-                    <!-- Address Input -->
+                    <!-- Applicant Name -->
+                    <div>
+                        <label>Applicant Full Name <span class="req">*</span></label>
+                        <input type="text" id="applicantNameInput" name="applicant_name" placeholder="Enter Full Name" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter full applicant name.</div>
+                    </div>
+
+                    
+                    <!-- Mobile Number -->
+<div>
+    <label>Mobile Number <span class="req">*</span></label>
+
+    <div style="display:flex; gap:8px;">
+        <input
+            type="tel"
+            id="mobileInput"
+            name="mobile_number"
+            required
+            oninput="validateMobileAndShowOtp()"
+            placeholder="Registered Mobile Number"
+            maxlength="10"
+            pattern="[0-9]{10}"
+            style="flex:1;"
+        >
+
+        <button
+            type="button"
+            id="sendOtpBtn"
+            class="btn-ui"
+            onclick="sendWhatsAppOTP()"
+            style="display:none; white-space:nowrap; padding:8px 14px;"
+        >
+            Send OTP
+        </button>
+    </div>
+
+    <div
+        class="invalid-feedback"
+        id="mobileError"
+        style="color:#dc3545 !important; display:none;"
+    >
+        Please enter a valid 10-digit mobile number.
+    </div>
+
+    <!-- OTP Section -->
+    <div
+        id="otpSection"
+        style="
+            display:none;
+            margin-top:12px;
+            padding:12px;
+            background:#f8faf9;
+            border:1px solid var(--line);
+            border-radius:8px;
+        "
+    >
+
+        <div
+            style="
+                color:var(--green);
+                font-size:13px;
+                font-weight:700;
+                margin-bottom:8px;
+            "
+        >
+            <i class="bi bi-whatsapp"></i>
+            OTP sent to your WhatsApp number.
+        </div>
+
+        <div style="display:flex; gap:8px;">
+
+            <input
+                type="text"
+                id="otpInput"
+                maxlength="6"
+                inputmode="numeric"
+                placeholder="Enter 6-digit OTP"
+                style="flex:1;"
+            >
+
+            <button
+                type="button"
+                class="btn-ui"
+                id="verifyOtpBtn"
+                onclick="verifyWhatsAppOTP()"
+                style="white-space:nowrap; padding:8px 14px;"
+            >
+                Verify OTP
+            </button>
+
+        </div>
+
+        <div
+            id="otpMessage"
+            style="
+                display:none;
+                margin-top:7px;
+                font-size:12px;
+                font-weight:600;
+            "
+        ></div>
+
+    </div>
+
+</div>
+
+<div id="otpProtectedFields" style="display:contents;">
+                    <!-- Image Upload -->
+                    <div class="wide">
+                        <label>Upload Waste Images <span class="req">*</span></label>
+                        <div class="custom-file-upload">
+                            <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
+                            <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
+                                <div class="file-upload-btn">Choose Files</div>
+                                <div class="file-upload-text" id="fileUploadText">No files selected</div>
+                                <i class="bi bi-check-lg text-success file-upload-check" style="display:none;" id="fileUploadCheck"></i>
+                            </div>
+                            <div class="invalid-feedback" id="fileUploadError" style="color: #dc3545 !important; display:none; margin-top:4px;">Please select at least one image.</div>
+                            <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">You can select multiple images to upload.</div>
+                            
+                            <div class="image-preview-container" id="imagePreviewContainer"></div>
+                        </div>
+                    </div>
+
+                    <!-- Pickup Address -->
                     <div class="wide">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <label style="margin-bottom: 0;">Pickup Location <span class="req">*</span></label>
@@ -690,13 +930,13 @@ textarea.is-invalid ~ .invalid-feedback,
                                 <i class="bi bi-crosshair"></i> Fetch Location
                             </button>
                         </div>
-                        <textarea id="addressInput" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter complete site address (House/Site No, Street, Main, Area)"></textarea>
+                        <textarea id="addressInput" name="address" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter complete site address (House/Site No, Street, Main, Area)"></textarea>
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter complete site address.</div>
                     </div>
 
                     <!-- Map -->
                     <div class="wide">
-                        <label>Pin location on map (Click map to position marker)</label>
+                        <label>Pin location on map (Click map to position marker &amp; auto-map Ward)</label>
                         <div class="map-container-box">
                             <div class="map-search-bar">
                                 <input type="text" id="mapSearchInput" placeholder="Search location e.g. Indiranagar, Bengaluru">
@@ -712,36 +952,55 @@ textarea.is-invalid ~ .invalid-feedback,
                         </div>
                     </div>
 
+                    <!-- House No -->
                     <div>
-                        <label>Select Ward <span class="req">*</span></label>
-                        <select id="wardSelect" required onchange="validateSingleField(this)">
-                            <option value="">— Select Ward —</option>
-                            <option value="Ward 95 - Subhash Nagar">Ward 95 - Subhash Nagar (South)</option>
-                            <option value="Ward 49 - Karanagar">Ward 49 - Karanagar (West)</option>
-                            <option value="Ward 110 - Indiranagar">Ward 110 - Indiranagar (East)</option>
-                            <option value="Ward 148 - HSR Layout">Ward 148 - HSR Layout (Bommanahalli)</option>
-                            <option value="Ward 174 - Jayanagar">Ward 174 - Jayanagar (South)</option>
-                            <option value="Ward 12 - Yelahanka">Ward 12 - Yelahanka (North)</option>
-                        </select>
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please select a ward.</div>
+                        <label>House No <span class="req">*</span></label>
+                        <input type="text" id="houseNoInput" name="house_no" placeholder="e.g. #123" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter house number.</div>
                     </div>
 
+                    <!-- Floor No -->
                     <div>
-                        <label>Landmark</label>
-                        <input type="text" id="landmarkInput" placeholder="Enter nearby landmark (e.g. Near Metro Station)">
+                        <label>Floor No <span class="req">*</span></label>
+                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. #123" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
                     </div>
 
+                    <!-- Ward (Readonly - Auto-Mapped from GPS) -->
+                    <div>
+                        <label>Ward (Auto-Mapped from Map Pin) <span class="req">*</span></label>
+                        <input type="hidden" name="ward_id" id="wardIdInput" required>
+                        <input type="text" id="wardDisplayInput" placeholder="Pin location on map to map Ward..." readonly required style="background-color: #f8f9fa; cursor: not-allowed; font-weight: 700; color: var(--green);">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please pin your location on the map to auto-map Ward.</div>
+                    </div>
+
+                    <!-- Constituency (Readonly - Auto-Mapped) -->
+                    <div>
+                        <label>Constituency (Auto-Mapped)</label>
+                        <input type="text" id="constituencyInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                    </div>
+
+                    <!-- Corporation (Readonly - Auto-Mapped) -->
+                    <div>
+                        <label>Corporation (Auto-Mapped)</label>
+                        <input type="text" id="corporationInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                    </div>
+
+                    <!-- Landmark -->
+                    <div>
+                        <label>Landmark <span class="req">*</span></label>
+                        <input type="text" id="landmarkInput" name="landmark" placeholder="Enter nearby landmark (e.g. Near Metro Station)" required oninput="validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a landmark.</div>
+                    </div>
+
+                    <!-- Pincode -->
                     <div>
                         <label>Pincode <span class="req">*</span></label>
-                        <input type="text" id="pincodeInput" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}">
+                        <input type="text" id="pincodeInput" name="pincode" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a valid 6-digit pincode.</div>
                     </div>
 
-                    <div>
-                        <label>Mobile Number <span class="req">*</span></label>
-                        <input type="tel" id="mobileInput" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Registered Mobile Number" maxlength="10" pattern="[0-9]{10}">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a valid 10-digit mobile number.</div>
-                    </div>
+</div>
                 </div>
 
                 <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
@@ -758,25 +1017,16 @@ textarea.is-invalid ~ .invalid-feedback,
             <div id="step-3" class="wizard-step" style="display:none;">
                 <div class="step-header">Select Pickup Day (Sundays Only)</div>
 
-                <div style="background: #e8f5ed; border: 1px solid #bce4c8; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-                    <div style="font-weight: 700; color: var(--green); margin-bottom: 4px;">
-                        <i class="bi bi-info-circle-fill"></i> Sunday Pickup Policy
-                    </div>
-                    <div style="font-size: 13px; color: #2b3930;">
-                        D-Clutter waste collection is scheduled <strong>exclusively on Sundays</strong>. Other days are unselectable.
-                    </div>
-                </div>
-
                 <div class="mb-3">
                     <label for="preferredDateInput">Select Pickup Date (Only Sundays) <span class="req">*</span></label>
-                    <input type="date" id="preferredDateInput" required onchange="validateSundayDate(this)">
+                    <input type="date" id="preferredDateInput" name="preferred_pickup_date" required onchange="validateSundayDate(this)">
                     <div id="date-error" class="invalid-feedback" style="color: #dc3545 !important;">
                         Please select a valid Sunday for pickup.
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
-                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(2)" style="width: 30%;">
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(2)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
                     <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(4)" style="width: 70%;">
@@ -799,13 +1049,29 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div id="review-items" style="font-weight: 700; color: var(--ink); font-size: 14px; margin-top: 4px;">-</div>
                     </div>
 
+                    <div style="margin-bottom: 14px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
+                        <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">WASTE IMAGES</small>
+                        <div id="review-images" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">-</div>
+                    </div>
+
+                    <div class="grid-ui" style="margin-bottom: 14px;">
+                        <div>
+                            <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">APPLICANT NAME</small>
+                            <div id="review-applicant-name" style="font-weight: 700; color: var(--ink); font-size: 13px; margin-top: 4px;">-</div>
+                        </div>
+                        <div>
+                            <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">HOUSE NO</small>
+                            <div id="review-house-no" style="font-weight: 700; color: var(--ink); font-size: 13px; margin-top: 4px;">-</div>
+                        </div>
+                    </div>
+
                     <div class="grid-ui" style="margin-bottom: 14px;">
                         <div>
                             <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">PICKUP LOCATION</small>
                             <div id="review-address" style="font-weight: 700; color: var(--ink); font-size: 13px; margin-top: 4px;">-</div>
                         </div>
                         <div>
-                            <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">WARD &amp; PINCODE</small>
+                            <small style="color: var(--muted); display: block; font-weight: 600; font-size: 11px;">AUTO-MAPPED WARD &amp; PINCODE</small>
                             <div id="review-ward" style="font-weight: 700; color: var(--ink); font-size: 13px; margin-top: 4px;">-</div>
                         </div>
                     </div>
@@ -820,13 +1086,35 @@ textarea.is-invalid ~ .invalid-feedback,
                             <div id="review-date" style="font-weight: 800; color: var(--green); font-size: 14px; margin-top: 4px;">-</div>
                         </div>
                     </div>
+
+                    <div style="background: #e8f5ed; border: 1px solid #bce4c8; border-radius: 8px; padding: 14px; margin-bottom: 20px; margin-top: 10px;">
+                        <div style="font-weight: 700; color: var(--green); margin-bottom: 4px;">
+                            <i class="bi bi-info-circle-fill"></i> Note:
+                        </div>
+                        <div style="font-size: 13px; color: #2b3930;">
+All Bulky Waste shall be dismantled & should be kept in the ground floor for the pickup failing which the waste shall not be picked up and Request shall be closed.                        </div>
+                    </div>
+
+<div class="declaration-checkbox">
+    <input
+        type="checkbox"
+        id="agree"
+        onchange="document.getElementById('submitBtn').disabled = !this.checked"
+    >
+
+    <label for="agree">
+        I agree to dismantel the bulk waste and placed for pickup at Ground Floor.
+    </label>
+</div>
+
+
                 </div>
 
                 <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
                     <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(3)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="submit" class="btn-ui continue-btn mt-0 w-auto" style="width: 70%;">
+                    <button type="submit" class="btn-ui continue-btn mt-0" style="width: 70%;">
                         <i class="bi bi-check-circle-fill"></i> Submit D-Clutter Request
                     </button>
                 </div>
@@ -846,13 +1134,185 @@ let globalMap = null;
 let globalMarker = null;
 let currentStep = 1;
 let fpInstance = null;
+let updateLocationDebounceTimer = null;
+let selectedWasteFiles = [];
+let isProgrammaticSync = false;
+
+// Dynamic Categories & Subcategories from Backend Database
+const dbCategories = @json($categories);
+const subcategoriesMap = {};
+const categoryStyles = {};
+
+dbCategories.forEach((cat, index) => {
+    const colors = ['#0e7a43', '#4d7cda', '#d97706', '#8b5cf6', '#0f9bb4', '#b45309', '#e05d3b', '#64748b'];
+    categoryStyles[cat.name] = { color: colors[index % colors.length] };
+    subcategoriesMap[cat.name] = (cat.subcategories || []).map(sub => ({
+        id: sub.id,
+        name: sub.name,
+        icon: sub.icon || 'fa-tag'
+    }));
+});
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof hideLoader === 'function') hideLoader();
 
     initSundayDatePicker();
-    initLeafletMap();
+    setTimeout(() => {
+        initLeafletMap();
+    }, 100);
+    fetchCurrentLocation({ silent: true });
 });
+
+function handleImageSelection(event) {
+    if (isProgrammaticSync) return;
+
+    const newFiles = event.target.files;
+    if (!newFiles || newFiles.length === 0) return;
+
+    // Reset array to exact files picked in dialog
+    selectedWasteFiles = Array.from(newFiles);
+
+    updateImagePreview();
+}
+
+function removeImage(index) {
+    if (index >= 0 && index < selectedWasteFiles.length) {
+        selectedWasteFiles.splice(index, 1);
+
+        // Sync remaining files back to input.files using DataTransfer with guard flag
+        isProgrammaticSync = true;
+        const dt = new DataTransfer();
+        selectedWasteFiles.forEach(file => dt.items.add(file));
+        const input = document.getElementById('wasteImagesInput');
+        if (input) {
+            input.files = dt.files;
+        }
+        isProgrammaticSync = false;
+
+        updateImagePreview();
+    }
+}
+
+function updateImagePreview() {
+    const container = document.getElementById('imagePreviewContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const fileText = document.getElementById('fileUploadText');
+    const box = document.getElementById('fileUploadBox');
+    const check = document.getElementById('fileUploadCheck');
+    const err = document.getElementById('fileUploadError');
+
+    if (selectedWasteFiles.length > 0) {
+        if (fileText) fileText.textContent = selectedWasteFiles.length + ' file(s) selected';
+        if (box) {
+            box.classList.add('is-valid');
+            box.style.borderColor = '';
+        }
+        if (check) check.style.display = 'block';
+        if (err) err.style.display = 'none';
+
+        selectedWasteFiles.forEach((file, i) => {
+            const blobUrl = URL.createObjectURL(file);
+            const div = document.createElement('div');
+            div.className = 'image-preview-item';
+            div.innerHTML = `
+                <img src="${blobUrl}" alt="Preview">
+                <div class="image-preview-remove" onclick="removeImage(${i})">
+                    <i class="bi bi-x"></i>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    } else {
+        if (fileText) fileText.textContent = 'No files selected';
+        if (box) box.classList.remove('is-valid');
+        if (check) check.style.display = 'none';
+    }
+}
+
+function renderSubcategories() {
+    const checked = Array.from(document.querySelectorAll('input[name="pickup_items[]"]:checked')).map(cb => cb.value);
+    const container = document.getElementById('subcategory-container');
+    const section = document.getElementById('subcategory-section');
+    
+    container.innerHTML = '';
+    
+    if (checked.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    
+    checked.forEach(category => {
+        if (subcategoriesMap[category] && subcategoriesMap[category].length > 0) {
+            const catDiv = document.createElement('div');
+            catDiv.style.marginBottom = '20px';
+            
+            const title = document.createElement('div');
+            title.style.fontWeight = '700';
+            title.style.fontSize = '14px';
+            title.style.marginBottom = '12px';
+            title.style.color = 'var(--ink)';
+            title.textContent = `Details for ${category}`;
+            catDiv.appendChild(title);
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'category-options-grid';
+            
+            const styleInfo = categoryStyles[category];
+            const tileColor = styleInfo ? styleInfo.color : '#087d45';
+            
+            subcategoriesMap[category].forEach(subcatObj => {
+                const subcatName = subcatObj.name;
+                const subcatIcon = subcatObj.icon;
+
+                const label = document.createElement('label');
+                label.className = 'item-option';
+                label.style.setProperty('--tile-color', tileColor);
+                
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'pickup_subitems[]';
+                input.value = `${category}: ${subcatName}`;
+                
+                input.onchange = function() {
+                    if (this.checked) {
+                        label.classList.add('selected');
+                        const err = document.getElementById('step1-subcat-error');
+                        if (err) err.style.display = 'none';
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                };
+                
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'category-icon';
+                if (subcatIcon && (subcatIcon.startsWith('fa-') || subcatIcon.startsWith('fa '))) {
+                    iconSpan.innerHTML = `<i class="fa-solid ${subcatIcon}"></i>`;
+                } else if (subcatIcon) {
+                    const imgSrc = (subcatIcon.startsWith('http') || subcatIcon.startsWith('/')) ? subcatIcon : `/storage/${subcatIcon}`;
+                    iconSpan.innerHTML = `<img src="${imgSrc}" alt="${subcatName}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fa-solid fa-tag\\'></i>';">`;
+                } else {
+                    iconSpan.innerHTML = `<i class="fa-solid fa-tag"></i>`;
+                }
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'item-option-text';
+                textSpan.innerHTML = `<strong>${subcatName}</strong>`;
+                
+                label.appendChild(input);
+                label.appendChild(iconSpan);
+                label.appendChild(textSpan);
+                optionsDiv.appendChild(label);
+            });
+            
+            catDiv.appendChild(optionsDiv);
+            container.appendChild(catDiv);
+        }
+    });
+}
 
 function onCategoryItemChange(cb) {
     const parentLabel = cb.closest('.item-option');
@@ -863,7 +1323,7 @@ function onCategoryItemChange(cb) {
             parentLabel.classList.remove('selected');
         }
     }
-    const checked = document.querySelectorAll('input[name="pickup_items"]:checked');
+    const checked = document.querySelectorAll('input[name="pickup_items[]"]:checked');
     const selectedCount = document.getElementById('selected-category-count');
     if (selectedCount) {
         selectedCount.textContent = `${checked.length} selected`;
@@ -871,6 +1331,17 @@ function onCategoryItemChange(cb) {
     const err = document.getElementById('step1-error');
     if (checked.length > 0) {
         if (err) err.style.display = 'none';
+    }
+
+    renderSubcategories();
+
+    if (cb.checked) {
+        setTimeout(() => {
+            const section = document.getElementById('subcategory-section');
+            if (section && section.style.display !== 'none') {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 50);
     }
 }
 
@@ -894,9 +1365,8 @@ function initSundayDatePicker() {
     dateInput.type = "text";
     dateInput.placeholder = "Click to select a Sunday";
 
-    // Calculate next Sunday
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 is Sunday
+    const dayOfWeek = today.getDay();
     const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
     const nextSunday = new Date(today);
     nextSunday.setDate(today.getDate() + daysUntilSunday);
@@ -907,7 +1377,6 @@ function initSundayDatePicker() {
         defaultDate: nextSunday,
         enable: [
             function(date) {
-                // Disable all days except Sundays (0 = Sunday)
                 return (date.getDay() === 0);
             }
         ],
@@ -965,7 +1434,6 @@ function validateSundayDate(input) {
 }
 
 function goToStep(stepNum) {
-    // Validate current step before proceeding forward
     if (stepNum > currentStep) {
         if (!validateStep(currentStep)) {
             return;
@@ -974,7 +1442,6 @@ function goToStep(stepNum) {
 
     currentStep = stepNum;
 
-    // Toggle step visibility
     for (let i = 1; i <= 4; i++) {
         const stepEl = document.getElementById(`step-${i}`);
         const navEl = document.getElementById(`step-nav-${i}`);
@@ -1001,25 +1468,54 @@ function goToStep(stepNum) {
 
 function validateStep(step) {
     if (step === 1) {
-        const checkedItems = document.querySelectorAll('input[name="pickup_items"]:checked');
+        const checkedItems = document.querySelectorAll('input[name="pickup_items[]"]:checked');
         const errorDiv = document.getElementById('step1-error');
+        const subcatErrorDiv = document.getElementById('step1-subcat-error');
+        
+        let valid = true;
+        
         if (checkedItems.length === 0) {
             if (errorDiv) errorDiv.style.display = 'block';
-            return false;
+            if (subcatErrorDiv) subcatErrorDiv.style.display = 'none';
+            valid = false;
         } else {
             if (errorDiv) errorDiv.style.display = 'none';
-            return true;
+            
+            const checkedSubItems = document.querySelectorAll('input[name="pickup_subitems[]"]:checked');
+            if (checkedSubItems.length === 0) {
+                if (subcatErrorDiv) subcatErrorDiv.style.display = 'block';
+                valid = false;
+            } else {
+                if (subcatErrorDiv) subcatErrorDiv.style.display = 'none';
+            }
         }
+        
+        return valid;
     }
 
     if (step === 2) {
+        const applicantName = document.getElementById('applicantNameInput');
         const address = document.getElementById('addressInput');
-        const ward = document.getElementById('wardSelect');
+        const houseNo = document.getElementById('houseNoInput');
+        const landmark = document.getElementById('landmarkInput');
+        const wardDisplay = document.getElementById('wardDisplayInput');
+        const wardId = document.getElementById('wardIdInput');
         const pincode = document.getElementById('pincodeInput');
         const mobile = document.getElementById('mobileInput');
 
         let valid = true;
-        [address, ward, pincode, mobile].forEach(el => {
+        
+        const imageError = document.getElementById('fileUploadError');
+        const imageBox = document.getElementById('fileUploadBox');
+        if (selectedWasteFiles.length === 0) {
+            if (imageError) imageError.style.display = 'block';
+            if (imageBox) imageBox.style.borderColor = '#dc3545';
+            valid = false;
+        } else {
+            if (imageError) imageError.style.display = 'none';
+        }
+
+        [applicantName, address, houseNo, landmark, wardDisplay, pincode, mobile].forEach(el => {
             if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                 if (el) {
                     el.classList.remove('is-valid');
@@ -1034,6 +1530,14 @@ function validateStep(step) {
             }
         });
 
+        if (!wardId || !wardId.value) {
+            if (wardDisplay) {
+                wardDisplay.classList.remove('is-valid');
+                wardDisplay.classList.add('is-invalid');
+            }
+            valid = false;
+        }
+
         return valid;
     }
 
@@ -1046,13 +1550,48 @@ function validateStep(step) {
 }
 
 function buildReviewSummary() {
-    const checkedItems = Array.from(document.querySelectorAll('input[name="pickup_items"]:checked')).map(cb => cb.value);
-    document.getElementById('review-items').innerText = checkedItems.length ? checkedItems.join(', ') : 'None selected';
+    const checkedItems = Array.from(document.querySelectorAll('input[name="pickup_items[]"]:checked')).map(cb => cb.value);
+    const checkedSubItems = Array.from(document.querySelectorAll('input[name="pickup_subitems[]"]:checked')).map(cb => cb.value.split(': ')[1]);
+    
+    let itemsText = checkedItems.length ? checkedItems.join(', ') : 'None selected';
+    if (checkedSubItems.length > 0) {
+        itemsText += `\n(Details: ${checkedSubItems.join(', ')})`;
+    }
+    document.getElementById('review-items').innerText = itemsText;
+    
+    const imageContainer = document.getElementById('review-images');
+    imageContainer.innerHTML = '';
+    
+    if (selectedWasteFiles.length > 0) {
+        imageContainer.style.fontWeight = 'normal';
+        imageContainer.style.color = '';
+        imageContainer.style.fontSize = '';
+        
+        selectedWasteFiles.forEach(file => {
+            const blobUrl = URL.createObjectURL(file);
+            const img = document.createElement('img');
+            img.src = blobUrl;
+            img.style.width = '64px';
+            img.style.height = '64px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '6px';
+            img.style.border = '1px solid var(--line)';
+            imageContainer.appendChild(img);
+        });
+    } else {
+        imageContainer.innerText = 'None';
+        imageContainer.style.fontWeight = '700';
+        imageContainer.style.color = 'var(--ink)';
+        imageContainer.style.fontSize = '14px';
+    }
+    
+    document.getElementById('review-applicant-name').innerText = document.getElementById('applicantNameInput').value || '-';
+    document.getElementById('review-house-no').innerText = document.getElementById('houseNoInput').value || '-';
     document.getElementById('review-address').innerText = document.getElementById('addressInput').value || '-';
     
-    const wardVal = document.getElementById('wardSelect').value;
+    const wardDisplay = document.getElementById('wardDisplayInput');
     const pinVal = document.getElementById('pincodeInput').value;
-    document.getElementById('review-ward').innerText = `${wardVal || '-'} (${pinVal ? 'Pin: ' + pinVal : '-'})`;
+    document.getElementById('review-ward').innerText = `${wardDisplay ? wardDisplay.value : '-'} (${pinVal ? 'Pin: ' + pinVal : '-'})`;
     
     document.getElementById('review-mobile').innerText = document.getElementById('mobileInput').value || '-';
     
@@ -1085,16 +1624,20 @@ function initLeafletMap() {
 
     function updateMarkerCoords(lat, lng) {
         document.getElementById('mapCoordinates').innerText = `Location selected: ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+        document.getElementById('latitudeInput').value = lat;
+        document.getElementById('longitudeInput').value = lng;
     }
 
     globalMarker.on('dragend', function(e) {
         const position = globalMarker.getLatLng();
         updateMarkerCoords(position.lat, position.lng);
+        updatePickupLocation(position.lat, position.lng);
     });
 
     globalMap.on('click', function(e) {
         globalMarker.setLatLng(e.latlng);
         updateMarkerCoords(e.latlng.lat, e.latlng.lng);
+        updatePickupLocation(e.latlng.lat, e.latlng.lng);
     });
 
     window.searchOnMap = function() {
@@ -1109,20 +1652,92 @@ function initLeafletMap() {
                     globalMap.setView([lat, lon], 14);
                     globalMarker.setLatLng([lat, lon]);
                     updateMarkerCoords(lat, lon);
+                    updatePickupLocation(lat, lon);
                 }
             })
             .catch(err => console.error('Map search failed', err));
     };
 }
 
-window.fetchCurrentLocation = function() {
-    if (typeof showLoader === 'function') {
+function updatePickupLocation(lat, lng) {
+    if (updateLocationDebounceTimer) {
+        clearTimeout(updateLocationDebounceTimer);
+    }
+
+    updateLocationDebounceTimer = setTimeout(() => {
+        const wardIdInput = document.getElementById('wardIdInput');
+        const wardDisplay = document.getElementById('wardDisplayInput');
+        const constInput = document.getElementById('constituencyInput');
+        const corpInput = document.getElementById('corporationInput');
+
+        // 1. Fast local Laravel Spatial Ward Lookup (<20ms)
+        fetch(`{{ route('citizen.lookup-ward') }}?lat=${lat}&lng=${lng}`)
+            .then(r => r.json())
+            .then(wardRes => {
+                if (wardRes.success && wardRes.ward) {
+                    if (wardIdInput) wardIdInput.value = wardRes.ward.id;
+                    if (wardDisplay) {
+                        wardDisplay.value = `${wardRes.ward.name} (${wardRes.ward.constituency_name || 'Ward ' + wardRes.ward.ward_number})`;
+                        validateSingleField(wardDisplay);
+                    }
+                    if (constInput) {
+                        constInput.value = wardRes.ward.constituency_name || 'N/A';
+                        validateSingleField(constInput);
+                    }
+                    if (corpInput) {
+                        corpInput.value = wardRes.ward.corporation_name || 'N/A';
+                        validateSingleField(corpInput);
+                    }
+                }
+            })
+            .catch(e => console.error('Ward spatial lookup error', e));
+
+        // 2. Safe reverse geocoding with 2.5s AbortController timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`, {
+            signal: controller.signal,
+            headers: { 'Accept-Language': 'en' }
+        })
+        .then(res => {
+            clearTimeout(timeoutId);
+            if (!res.ok) throw new Error('Reverse geocode error');
+            return res.json();
+        })
+        .then(data => {
+            const addrEl = document.getElementById('addressInput');
+            if (data && data.display_name && addrEl && !addrEl.value) {
+                addrEl.value = data.display_name;
+                validateSingleField(addrEl);
+            }
+
+            const pinEl = document.getElementById('pincodeInput');
+            if (data && data.address && data.address.postcode && pinEl && !pinEl.value) {
+                pinEl.value = data.address.postcode;
+                validateSingleField(pinEl);
+            }
+        })
+        .catch(err => {
+            clearTimeout(timeoutId);
+            const addrEl = document.getElementById('addressInput');
+            if (addrEl && !addrEl.value) {
+                addrEl.value = `Site Location near ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E, Bengaluru`;
+                validateSingleField(addrEl);
+            }
+        });
+    }, 200);
+}
+
+window.fetchCurrentLocation = function(options = {}) {
+    const silent = options.silent === true;
+    if (!silent && typeof showLoader === 'function') {
         showLoader('Fetching your GPS location...');
     }
 
     if (!navigator.geolocation) {
-        if (typeof hideLoader === 'function') hideLoader();
-        alert("Geolocation is not supported by your browser.");
+        if (!silent && typeof hideLoader === 'function') hideLoader();
+        if (!silent) alert("Geolocation is not supported by your browser.");
         return;
     }
 
@@ -1131,7 +1746,10 @@ window.fetchCurrentLocation = function() {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
 
-            if (typeof hideLoader === 'function') hideLoader();
+            if (!silent && typeof hideLoader === 'function') hideLoader();
+
+            document.getElementById('latitudeInput').value = lat;
+            document.getElementById('longitudeInput').value = lng;
 
             if (globalMap && globalMarker) {
                 globalMap.setView([lat, lng], 15);
@@ -1139,88 +1757,278 @@ window.fetchCurrentLocation = function() {
                 document.getElementById('mapCoordinates').innerText = `Location selected: ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
             }
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.display_name) {
-                        const addrEl = document.getElementById('addressInput');
-                        addrEl.value = data.display_name;
-                        validateSingleField(addrEl);
-
-                        if (data.address && data.address.postcode) {
-                            const pinEl = document.getElementById('pincodeInput');
-                            pinEl.value = data.address.postcode;
-                            validateSingleField(pinEl);
-                        }
-                    }
-                })
-                .catch(() => {
-                    const addrEl = document.getElementById('addressInput');
-                    addrEl.value = `GPS Location (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E), Bengaluru`;
-                    validateSingleField(addrEl);
-                });
+            updatePickupLocation(lat, lng);
         },
         function(error) {
             if (typeof hideLoader === 'function') hideLoader();
 
-            const demoLat = 12.9716;
-            const demoLng = 77.5946;
+            const demoLat = 12.9911;
+            const demoLng = 77.5971;
+            document.getElementById('latitudeInput').value = demoLat;
+            document.getElementById('longitudeInput').value = demoLng;
+
             if (globalMap && globalMarker) {
                 globalMap.setView([demoLat, demoLng], 15);
                 globalMarker.setLatLng([demoLat, demoLng]);
                 document.getElementById('mapCoordinates').innerText = `Location selected: ${demoLat.toFixed(4)}° N, ${demoLng.toFixed(4)}° E`;
             }
             const addrEl = document.getElementById('addressInput');
-            addrEl.value = "123, 1st Cross, Kanamangala 6th Block, Bengaluru, Karnataka - 560064";
-            validateSingleField(addrEl);
+            if (addrEl && !addrEl.value) {
+                addrEl.value = "Millers Tank Bund Road, Kaverappa Layout, Vasanth Nagar, Bengaluru, Karnataka 560052";
+                validateSingleField(addrEl);
+            }
 
             const pinEl = document.getElementById('pincodeInput');
-            pinEl.value = "560064";
-            validateSingleField(pinEl);
+            if (pinEl && !pinEl.value) {
+                pinEl.value = "560052";
+                validateSingleField(pinEl);
+            }
 
-            alert("Current location fetched successfully!");
+            updatePickupLocation(demoLat, demoLng);
         },
-        { enableHighAccuracy: true, timeout: 8000 }
+        { enableHighAccuracy: true, timeout: 5000 }
     );
 };
 
 function handleFormSubmit(event) {
-    event.preventDefault();
-
     if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
+        event.preventDefault();
         return;
     }
     
     if (typeof showLoader === 'function') {
         showLoader('Submitting D-Clutter request...');
     }
-
-    setTimeout(() => {
-        const randomNum = Math.floor(100000 + Math.random() * 900000);
-        const reqId = `DCL-2025-${randomNum}`;
-
-        const checkedItems = Array.from(document.querySelectorAll('input[name="pickup_items"]:checked')).map(cb => cb.value);
-
-        const requestData = {
-            id: reqId,
-            items: checkedItems,
-            wasteType: checkedItems.join(', '),
-            address: document.getElementById('addressInput').value,
-            ward: document.getElementById('wardSelect').value,
-            landmark: document.getElementById('landmarkInput').value,
-            pincode: document.getElementById('pincodeInput').value,
-            mobile: document.getElementById('mobileInput').value,
-            prefDate: document.getElementById('preferredDateInput').value,
-            dateSubmitted: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-        };
-
-        const saved = JSON.parse(localStorage.getItem('dclutter_requests') || '[]');
-        saved.unshift(requestData);
-        localStorage.setItem('dclutter_requests', JSON.stringify(saved));
-        localStorage.setItem('last_req_id', reqId);
-
-        window.location.href = `{{ route('citizen.success') }}?id=${reqId}`;
-    }, 600);
 }
+
+
+
+
+/* =========================================================
+   OTP PROTECTION
+========================================================= */
+
+let otpVerified = false;
+
+
+/* ---------------------------------------------------------
+   FIELDS THAT REQUIRE OTP VERIFICATION
+--------------------------------------------------------- */
+
+const otpProtectedFieldIds = [
+    'wasteImagesInput',
+    'addressInput',
+    'mapSearchInput',
+    'houseNoInput',
+    'floorNoInput',
+    'wardDisplayInput',
+    'constituencyInput',
+    'corporationInput',
+    'landmarkInput',
+    'pincodeInput'
+];
+
+
+/* ---------------------------------------------------------
+   LOCK ALL FIELDS INITIALLY
+--------------------------------------------------------- */
+
+function lockOtpProtectedFields() {
+
+    otpProtectedFieldIds.forEach(function(id) {
+
+        const field = document.getElementById(id);
+
+        if (field) {
+            field.disabled = true;
+        }
+
+    });
+
+    // Disable buttons related to location/map
+    document.querySelectorAll(
+        '.btn-fetch-loc'
+    ).forEach(function(button) {
+        button.disabled = true;
+    });
+
+}
+
+
+/* ---------------------------------------------------------
+   UNLOCK AFTER OTP VERIFICATION
+--------------------------------------------------------- */
+
+function unlockOtpProtectedFields() {
+
+    otpProtectedFieldIds.forEach(function(id) {
+
+        const field = document.getElementById(id);
+
+        if (field) {
+            field.disabled = false;
+        }
+
+    });
+
+    document.querySelectorAll(
+        '.btn-fetch-loc'
+    ).forEach(function(button) {
+        button.disabled = false;
+    });
+
+    otpVerified = true;
+
+}
+
+
+/* ---------------------------------------------------------
+   CHECK MOBILE NUMBER
+--------------------------------------------------------- */
+
+function validateMobileAndShowOtp() {
+
+    const mobile =
+        document.getElementById('mobileInput').value.trim();
+
+    const sendOtpBtn =
+        document.getElementById('sendOtpBtn');
+
+    const mobileError =
+        document.getElementById('mobileError');
+
+    // Only numbers
+    document.getElementById('mobileInput').value =
+        mobile.replace(/\D/g, '').substring(0, 10);
+
+    if (/^[0-9]{10}$/.test(
+        document.getElementById('mobileInput').value
+    )) {
+
+        sendOtpBtn.style.display = 'block';
+        mobileError.style.display = 'none';
+
+    } else {
+
+        sendOtpBtn.style.display = 'none';
+        mobileError.style.display = 'none';
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   SEND WHATSAPP OTP
+--------------------------------------------------------- */
+
+function sendWhatsAppOTP() {
+
+    const mobile =
+        document.getElementById('mobileInput').value.trim();
+
+    if (!/^[0-9]{10}$/.test(mobile)) {
+
+        document.getElementById('mobileError').style.display =
+            'block';
+
+        return;
+    }
+
+    const sendBtn =
+        document.getElementById('sendOtpBtn');
+
+    const otpSection =
+        document.getElementById('otpSection');
+
+    /*
+     * IMPORTANT:
+     * Replace this section with your Laravel AJAX request
+     * when WhatsApp OTP backend is connected.
+     */
+
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = 'Sending...';
+
+    setTimeout(function() {
+
+        otpSection.style.display = 'block';
+
+        sendBtn.innerHTML = 'OTP Sent';
+
+        document.getElementById('otpInput').focus();
+
+    }, 800);
+
+}
+
+
+/* ---------------------------------------------------------
+   VERIFY WHATSAPP OTP
+--------------------------------------------------------- */
+
+function verifyWhatsAppOTP() {
+
+    const otp =
+        document.getElementById('otpInput').value.trim();
+
+    const message =
+        document.getElementById('otpMessage');
+
+    if (!/^[0-9]{6}$/.test(otp)) {
+
+        message.style.display = 'block';
+        message.style.color = '#dc3545';
+
+        message.innerHTML =
+            'Please enter a valid 6-digit OTP.';
+
+        return;
+    }
+
+    /*
+     * TEMPORARY FRONTEND DEMO
+     *
+     * Replace this with Laravel OTP verification.
+     */
+
+    const verifyBtn =
+        document.getElementById('verifyOtpBtn');
+
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = 'Verifying...';
+
+    setTimeout(function() {
+
+        otpVerified = true;
+
+        message.style.display = 'block';
+        message.style.color = '#198754';
+
+        message.innerHTML =
+            '<i class="bi bi-check-circle-fill"></i> ' +
+            'Mobile number verified successfully.';
+
+        verifyBtn.innerHTML = 'Verified';
+        verifyBtn.disabled = true;
+
+        document.getElementById('otpInput').disabled = true;
+
+        unlockOtpProtectedFields();
+
+    }, 700);
+
+}
+
+
+/* ---------------------------------------------------------
+   INITIAL LOCK
+--------------------------------------------------------- */
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    lockOtpProtectedFields();
+
+});
 </script>
 @endsection

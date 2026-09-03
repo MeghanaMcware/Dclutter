@@ -3,7 +3,7 @@
         <a href="javascript:history.back()"><i class="fa-solid fa-arrow-left"></i></a>
         @yield('heading', 'DCLUTTER Driver')
     </h1>
-    <a href="{{ route('driver.notifications') }}" style="color: #fff;"><i class="fa-solid fa-bell font-16"></i></a>
+    <a href="{{ route('vehicle.notifications') }}" style="color: #fff;"><i class="fa-solid fa-bell font-16"></i></a>
 </div>
 
 <style>

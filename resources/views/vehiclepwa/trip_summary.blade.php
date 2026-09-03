@@ -6,105 +6,69 @@
 @section('style')
     <style>
         :root { --primary-green: #0e7a43; --primary-dark: #095930; }
-
-        .check-circle { width: 80px; height: 80px; background: var(--primary-green); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 10px auto 16px; font-size: 38px; box-shadow: 0 10px 25px rgba(14,122,67,0.3); }
-
-        .summary-title { font-size: 22px; font-weight: 800; color: var(--primary-green); margin-bottom: 6px; }
-        .summary-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
-
-        .summary-card { background: #fff; border-radius: 16px; padding: 18px; border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align: left; margin-bottom: 24px; }
-        .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .summary-row:last-child { border-bottom: none; }
-        .summary-row .label { color: #64748b; font-weight: 500; }
-        .summary-row .val { color: #0f172a; font-weight: 700; }
-
-        .btn-submit-summary { width: 100%; height: 50px; background: var(--primary-green); color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 14px rgba(14,122,67,0.3); }
-        .btn-submit-summary:hover { background: var(--primary-dark); color: #fff; }
+        .summary-card { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+        .stat-box { background: #f8fafc; border-radius: 12px; padding: 14px; text-align: center; border: 1px solid #cbd5e1; }
+        .stat-num { font-size: 20px; font-weight: 800; color: var(--primary-green); }
+        .stat-label { font-size: 12px; color: #64748b; font-weight: 600; margin-top: 2px; }
+        .btn-home { width: 100%; height: 48px; background: var(--primary-green); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
     </style>
 @endsection
 
 @section('content')
-    <div class="container py-2 text-center" style="max-width: 440px; margin: 0 auto;">
+    <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
 
-        <!-- Checkmark Badge -->
-        <div class="check-circle">
-            <i class="fa-solid fa-check"></i>
+        <!-- Shift Working Date Filter -->
+        <div class="mb-3">
+            <form method="GET" action="{{ route('vehicle.trip_summary') }}" id="summaryDateFilterForm">
+                <div class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-white border shadow-sm">
+                    <span class="small fw-bold text-muted ps-2"><i class="fa-regular fa-calendar-check text-success me-1"></i> Shift Date:</span>
+                    <select name="date" class="form-select form-select-sm border-0 font-13 fw-bold w-auto" onchange="document.getElementById('summaryDateFilterForm').submit();">
+                        @forelse($workingDates as $date)
+                            <option value="{{ $date }}" {{ $selectedDate == $date ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::parse($date)->format('d M Y (l)') }}
+                            </option>
+                        @empty
+                            <option value="{{ now()->toDateString() }}" selected>{{ now()->format('d M Y (l)') }}</option>
+                        @endforelse
+                    </select>
+                </div>
+            </form>
         </div>
 
-        <h2 class="summary-title">Trip Completed!</h2>
-        <p class="summary-sub">Great job! You have completed all<br>stops for this trip.</p>
-
-        <!-- Summary Data Breakdown -->
         <div class="summary-card">
-            <div class="summary-row">
-                <span class="label">Trip ID</span>
-                <span class="val">TRP-2025-05-24-01</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">Total Stops</span>
-                <span class="val">35</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">Completed</span>
-                <span class="val">35</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">Waste Collected</span>
-                <span class="val">2.4 Ton</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">Distance Covered</span>
-                <span class="val">11.8 km</span>
-            </div>
-            <div class="summary-row">
-                <span class="label">Time Taken</span>
-                <span class="val">4h 15m</span>
-            </div>
-        </div>
+            <h5 class="fw-bold text-dark mb-1">Shift Collection Summary</h5>
+            <p class="text-muted small mb-3">Overview of completed pickups for {{ \Carbon\Carbon::parse($selectedDate)->format('d M Y (l)') }}.</p>
 
-        <!-- Recent Uploads (Mockup Display) -->
-        <div class="summary-card" id="recentUploadsCard" style="display: none;">
-            <h5 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #1f2937;">Recent Photos</h5>
-            <div style="display: flex; gap: 10px;">
-                <div style="flex: 1; text-align: center;">
-                    <img id="summaryBeforeImg" src="" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; display: none;">
-                    <span style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px; display: block;">BEFORE</span>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-num">{{ $completedRequests->count() }}</div>
+                    <div class="stat-label">Total Pickups</div>
                 </div>
-                <div style="flex: 1; text-align: center;">
-                    <img id="summaryAfterImg" src="" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; display: none;">
-                    <span style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px; display: block;">AFTER</span>
+                <div class="stat-box">
+                    <div class="stat-num">{{ number_format($completedRequests->sum('approx_weight_kg'), 1) }} kg</div>
+                    <div class="stat-label">Total Weight</div>
                 </div>
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <a href="{{ route('driver.notifications') }}" class="btn-submit-summary">
-            <span>Submit Summary</span>
+        <div class="summary-card">
+            <h6 class="fw-bold text-dark mb-3">Completed Requests</h6>
+            @forelse($completedRequests as $req)
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <strong class="text-dark d-block small">{{ $req->request_number }}</strong>
+                        <span class="text-muted" style="font-size: 11px;">{{ $req->house_no }}, {{ Str::limit($req->address, 20) }}</span>
+                    </div>
+                    <span class="badge bg-success small">{{ $req->picked_up_at ? $req->picked_up_at->format('H:i') : 'Done' }}</span>
+                </div>
+            @empty
+                <p class="text-muted small text-center my-3">No pickups completed on this date.</p>
+            @endforelse
+        </div>
+
+        <a href="{{ route('vehicle.requests') }}" class="btn-home">
+            <i class="fa-solid fa-truck-fast"></i> Back to Requests
         </a>
-
     </div>
-@endsection
-
-@section('script')
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const beforeData = localStorage.getItem('recentBeforeImg');
-        const afterData = localStorage.getItem('recentAfterImg');
-        
-        if (beforeData || afterData) {
-            document.getElementById('recentUploadsCard').style.display = 'block';
-            
-            if (beforeData) {
-                const bImg = document.getElementById('summaryBeforeImg');
-                bImg.src = beforeData;
-                bImg.style.display = 'block';
-            }
-            if (afterData) {
-                const aImg = document.getElementById('summaryAfterImg');
-                aImg.src = afterData;
-                aImg.style.display = 'block';
-            }
-        }
-    });
-</script>
 @endsection
