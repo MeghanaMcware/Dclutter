@@ -645,6 +645,105 @@ textarea.is-invalid ~ .invalid-feedback,
     line-height: 18px;
     cursor: pointer;
 }
+
+/* Shared loading state for wizard actions */
+.request-page-loader {
+    position: fixed;
+    z-index: 2000;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.request-page-loader.show {
+    display: flex;
+}
+
+.request-page-loader__content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 170px;
+    justify-content: center;
+    padding: 14px 18px;
+    border: 1px solid #dcebe0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 8px 25px rgba(20, 56, 38, 0.16);
+}
+
+.request-ui button.is-loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.camera-modal {
+    position: fixed;
+    z-index: 2100;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(10, 24, 16, 0.72);
+}
+
+.camera-modal.show {
+    display: flex;
+}
+
+.camera-modal__panel {
+    width: min(100%, 480px);
+    overflow: hidden;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.camera-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.camera-modal__close {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#cameraVideo {
+    display: block;
+    width: 100%;
+    max-height: 65vh;
+    min-height: 240px;
+    background: #101412;
+    object-fit: cover;
+}
+
+.camera-modal__actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px 16px;
+}
+
+@media (max-width: 480px) {
+    .camera-modal { align-items: flex-end; padding: 0; }
+    .camera-modal__panel { border-radius: 14px 14px 0 0; }
+    #cameraVideo { max-height: 62vh; }
+}
 </style>
 @endsection
 
@@ -837,9 +936,14 @@ textarea.is-invalid ~ .invalid-feedback,
                         <label>Upload Waste Images <span class="req">*</span></label>
                         <div class="custom-file-upload">
                             <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
-                            <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
-                                <div class="file-upload-btn">Choose Files</div>
+                            <div class="file-upload-box" id="fileUploadBox">
+                                <button type="button" class="file-upload-btn" onclick="document.getElementById('wasteImagesInput').click()">
+                                    <i class="bi bi-folder2-open me-1"></i> Choose Files
+                                </button>
                                 <div class="file-upload-text" id="fileUploadText">No files selected</div>
+                                <button type="button" class="btn-fetch-loc me-2" onclick="openCamera()">
+                                    <i class="bi bi-camera-fill"></i> Camera
+                                </button>
                                 <i class="bi bi-check-lg text-success file-upload-check" style="display:none;" id="fileUploadCheck"></i>
                             </div>
                             <div class="invalid-feedback" id="fileUploadError" style="color: #dc3545 !important; display:none; margin-top:4px;">Please select at least one image.</div>
@@ -1066,6 +1170,28 @@ All Bulky Waste shall be dismantled & should be kept in the ground floor for the
         </form>
     </div>
 </main>
+<div id="requestPageLoader" class="request-page-loader" role="status" aria-live="polite" aria-hidden="true">
+    <div class="request-page-loader__content">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span id="requestPageLoaderText">Please wait...</span>
+    </div>
+</div>
+<div id="cameraModal" class="camera-modal" role="dialog" aria-modal="true" aria-labelledby="cameraModalTitle" aria-hidden="true">
+    <div class="camera-modal__panel">
+        <div class="camera-modal__header">
+            <span id="cameraModalTitle">Take waste photo</span>
+            <button type="button" class="camera-modal__close" onclick="closeCamera()" aria-label="Close camera">&times;</button>
+        </div>
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" hidden></canvas>
+        <div class="camera-modal__actions">
+            <button type="button" class="btn-ui btn-secondary-ui" onclick="closeCamera()">Cancel</button>
+            <button type="button" class="btn-ui" id="capturePhotoBtn" onclick="capturePhoto()">
+                <i class="bi bi-camera-fill"></i> Capture Photo
+            </button>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
@@ -1081,6 +1207,53 @@ let fpInstance = null;
 let updateLocationDebounceTimer = null;
 let selectedWasteFiles = [];
 let isProgrammaticSync = false;
+let requestLoaderTimer = null;
+
+function showLoader(message = 'Please wait...') {
+    const loader = document.getElementById('requestPageLoader');
+    const text = document.getElementById('requestPageLoaderText');
+    if (!loader) return;
+
+    if (text) text.textContent = message;
+    loader.classList.add('show');
+    loader.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('overflow-hidden');
+}
+
+function hideLoader() {
+    const loader = document.getElementById('requestPageLoader');
+    if (!loader) return;
+
+    loader.classList.remove('show');
+    loader.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('overflow-hidden');
+}
+
+function setButtonLoading(button, loading, label = 'Please wait...') {
+    if (!button) return;
+
+    if (loading) {
+        button.dataset.originalContent = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ' + label;
+        button.classList.add('is-loading');
+        button.disabled = true;
+    } else {
+        button.innerHTML = button.dataset.originalContent || button.innerHTML;
+        button.classList.remove('is-loading');
+        button.disabled = false;
+    }
+}
+
+function showButtonLoader(button, message, callback, delay = 250) {
+    setButtonLoading(button, true, message);
+    showLoader(message);
+    window.clearTimeout(requestLoaderTimer);
+    requestLoaderTimer = window.setTimeout(function() {
+        hideLoader();
+        if (callback) callback();
+        setButtonLoading(button, false);
+    }, delay);
+}
 
 // Dynamic Categories & Subcategories from Backend Database
 const dbCategories = [
@@ -1380,34 +1553,42 @@ function validateSundayDate(input) {
 function goToStep(stepNum) {
     if (stepNum > currentStep) {
         if (!validateStep(currentStep)) {
+            hideLoader();
             return;
         }
     }
 
-    currentStep = stepNum;
+    const clickedButton = document.activeElement && document.activeElement.tagName === 'BUTTON'
+        ? document.activeElement
+        : null;
+    const direction = stepNum > currentStep ? 'Loading next step...' : 'Loading previous step...';
 
-    for (let i = 1; i <= 4; i++) {
-        const stepEl = document.getElementById(`step-${i}`);
-        const navEl = document.getElementById(`step-nav-${i}`);
-        if (stepEl) {
-            stepEl.style.display = (i === stepNum) ? 'block' : 'none';
+    showButtonLoader(clickedButton, direction, function() {
+        currentStep = stepNum;
+
+        for (let i = 1; i <= 4; i++) {
+            const stepEl = document.getElementById(`step-${i}`);
+            const navEl = document.getElementById(`step-nav-${i}`);
+            if (stepEl) {
+                stepEl.style.display = (i === stepNum) ? 'block' : 'none';
+            }
+            if (navEl) {
+                navEl.className = (i === stepNum) ? 'active' : (i < stepNum ? 'completed' : '');
+            }
         }
-        if (navEl) {
-            navEl.className = (i === stepNum) ? 'active' : (i < stepNum ? 'completed' : '');
+
+        if (stepNum === 2 && globalMap) {
+            setTimeout(() => {
+                globalMap.invalidateSize();
+            }, 200);
         }
-    }
 
-    if (stepNum === 2 && globalMap) {
-        setTimeout(() => {
-            globalMap.invalidateSize();
-        }, 200);
-    }
+        if (stepNum === 4) {
+            buildReviewSummary();
+        }
 
-    if (stepNum === 4) {
-        buildReviewSummary();
-    }
-
-    window.scrollTo({ top: 100, behavior: 'smooth' });
+        window.scrollTo({ top: 100, behavior: 'smooth' });
+    });
 }
 
 function validateStep(step) {
@@ -1586,7 +1767,16 @@ function initLeafletMap() {
 
     window.searchOnMap = function() {
         const query = document.getElementById('mapSearchInput').value;
-        if (!query) return;
+        const searchButton = document.querySelector('.map-search-bar button.btn-ui');
+        if (!query) {
+            document.getElementById('mapSearchInput').classList.add('is-invalid');
+            return;
+        }
+
+        document.getElementById('mapSearchInput').classList.remove('is-invalid');
+        showLoader('Searching location...');
+        if (searchButton) setButtonLoading(searchButton, true, 'Searching...');
+
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bengaluru')}`)
             .then(res => res.json())
             .then(data => {
@@ -1599,7 +1789,11 @@ function initLeafletMap() {
                     updatePickupLocation(lat, lon);
                 }
             })
-            .catch(err => console.error('Map search failed', err));
+            .catch(err => console.error('Map search failed', err))
+            .finally(function() {
+                hideLoader();
+                setButtonLoading(searchButton, false);
+            });
     };
 }
 
@@ -1629,13 +1823,13 @@ function updatePickupLocation(lat, lng) {
         })
         .then(data => {
             const addrEl = document.getElementById('addressInput');
-            if (data && data.display_name && addrEl && !addrEl.value) {
+            if (data && data.display_name && addrEl) {
                 addrEl.value = data.display_name;
                 validateSingleField(addrEl);
             }
 
             const pinEl = document.getElementById('pincodeInput');
-            if (data && data.address && data.address.postcode && pinEl && !pinEl.value) {
+            if (data && data.address && data.address.postcode && pinEl) {
                 pinEl.value = data.address.postcode;
                 validateSingleField(pinEl);
             }
@@ -1646,7 +1840,7 @@ function updatePickupLocation(lat, lng) {
         .catch(err => {
             clearTimeout(timeoutId);
             const addrEl = document.getElementById('addressInput');
-            if (addrEl && !addrEl.value) {
+            if (addrEl) {
                 addrEl.value = `Site Location near ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E, Bengaluru`;
                 validateSingleField(addrEl);
             }
@@ -1726,12 +1920,13 @@ function handleFormSubmit(event) {
     
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+        setButtonLoading(submitBtn, true, 'Submitting...');
     }
+    showLoader('Submitting request...');
     
     setTimeout(() => {
         if (typeof Swal !== 'undefined') {
+            hideLoader();
             Swal.fire({
                 icon: 'success',
                 title: 'Request Submitted!',
@@ -1745,13 +1940,13 @@ function handleFormSubmit(event) {
                 }
             });
         } else {
+            hideLoader();
             alert('Your D-Clutter pickup request has been received successfully.');
             window.location.href = "/user/track-request";
         }
         
         if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Submit D-Clutter Request';
+            setButtonLoading(submitBtn, false);
         }
     }, 1200);
 }
@@ -1821,12 +2016,15 @@ function sendWhatsAppOTP() {
     const sendBtn = document.getElementById('sendOtpBtn');
     const otpSection = document.getElementById('otpSection');
 
-    sendBtn.disabled = true;
-    sendBtn.innerHTML = 'Sending...';
+    setButtonLoading(sendBtn, true, 'Sending...');
+    showLoader('Sending OTP...');
 
     setTimeout(function() {
+        hideLoader();
         otpSection.style.display = 'block';
-        sendBtn.innerHTML = 'OTP Sent';
+        setButtonLoading(sendBtn, false);
+        sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> OTP Sent';
+        sendBtn.disabled = true;
         document.getElementById('otpInput').focus();
     }, 800);
 }
@@ -1843,15 +2041,17 @@ function verifyWhatsAppOTP() {
     }
 
     const verifyBtn = document.getElementById('verifyOtpBtn');
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = 'Verifying...';
+    setButtonLoading(verifyBtn, true, 'Verifying...');
+    showLoader('Verifying OTP...');
 
     setTimeout(function() {
+        hideLoader();
         otpVerified = true;
         message.style.display = 'block';
         message.style.color = '#198754';
         message.innerHTML = '<i class="bi bi-check-circle-fill"></i> Mobile number verified successfully.';
-        verifyBtn.innerHTML = 'Verified';
+        setButtonLoading(verifyBtn, false);
+        verifyBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Verified';
         verifyBtn.disabled = true;
         document.getElementById('otpInput').disabled = true;
         unlockOtpProtectedFields();

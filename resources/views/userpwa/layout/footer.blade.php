@@ -34,7 +34,7 @@
                 margin: 30px 10px 15px;
     }
     .footernewp{
-        font-size:11px;
+        font-size:10px;
     }
 
     .user-footer__content {
@@ -74,7 +74,7 @@
     .user-footer__tagline {
         margin-top: 2px;
         color: #71839a;
-        font-size: 9px;
+        font-size: 8px;
         font-weight: 700;
         letter-spacing: 2px;
     }
