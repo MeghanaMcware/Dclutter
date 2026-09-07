@@ -11,7 +11,7 @@
 }
 
 .request-ui {
-    max-width: 1080px;
+    max-width: auto;
     margin: 0 auto;
     padding: 30px 20px 50px;
     color: var(--ink);

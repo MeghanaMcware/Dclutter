@@ -771,7 +771,10 @@ textarea.is-invalid ~ .invalid-feedback,
 
                     <!-- Dynamic Subcategory Section -->
                     <div id="subcategory-section" style="display: none; margin-top: 20px; border-top: 1px solid #dcebe0; padding-top: 16px;">
-                        <h3 style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px;">Select Subcategory</h3>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+                            <h3 style="font-size: 16px; font-weight: 700; color: var(--ink); margin: 0;">Select Subcategory</h3>
+                            <span class="category-count" id="selected-subcategory-count">0 selected</span>
+                        </div>
                         <div id="subcategory-container" style="display: flex; flex-direction: column; gap: 16px;">
                             <!-- Subcategories will be injected here via JS -->
                         </div>
@@ -801,7 +804,7 @@ textarea.is-invalid ~ .invalid-feedback,
                     <!-- Applicant Name -->
                     <div>
                         <label>Applicant Full Name <span class="req">*</span></label>
-                        <input type="text" id="applicantNameInput" name="applicant_name" placeholder="Enter Full Name" required oninput="validateSingleField(this)">
+                        <input type="text" id="applicantNameInput"  oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').replace(/\s{2,}/g, ' ')" name="applicant_name" placeholder="Enter Full Name" required oninput="validateSingleField(this)">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter full applicant name.</div>
                     </div>
 
@@ -909,7 +912,7 @@ textarea.is-invalid ~ .invalid-feedback,
                     <div class="wide">
                         <label>Upload Waste Images <span class="req">*</span></label>
                         <div class="custom-file-upload">
-                            <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
+                            <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" capture="environment" multiple style="display:none;" onchange="handleImageSelection(event)">
                             <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
                                 <div class="file-upload-btn">Choose Files</div>
                                 <div class="file-upload-text" id="fileUploadText">No files selected</div>
@@ -1025,7 +1028,7 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 mt-4">
+                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
                     <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(2)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
@@ -1099,12 +1102,17 @@ All Bulky Waste shall be dismantled & should be kept in the ground floor for the
     <input
         type="checkbox"
         id="agree"
-        onchange="document.getElementById('submitBtn').disabled = !this.checked"
+        name="agreement"
+        required
+        onchange="document.getElementById('agreement-error').style.display = this.checked ? 'none' : 'block'"
     >
 
     <label for="agree">
         I agree to dismantel the bulk waste and placed for pickup at Ground Floor.
     </label>
+</div>
+<div id="agreement-error" class="invalid-feedback" role="alert">
+    Please accept the agreement before submitting your request.
 </div>
 
 
@@ -1235,10 +1243,12 @@ function renderSubcategories() {
     const checked = Array.from(document.querySelectorAll('input[name="pickup_items[]"]:checked')).map(cb => cb.value);
     const container = document.getElementById('subcategory-container');
     const section = document.getElementById('subcategory-section');
+    const selectedCount = document.getElementById('selected-subcategory-count');
     
     container.innerHTML = '';
     
     if (checked.length === 0) {
+        if (selectedCount) selectedCount.textContent = '0 selected';
         section.style.display = 'none';
         return;
     }
@@ -1285,6 +1295,8 @@ function renderSubcategories() {
                     } else {
                         label.classList.remove('selected');
                     }
+
+                    updateSubcategoryCount();
                 };
                 
                 const iconSpan = document.createElement('span');
@@ -1342,6 +1354,17 @@ function onCategoryItemChange(cb) {
                 section.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }, 50);
+    }
+
+    updateSubcategoryCount();
+}
+
+function updateSubcategoryCount() {
+    const selectedCount = document.getElementById('selected-subcategory-count');
+    const checkedSubcategories = document.querySelectorAll('input[name="pickup_subitems[]"]:checked');
+
+    if (selectedCount) {
+        selectedCount.textContent = `${checkedSubcategories.length} selected`;
     }
 }
 
@@ -1440,6 +1463,14 @@ function goToStep(stepNum) {
         }
     }
 
+    const stepLoaderMessage = stepNum > currentStep
+        ? 'Loading next step...'
+        : 'Loading previous step...';
+
+    if (typeof showLoader === 'function') {
+        showLoader(stepLoaderMessage);
+    }
+
     currentStep = stepNum;
 
     for (let i = 1; i <= 4; i++) {
@@ -1464,6 +1495,10 @@ function goToStep(stepNum) {
     }
 
     window.scrollTo({ top: 100, behavior: 'smooth' });
+
+    if (typeof hideLoader === 'function') {
+        window.setTimeout(hideLoader, 350);
+    }
 }
 
 function validateStep(step) {
@@ -1497,6 +1532,7 @@ function validateStep(step) {
         const applicantName = document.getElementById('applicantNameInput');
         const address = document.getElementById('addressInput');
         const houseNo = document.getElementById('houseNoInput');
+        const floorNo = document.getElementById('floorNoInput');
         const landmark = document.getElementById('landmarkInput');
         const wardDisplay = document.getElementById('wardDisplayInput');
         const wardId = document.getElementById('wardIdInput');
@@ -1515,7 +1551,7 @@ function validateStep(step) {
             if (imageError) imageError.style.display = 'none';
         }
 
-        [applicantName, address, houseNo, landmark, wardDisplay, pincode, mobile].forEach(el => {
+        [applicantName, address, houseNo, floorNo, landmark, wardDisplay, pincode, mobile].forEach(el => {
             if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                 if (el) {
                     el.classList.remove('is-valid');
@@ -1547,13 +1583,13 @@ function validateStep(step) {
     }
 
     if (step === 4) {
-        const termsCb = document.getElementById('termsAccepted');
-        const termsErr = document.getElementById('terms-error');
-        if (termsCb && !termsCb.checked) {
-            if (termsErr) termsErr.style.display = 'block';
+        const agreementCb = document.getElementById('agree');
+        const agreementError = document.getElementById('agreement-error');
+        if (!agreementCb || !agreementCb.checked) {
+            if (agreementError) agreementError.style.display = 'block';
             return false;
         } else {
-            if (termsErr) termsErr.style.display = 'none';
+            if (agreementError) agreementError.style.display = 'none';
         }
         return true;
     }
@@ -1803,7 +1839,11 @@ window.fetchCurrentLocation = function(options = {}) {
 };
 
 function handleFormSubmit(event) {
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
+    const form = event.currentTarget;
+    const isValid = validateStep(1) && validateStep(2) && validateStep(3) && validateStep(4);
+    form.classList.toggle('was-validated', !isValid);
+
+    if (!isValid) {
         event.preventDefault();
         return;
     }
