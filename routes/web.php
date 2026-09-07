@@ -143,6 +143,17 @@ Route::prefix('user')->name('user.')->group(function () {
     Route::post('/otp/send', [UserPwaAuthController::class, 'sendOtp'])->name('otp.send');
     Route::post('/otp/verify', [UserPwaAuthController::class, 'verifyOtp'])->name('otp.verify');
 
+    // Ward lookup & OTP aliases (accessible publicly and within PWA)
+    Route::get('/ward-lookup', [UserPwaRequestController::class, 'lookupWard'])->name('ward_lookup');
+    Route::post('/send_otp', [UserPwaAuthController::class, 'sendOtp'])->name('send_otp');
+    Route::post('/verify_otp', [UserPwaAuthController::class, 'verifyOtp'])->name('verify_otp');
+
+    // Public PWA Request Submission & Tracking (OTP-verified)
+    Route::get('/report-request', [UserPwaRequestController::class, 'report'])->name('report');
+    Route::post('/report-request', [UserPwaRequestController::class, 'store'])->name('report.store');
+    Route::get('/track-request', [UserPwaRequestController::class, 'track'])->name('track');
+    Route::get('/request-details/{id?}', [UserPwaRequestController::class, 'show'])->name('details');
+
     // Authenticated User Routes (Protected by auth middleware)
     Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/logout', [UserPwaAuthController::class, 'logout'])->name('logout');
@@ -156,15 +167,6 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/requests', [UserPwaRequestController::class, 'store'])->name('requests.store');
         Route::get('/requests/{id}', [UserPwaRequestController::class, 'show'])->name('requests.show');
         Route::get('/requests/{id}/edit', [UserPwaRequestController::class, 'edit'])->name('requests.edit');
-
-        // PWA URL Aliases (backward-compatible with existing navigation links)
-        Route::get('/report-request', [UserPwaRequestController::class, 'report'])->name('report');
-        Route::post('/report-request', [UserPwaRequestController::class, 'store'])->name('report.store');
-        Route::get('/ward-lookup', [UserPwaRequestController::class, 'lookupWard'])->name('ward_lookup');
-        Route::post('/send-otp', [UserPwaRequestController::class, 'sendOtp'])->name('send_otp');
-        Route::post('/verify-otp', [UserPwaRequestController::class, 'verifyOtp'])->name('verify_otp');
-        Route::get('/track-request', [UserPwaRequestController::class, 'track'])->name('track');
-        Route::get('/request-details/{id?}', [UserPwaRequestController::class, 'show'])->name('details');
         Route::get('/request-edit/{id?}', [UserPwaRequestController::class, 'edit'])->name('edit');
 
         // Profile Routes

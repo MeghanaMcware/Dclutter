@@ -192,52 +192,74 @@ class UserPwaRequestController extends Controller
         // Generate unique request tracking number
         $requestNumber = WasteRequest::generateRequestNumber();
 
-        // Create waste request
-        $wasteRequest = WasteRequest::create([
-            'request_number' => $requestNumber,
-            'source' => 'userpwa',
-            'user_id' => Auth::id(),
-            'applicant_name' => $request->input('applicant_name') ?: (Auth::user()?->name ?: 'User'),
-            'mobile_number' => $request->input('mobile_number') ?: Auth::user()?->mobile_number,
-            'category_ids' => $request->input('pickup_items'),
-            'subcategory_ids' => $request->input('pickup_subitems', []),
-            'waste_images' => $uploadedImagePaths,
-            'house_no' => $request->input('house_no'),
-            'floor_no' => $request->input('floor_no'),
-            'address' => $request->input('address'),
-            'landmark' => $request->input('landmark'),
-            'pincode' => $request->input('pincode'),
-            'latitude' => $request->input('latitude') ?: 12.9716,
-            'longitude' => $request->input('longitude') ?: 77.5946,
-            'corporation_id' => $corporationId,
-            'constituency_id' => $constituencyId,
-            'ward_id' => $wardId,
-            'preferred_pickup_date' => $request->input('preferred_pickup_date'),
-            'terms_accepted' => 1,
-            'status' => 'pending',
-        ]);
-
-        // Trigger WhatsApp Notification
         try {
-            $this->whatsappService->sendRegistrationConfirmation(
-                $wasteRequest->mobile_number,
-                $wasteRequest->applicant_name,
-                $wasteRequest->request_number
-            );
+            // Find or associate user by mobile if not logged in
+            $userId = Auth::id();
+            if (!$userId && $request->filled('mobile_number')) {
+                $user = \App\Models\User::where('mobile_number', $request->input('mobile_number'))->first();
+                if ($user) {
+                    $userId = $user->id;
+                }
+            }
+
+            // Create waste request
+            $wasteRequestData = [
+                'request_number' => $requestNumber,
+                'source' => 'userpwa',
+                'user_id' => $userId,
+                'applicant_name' => $request->input('applicant_name') ?: (Auth::user()?->name ?: 'User'),
+                'mobile_number' => $request->input('mobile_number') ?: Auth::user()?->mobile_number,
+                'category_ids' => $request->input('pickup_items'),
+                'subcategory_ids' => $request->input('pickup_subitems', []),
+                'waste_images' => $uploadedImagePaths,
+                'house_no' => $request->input('house_no'),
+                'floor_no' => $request->input('floor_no') ?: $request->input('floor'),
+                'address' => $request->input('address'),
+                'landmark' => $request->input('landmark'),
+                'pincode' => $request->input('pincode'),
+                'latitude' => $request->input('latitude') ?: 12.9716,
+                'longitude' => $request->input('longitude') ?: 77.5946,
+                'corporation_id' => $corporationId,
+                'constituency_id' => $constituencyId,
+                'ward_id' => $wardId,
+                'preferred_pickup_date' => $request->input('preferred_pickup_date'),
+                'terms_accepted' => 1,
+                'status' => 'pending',
+            ];
+
+            $wasteRequest = WasteRequest::create($wasteRequestData);
+
+            // Trigger WhatsApp Notification
+            try {
+                $this->whatsappService->sendRegistrationConfirmation(
+                    $wasteRequest->mobile_number,
+                    $wasteRequest->applicant_name,
+                    $wasteRequest->request_number
+                );
+            } catch (\Throwable $e) {
+                Log::error('WhatsApp Confirmation Exception: ' . $e->getMessage());
+            }
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Your D-Clutter pickup request has been received successfully. You can now track its status.',
+                    'request_number' => $wasteRequest->request_number,
+                    'redirect_url' => route('user.track'),
+                ]);
+            }
+
+            return redirect()->route('user.track')->with('success', 'Pickup request #' . $wasteRequest->request_number . ' submitted successfully!');
         } catch (\Throwable $e) {
-            Log::error('WhatsApp Confirmation Exception: ' . $e->getMessage());
+            Log::error('UserPwaRequest store error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to save request: ' . $e->getMessage(),
+                ], 500);
+            }
+            return back()->withInput()->with('error', 'Failed to save request: ' . $e->getMessage());
         }
-
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Your D-Clutter pickup request has been received successfully. You can now track its status.',
-                'request_number' => $wasteRequest->request_number,
-                'redirect_url' => route('user.track'),
-            ]);
-        }
-
-        return redirect()->route('user.track')->with('success', 'Pickup request #' . $wasteRequest->request_number . ' submitted successfully!');
     }
 
     /**

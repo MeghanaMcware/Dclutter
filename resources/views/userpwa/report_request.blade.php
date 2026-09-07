@@ -2236,11 +2236,21 @@ function handleFormSubmit(event) {
         },
         body: formData
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(async (res) => {
+        let data;
+        try {
+            data = await res.json();
+        } catch (e) {
+            data = { success: false, message: 'Server returned HTTP ' + res.status };
+        }
+        return { status: res.status, ok: res.ok, data: data };
+    })
+    .then(result => {
         hideLoader();
         if (submitBtn) setButtonLoading(submitBtn, false);
-        if (data.success) {
+        const data = result.data;
+
+        if (result.ok && data.success) {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'success',
@@ -2257,7 +2267,7 @@ function handleFormSubmit(event) {
                 window.location.href = data.redirect_url || "{{ route('user.track') }}";
             }
         } else {
-            const errorMsg = data.message || (data.errors ? Object.values(data.errors).flat().join('\n') : 'An error occurred while submitting.');
+            const errorMsg = data.message || (data.errors ? Object.values(data.errors).flat().join('\n') : ('Server error (' + result.status + ')'));
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'error',
@@ -2274,7 +2284,7 @@ function handleFormSubmit(event) {
         hideLoader();
         if (submitBtn) setButtonLoading(submitBtn, false);
         console.error('Submit error:', err);
-        alert('An unexpected network or server error occurred. Please try again.');
+        alert('Network or server error: ' + (err.message || 'Please check your connection and try again.'));
     });
 }
 </script>

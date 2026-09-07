@@ -90,18 +90,12 @@ class UserPwaAuthController extends Controller
                 'password' => bcrypt(Str::random(16)),
             ]);
 
-            // Assign role 'user' & 'citizen'
-            $userRole = Role::firstOrCreate(['name' => 'user']);
-            $user->assignRole($userRole);
-
-            $citizenRole = Role::firstOrCreate(['name' => 'citizen']);
+            // Assign role 'citizen'
+            $citizenRole = Role::firstOrCreate(['name' => 'citizen', 'guard_name' => 'web']);
             $user->assignRole($citizenRole);
         } else {
-            if (!$user->hasRole('user')) {
-                $user->assignRole(Role::firstOrCreate(['name' => 'user']));
-            }
             if (!$user->hasRole('citizen')) {
-                $user->assignRole(Role::firstOrCreate(['name' => 'citizen']));
+                $user->assignRole(Role::firstOrCreate(['name' => 'citizen', 'guard_name' => 'web']));
             }
         }
 
