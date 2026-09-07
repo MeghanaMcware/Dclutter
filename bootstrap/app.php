@@ -12,7 +12,26 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectTo(
+            guests: function (Request $request) {
+                if ($request->is('vehicle*')) {
+                    return route('vehicle.login');
+                }
+                if ($request->is('admin*')) {
+                    return route('admin.login');
+                }
+                return route('user.login');
+            },
+            users: function (Request $request) {
+                if ($request->is('vehicle*')) {
+                    return route('vehicle.dashboard');
+                }
+                if ($request->is('admin*')) {
+                    return route('admin.dashboard');
+                }
+                return route('user.dashboard');
+            }
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

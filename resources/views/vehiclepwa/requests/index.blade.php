@@ -608,7 +608,7 @@
                 mobile: '{{ $req->mobile_number }}',
                 date: '{{ $req->created_at->format("d-M-Y") }}',
                 houseNo: '{{ addslashes($req->house_no) }}',
-                floor: '{{ addslashes($req->floor ?? "") }}',
+                floor: '{{ addslashes($req->floor_no ?? $req->floor ?? "") }}',
                 ward: '{{ $req->ward?->name ?? "Ward" }}',
                 constituency: '{{ $req->constituency?->name ?? "Constituency" }}',
                 pincode: '{{ $req->pincode }}',

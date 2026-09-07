@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Citizen;
+namespace App\Http\Controllers\UserPwa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
@@ -9,9 +9,10 @@ use App\Models\Ward;
 use App\Services\OtpService;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class CitizenRequestController extends Controller
+class UserPwaRequestController extends Controller
 {
     protected OtpService $otpService;
     protected WhatsAppService $whatsappService;
@@ -23,9 +24,9 @@ class CitizenRequestController extends Controller
     }
 
     /**
-     * Display the report waste request wizard form.
+     * Show Report Request Form for User PWA
      */
-    public function create()
+    public function report()
     {
         $categories = Category::with(['subcategories' => function ($q) {
             $q->where('status', true);
@@ -33,11 +34,38 @@ class CitizenRequestController extends Controller
 
         $wards = Ward::with('constituency.corporation')->orderBy('name')->get();
 
-        return view('frontend.report_request', compact('categories', 'wards'));
+        return view('userpwa.report_request', compact('categories', 'wards'));
     }
 
     /**
-     * Send WhatsApp OTP for Citizen Report Request
+     * Lookup Ward, Constituency, and Corporation by coordinates
+     */
+    public function lookupWard(Request $request)
+    {
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+
+        $ward = null;
+        if ($lat && $lng) {
+            $ward = Ward::findWardByLatLng((float) $lat, (float) $lng);
+        }
+
+        if (!$ward) {
+            $ward = Ward::with('constituency.corporation')->first();
+        }
+
+        return response()->json([
+            'success' => true,
+            'ward_id' => $ward?->id,
+            'ward_number' => $ward?->ward_number,
+            'ward_name' => $ward ? ($ward->ward_number ? "Ward {$ward->ward_number} - {$ward->name}" : $ward->name) : 'Kempegowda Ward',
+            'constituency' => $ward?->constituency?->name ?? 'Yelahanka',
+            'corporation' => $ward?->constituency?->corporation?->name ?? 'BBMP',
+        ]);
+    }
+
+    /**
+     * Send WhatsApp OTP for Report Request Verification
      */
     public function sendOtp(Request $request)
     {
@@ -46,7 +74,7 @@ class CitizenRequestController extends Controller
         ]);
 
         $mobile = $request->input('mobile_number');
-        $name = $request->input('applicant_name') ?: 'Citizen';
+        $name = Auth::user()?->name ?: 'User';
 
         try {
             $result = $this->otpService->sendOtp(
@@ -69,7 +97,7 @@ class CitizenRequestController extends Controller
                 'message' => 'A 6-digit verification code has been sent to your WhatsApp number.',
             ]);
         } catch (\Exception $e) {
-            Log::error('Citizen Send OTP Error: ' . $e->getMessage());
+            Log::error('UserPWA Send OTP Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage() ?: 'Error sending OTP. Please try again.',
@@ -78,7 +106,7 @@ class CitizenRequestController extends Controller
     }
 
     /**
-     * Verify WhatsApp OTP for Citizen Report Request
+     * Verify WhatsApp OTP for Report Request
      */
     public function verifyOtp(Request $request)
     {
@@ -99,7 +127,8 @@ class CitizenRequestController extends Controller
             ], 422);
         }
 
-        session()->put('verified_citizen_mobile', $mobile);
+        // Store OTP verified status in session for this mobile
+        session()->put('verified_report_mobile', $mobile);
 
         return response()->json([
             'success' => true,
@@ -108,7 +137,7 @@ class CitizenRequestController extends Controller
     }
 
     /**
-     * Store a newly created waste request in the database.
+     * Store a newly submitted waste pickup request for User PWA
      */
     public function store(Request $request)
     {
@@ -116,9 +145,8 @@ class CitizenRequestController extends Controller
             'pickup_items' => 'required|array|min:1',
             'pickup_subitems' => 'nullable|array',
             'applicant_name' => 'nullable|string|max:255',
-            'mobile_number' => 'required|string|regex:/^[0-9]{10}$/',
+            'mobile_number' => 'required|string',
             'house_no' => 'required|string|max:255',
-            'floor' => 'nullable|string|max:100',
             'floor_no' => 'nullable|string|max:100',
             'address' => 'required|string',
             'landmark' => 'nullable|string|max:255',
@@ -127,7 +155,6 @@ class CitizenRequestController extends Controller
             'longitude' => 'nullable|numeric',
             'ward_id' => 'nullable|exists:wards,id',
             'preferred_pickup_date' => 'required|date',
-            'terms_accepted' => 'nullable',
             'waste_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
         ]);
 
@@ -168,139 +195,116 @@ class CitizenRequestController extends Controller
         // Create waste request
         $wasteRequest = WasteRequest::create([
             'request_number' => $requestNumber,
-            'source' => 'citizen',
-            'user_id' => auth()->check() ? auth()->id() : null,
-            'applicant_name' => $request->input('applicant_name') ?: 'Citizen User',
-            'mobile_number' => $request->input('mobile_number'),
+            'source' => 'userpwa',
+            'user_id' => Auth::id(),
+            'applicant_name' => $request->input('applicant_name') ?: (Auth::user()?->name ?: 'User'),
+            'mobile_number' => $request->input('mobile_number') ?: Auth::user()?->mobile_number,
             'category_ids' => $request->input('pickup_items'),
             'subcategory_ids' => $request->input('pickup_subitems', []),
             'waste_images' => $uploadedImagePaths,
             'house_no' => $request->input('house_no'),
-            'floor_no' => $request->input('floor_no') ?? $request->input('floor'),
+            'floor_no' => $request->input('floor_no'),
             'address' => $request->input('address'),
             'landmark' => $request->input('landmark'),
             'pincode' => $request->input('pincode'),
-            'latitude' => $request->input('latitude'),
-            'longitude' => $request->input('longitude'),
+            'latitude' => $request->input('latitude') ?: 12.9716,
+            'longitude' => $request->input('longitude') ?: 77.5946,
             'corporation_id' => $corporationId,
             'constituency_id' => $constituencyId,
             'ward_id' => $wardId,
             'preferred_pickup_date' => $request->input('preferred_pickup_date'),
-            'terms_accepted' => ($request->has('terms_accepted') || $request->input('terms_accepted') == 1 || $request->input('terms_accepted') === 'on') ? 1 : 0,
+            'terms_accepted' => 1,
             'status' => 'pending',
         ]);
 
         // Trigger WhatsApp Notification
         try {
-            app(\App\Services\WhatsAppService::class)->sendRegistrationConfirmation(
+            $this->whatsappService->sendRegistrationConfirmation(
                 $wasteRequest->mobile_number,
                 $wasteRequest->applicant_name,
                 $wasteRequest->request_number
             );
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('WhatsApp Registration Notification Exception: ' . $e->getMessage());
+            Log::error('WhatsApp Confirmation Exception: ' . $e->getMessage());
         }
 
-        return redirect()->route('citizen.success', ['id' => $wasteRequest->request_number]);
-    }
-
-    /**
-     * Display submission success summary page.
-     */
-    public function success(Request $request)
-    {
-        $reqId = $request->query('id');
-        $requestRecord = null;
-
-        if ($reqId) {
-            $requestRecord = WasteRequest::with(['ward', 'constituency', 'corporation'])
-                ->where('request_number', $reqId)
-                ->first();
-        }
-
-        return view('frontend.request_submitted', compact('requestRecord', 'reqId'));
-    }
-
-    /**
-     * Track a waste request dynamically by request number or mobile number.
-     */
-    public function trackRequest(Request $request)
-    {
-        $searchId = $request->query('id') ?? $request->query('query');
-        $wasteRequest = null;
-
-        if ($searchId) {
-            $cleanSearch = trim($searchId);
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->where('request_number', $cleanSearch)
-                ->orWhere('request_number', '#' . $cleanSearch)
-                ->orWhere('id', $cleanSearch)
-                ->orWhere('mobile_number', $cleanSearch)
-                ->latest()
-                ->first();
-        } else {
-            // Default: Load latest request if available
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->latest()
-                ->first();
-        }
-
-        return view('frontend.track.track_request', compact('wasteRequest', 'searchId'));
-    }
-
-    /**
-     * Display full request details page dynamically.
-     */
-    public function requestDetails(Request $request)
-    {
-        $reqId = $request->query('id');
-        $wasteRequest = null;
-
-        if ($reqId) {
-            $cleanId = trim($reqId);
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->where('request_number', $cleanId)
-                ->orWhere('request_number', '#' . $cleanId)
-                ->orWhere('id', $cleanId)
-                ->first();
-        }
-
-        if (!$wasteRequest) {
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->latest()
-                ->first();
-        }
-
-        return view('frontend.track.show', compact('wasteRequest', 'reqId'));
-    }
-
-    /**
-     * Spatial lookup helper endpoint for map clicks.
-     */
-    public function lookupWardByCoords(Request $request)
-    {
-        $lat = $request->query('lat');
-        $lng = $request->query('lng');
-
-        if (!$lat || !$lng) {
-            return response()->json(['success' => false, 'message' => 'Coordinates missing']);
-        }
-
-        $ward = Ward::findWardByLatLng($lat, $lng);
-
-        if ($ward) {
+        if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'ward' => [
-                    'id' => $ward->id,
-                    'name' => $ward->name,
-                    'ward_number' => $ward->ward_number,
-                    'constituency_name' => $ward->constituency?->name,
-                    'corporation_name' => $ward->constituency?->corporation?->name,
-                ]
+                'message' => 'Your D-Clutter pickup request has been received successfully. You can now track its status.',
+                'request_number' => $wasteRequest->request_number,
+                'redirect_url' => route('user.track'),
             ]);
         }
 
-        return response()->json(['success' => false, 'message' => 'Ward not found for coordinates']);
+        return redirect()->route('user.track')->with('success', 'Pickup request #' . $wasteRequest->request_number . ' submitted successfully!');
+    }
+
+    /**
+     * Show Track Requests List for User PWA
+     */
+    public function track(Request $request)
+    {
+        $user = Auth::user();
+        $mobile = $user ? $user->mobile_number : null;
+        $userId = $user ? $user->id : null;
+
+        $query = WasteRequest::with(['ward.constituency.corporation', 'vehicle']);
+
+        if ($mobile || $userId) {
+            $query->where(function($q) use ($mobile, $userId) {
+                if ($mobile) {
+                    $q->where('mobile_number', $mobile);
+                }
+                if ($userId) {
+                    $q->orWhere('user_id', $userId);
+                }
+            });
+        }
+
+        if ($request->filled('query') || $request->filled('id') || $request->filled('search')) {
+            $term = trim($request->input('query') ?: ($request->input('id') ?: $request->input('search')));
+            $query->where(function($q) use ($term) {
+                $q->where('request_number', 'like', "%{$term}%")
+                  ->orWhere('applicant_name', 'like', "%{$term}%")
+                  ->orWhere('mobile_number', 'like', "%{$term}%")
+                  ->orWhere('address', 'like', "%{$term}%");
+            });
+        }
+
+        $requests = $query->latest()->get();
+
+        return view('userpwa.track.index', compact('requests'));
+    }
+
+    /**
+     * Show Request Details for User PWA
+     */
+    public function show($id = null)
+    {
+        $id = $id ?: request('id');
+        if (!$id) {
+            return redirect()->route('user.track');
+        }
+
+        $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle', 'dump'])
+            ->where(function($q) use ($id) {
+                $q->where('id', $id)->orWhere('request_number', $id);
+            })->firstOrFail();
+
+        return view('userpwa.track.show', compact('wasteRequest'));
+    }
+
+    /**
+     * Edit Request Form for User PWA
+     */
+    public function edit($id = null)
+    {
+        $id = $id ?: request('id');
+        $wasteRequest = WasteRequest::where(function($q) use ($id) {
+            $q->where('id', $id)->orWhere('request_number', $id);
+        })->firstOrFail();
+
+        return view('userpwa.track.edit', compact('wasteRequest'));
     }
 }

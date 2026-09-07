@@ -27,7 +27,7 @@
         <a href="{{ route('user.track') }}" class="{{ request()->routeIs('user.track*') ? 'active' : '' }}">
             <i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Track</span>
         </a>
-        <a href="{{ route('user.login') }}">
+        <a href="{{ route('user.logout') }}">
             <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span>
         </a>
         <button type="button" class="user-menu__close" data-menu-close>

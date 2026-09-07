@@ -459,20 +459,19 @@
             <div id="otpSection">
                 <div class="welcome-header">
                     <h2>Verify <strong>OTP</strong></h2>
-                    <p>Enter the 4-digit code sent to your number.</p>
+                    <p>Enter the 6-digit code sent to your WhatsApp number.</p>
                 </div>
                 <div class="form-panel">
-                    <form action="{{ route('user.dashboard') }}" method="GET" class="needs-validation" novalidate>
+                    <form id="otpForm" class="needs-validation" novalidate>
                         <label class="field-label" for="otpCode">Verification code</label>
-                        <div class="phone-field"><input id="otpCode" type="text" placeholder="Enter 4-digit OTP"
-                                pattern="^[0-9]{4}$" minlength="4" maxlength="4" required
+                        <div class="phone-field"><input id="otpCode" type="text" placeholder="Enter 6-digit OTP"
+                                pattern="^[0-9]{6}$" minlength="6" maxlength="6" required
                                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
-                        <div class="invalid-feedback">Please enter a valid 4-digit OTP.</div>
+                        <div id="otpError" class="invalid-feedback text-danger font-11 mt-1" style="display:none;">Please enter a valid 6-digit OTP.</div>
                         <button type="submit" class="btn btn-primary" data-loading-label="Verifying..."><i class="fa-solid fa-right-to-bracket"></i> Verify &amp; Login</button>
                         <p class="mt-3 text-primary text-center" style="font-size: 14px; cursor: pointer;" onclick="showPhone()">
-                            Change
-                            Mobile Number</p>
+                            Change Mobile Number</p>
                     </form>
                 </div>
             </div>
@@ -487,13 +486,9 @@
         </div>
     </div>
 
-
-
     <script>
     (function() {
         'use strict';
-
-        const forms = document.querySelectorAll('.needs-validation');
 
         function setButtonLoading(button, loading) {
             if (!button) return;
@@ -501,7 +496,7 @@
             if (loading) {
                 button.dataset.originalContent = button.innerHTML;
                 button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ' +
-                    button.dataset.loadingLabel;
+                    (button.dataset.loadingLabel || 'Loading...');
                 button.classList.add('btn-loading');
                 button.setAttribute('aria-disabled', 'true');
             } else {
@@ -511,39 +506,107 @@
             }
         }
 
-        forms.forEach(function(form) {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                form.classList.add('was-validated');
+        const phoneForm = document.getElementById('phoneForm');
+        if (phoneForm) {
+            phoneForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const mobileInput = document.getElementById('mobileNumber');
+                const submitBtn = phoneForm.querySelector('button[type="submit"]');
 
-                if (!form.checkValidity()) return;
-
-                const submitButton = form.querySelector('button[type="submit"]');
-
-                if (form.id === 'phoneForm') {
-                    setButtonLoading(submitButton, true);
-                    window.setTimeout(function() {
-                        setButtonLoading(submitButton, false);
-                        document.getElementById('phoneSection').style.display = 'none';
-                        document.getElementById('otpSection').style.display = 'block';
-                        document.getElementById('otpCode').focus();
-                    }, 450);
+                if (!mobileInput || !/^[0-9]{10}$/.test(mobileInput.value)) {
+                    phoneForm.classList.add('was-validated');
                     return;
                 }
 
-                setButtonLoading(submitButton, true);
+                setButtonLoading(submitBtn, true);
+
+                fetch("{{ route('user.send-otp') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        mobile_number: mobileInput.value
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    setButtonLoading(submitBtn, false);
+                    if (data.success) {
+                        document.getElementById('phoneSection').style.display = 'none';
+                        document.getElementById('otpSection').style.display = 'block';
+                        document.getElementById('otpCode').focus();
+                    } else {
+                        alert(data.message || 'Failed to send OTP.');
+                    }
+                })
+                .catch(err => {
+                    setButtonLoading(submitBtn, false);
+                    alert('Server error occurred. Please try again.');
+                });
+            });
+        }
+
+        const otpForm = document.getElementById('otpForm');
+        if (otpForm) {
+            otpForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const mobileInput = document.getElementById('mobileNumber');
+                const otpInput = document.getElementById('otpCode');
+                const submitBtn = otpForm.querySelector('button[type="submit"]');
+                const otpError = document.getElementById('otpError');
+
+                if (!otpInput || !/^[0-9]{6}$/.test(otpInput.value)) {
+                    otpForm.classList.add('was-validated');
+                    if (otpError) {
+                        otpError.innerText = 'Please enter a valid 6-digit OTP.';
+                        otpError.style.display = 'block';
+                    }
+                    return;
+                }
+
+                setButtonLoading(submitBtn, true);
                 document.getElementById('pageLoader').classList.add('show');
-                document.getElementById('pageLoader').setAttribute('aria-hidden', 'false');
-                window.setTimeout(function() {
-                    form.submit();
-                }, 350);
-            }, false);
-        });
+
+                fetch("{{ route('user.verify-otp') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        mobile_number: mobileInput.value,
+                        otp: otpInput.value
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        setButtonLoading(submitBtn, false);
+                        document.getElementById('pageLoader').classList.remove('show');
+                        if (otpError) {
+                            otpError.innerText = data.message || 'Invalid OTP code.';
+                            otpError.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(err => {
+                    setButtonLoading(submitBtn, false);
+                    document.getElementById('pageLoader').classList.remove('show');
+                    if (otpError) {
+                        otpError.innerText = 'Server error occurred during verification.';
+                        otpError.style.display = 'block';
+                    }
+                });
+            });
+        }
     })();
 
     function showOtp(e) {
-        e.preventDefault();
+        if (e) e.preventDefault();
     }
 
     function showPhone() {

@@ -24,6 +24,8 @@ Route::get('/', function () {
 
 Route::get('/report-request', [CitizenRequestController::class, 'create'])->name('citizen.report');
 Route::post('/report-request', [CitizenRequestController::class, 'store'])->name('citizen.report.store');
+Route::post('/citizen/send-otp', [CitizenRequestController::class, 'sendOtp'])->name('citizen.send_otp');
+Route::post('/citizen/verify-otp', [CitizenRequestController::class, 'verifyOtp'])->name('citizen.verify_otp');
 Route::get('/request-submitted', [CitizenRequestController::class, 'success'])->name('citizen.success');
 Route::get('/lookup-ward', [CitizenRequestController::class, 'lookupWardByCoords'])->name('citizen.lookup-ward');
 Route::get('/track-request', [CitizenRequestController::class, 'trackRequest'])->name('citizen.track');
@@ -124,36 +126,52 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
 | DCLUTTER User PWA Routes
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\UserPwa\UserPwaAuthController;
+use App\Http\Controllers\UserPwa\UserPwaDashboardController;
+use App\Http\Controllers\UserPwa\UserPwaRequestController;
+use App\Http\Controllers\UserPwa\UserPwaProfileController;
+
 Route::prefix('user')->name('user.')->group(function () {
     Route::get('/', function () {
-        return redirect()->route('user.login');
+        return auth()->check() ? redirect()->route('user.dashboard') : redirect()->route('user.login');
     });
     
-    // Auth Routes
-    Route::view('/login', 'userpwa.auth.login')->name('login');
+    // Guest / Public Authentication Routes
+    Route::get('/login', [UserPwaAuthController::class, 'showLogin'])->name('login');
+    Route::post('/send-otp', [UserPwaAuthController::class, 'sendOtp'])->name('send-otp');
+    Route::post('/verify-otp', [UserPwaAuthController::class, 'verifyOtp'])->name('verify-otp');
+    Route::post('/otp/send', [UserPwaAuthController::class, 'sendOtp'])->name('otp.send');
+    Route::post('/otp/verify', [UserPwaAuthController::class, 'verifyOtp'])->name('otp.verify');
 
-    // Dashboard & Features
-    Route::get('/dashboard', function () {
-        return view('userpwa.dashboard');
-    })->name('dashboard');
+    // Authenticated User Routes (Protected by auth middleware)
+    Route::middleware('auth')->group(function () {
+        Route::match(['get', 'post'], '/logout', [UserPwaAuthController::class, 'logout'])->name('logout');
 
-    Route::get('/report-request', function () {
-        return view('userpwa.report_request');
-    })->name('report');
+        // Dashboard
+        Route::get('/dashboard', [UserPwaDashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/track-request', function () {
-        return view('userpwa.track.index');
-    })->name('track');
+        // Standard Laravel Resource Routes for Requests
+        Route::get('/requests', [UserPwaRequestController::class, 'track'])->name('requests.index');
+        Route::get('/requests/create', [UserPwaRequestController::class, 'report'])->name('requests.create');
+        Route::post('/requests', [UserPwaRequestController::class, 'store'])->name('requests.store');
+        Route::get('/requests/{id}', [UserPwaRequestController::class, 'show'])->name('requests.show');
+        Route::get('/requests/{id}/edit', [UserPwaRequestController::class, 'edit'])->name('requests.edit');
 
-    Route::get('/request-details', function () {
-        return view('userpwa.track.show');
-    })->name('details');
+        // PWA URL Aliases (backward-compatible with existing navigation links)
+        Route::get('/report-request', [UserPwaRequestController::class, 'report'])->name('report');
+        Route::post('/report-request', [UserPwaRequestController::class, 'store'])->name('report.store');
+        Route::get('/ward-lookup', [UserPwaRequestController::class, 'lookupWard'])->name('ward_lookup');
+        Route::post('/send-otp', [UserPwaRequestController::class, 'sendOtp'])->name('send_otp');
+        Route::post('/verify-otp', [UserPwaRequestController::class, 'verifyOtp'])->name('verify_otp');
+        Route::get('/track-request', [UserPwaRequestController::class, 'track'])->name('track');
+        Route::get('/request-details/{id?}', [UserPwaRequestController::class, 'show'])->name('details');
+        Route::get('/request-edit/{id?}', [UserPwaRequestController::class, 'edit'])->name('edit');
 
-    Route::get('/request-edit', function () {
-        return view('userpwa.track.edit');
-    })->name('edit');
-
-    Route::get('/profile', function () {
-        return view('userpwa.profile');
-    })->name('profile');
+        // Profile Routes
+        Route::get('/profile', [UserPwaProfileController::class, 'index'])->name('profile');
+        Route::match(['get'], '/profile/index', [UserPwaProfileController::class, 'index'])->name('profile.index');
+        Route::match(['post', 'put', 'patch'], '/profile', [UserPwaProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/update', [UserPwaProfileController::class, 'update']);
+    });
 });
+

@@ -123,4 +123,71 @@ class WhatsAppService
             $reportParams
         );
     }
+
+    /**
+     * 6. Send 6-Digit WhatsApp OTP via campaign 'otp'
+     */
+    public function sendOtp(string $destination, string $otp, string $firstName = 'user'): bool
+    {
+        $cleanDestination = preg_replace('/[^0-9]/', '', $destination);
+        if (strlen($cleanDestination) === 10) {
+            $cleanDestination = '91' . $cleanDestination;
+        }
+
+        $otpString = (string) $otp;
+
+        $payload = [
+            'apiKey' => $this->apiKey,
+            'campaignName' => 'otp',
+            'destination' => $cleanDestination,
+            'userName' => $this->userName,
+            'templateParams' => [$otpString],
+            'source' => 'new-landing-page form',
+            'media' => (object) [],
+            'buttons' => [
+                [
+                    'type' => 'button',
+                    'sub_type' => 'url',
+                    'index' => 0,
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $otpString,
+                        ]
+                    ]
+                ]
+            ],
+            'carouselCards' => [],
+            'location' => (object) [],
+            'attributes' => (object) [],
+            'paramsFallbackValue' => [
+                'FirstName' => $otpString
+            ]
+        ];
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($this->apiUrl, $payload);
+
+            if ($response->successful()) {
+                Log::info("WhatsApp OTP sent successfully to {$cleanDestination}");
+                return true;
+            }
+
+            Log::error("WhatsApp OTP API Error: " . $response->body());
+            return false;
+        } catch (\Throwable $e) {
+            Log::error("WhatsApp OTP Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 7. Verify 6-Digit WhatsApp OTP via OtpService
+     */
+    public function verifyOtp(string $destination, string $otp): array
+    {
+        return app(\App\Services\OtpService::class)->verifyOtp($destination, $otp);
+    }
 }

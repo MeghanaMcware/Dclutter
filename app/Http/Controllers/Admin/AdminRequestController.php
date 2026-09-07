@@ -63,7 +63,7 @@ class AdminRequestController extends Controller
                         'id' => $req->id,
                         'request_number' => $req->request_number,
                         'category' => is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?? 'N/A'),
-                        'pickup_location' => $req->house_no . ($req->floor ? ' (Floor: ' . $req->floor . ')' : '') . ', ' . Str::limit($req->address, 30),
+                        'pickup_location' => $req->house_no . (($req->floor_no ?? $req->floor) ? ' (Floor: ' . ($req->floor_no ?? $req->floor) . ')' : '') . ', ' . Str::limit($req->address, 30),
                         'constituency' => $req->constituency?->name ?? 'N/A',
                         'applicant_name' => $req->applicant_name,
                         'mobile_number' => $req->mobile_number,

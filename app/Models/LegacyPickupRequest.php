@@ -17,7 +17,7 @@ class LegacyPickupRequest extends Model
         'applicant_name',
         'mobile_number',
         'address',
-        'floor',
+        'floor_no',
         'corporation_name',
         'division_name',
         'ward_name_no',
