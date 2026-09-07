@@ -180,7 +180,7 @@ $(document).ready(function() {
         const switchElem = $(this);
 
         $.ajax({
-            url: '/admin/vehicles/' + vehicleId + '/toggle-status',
+            url: "{{ url('/admin/vehicles') }}/" + vehicleId + '/toggle-status',
             type: 'PATCH',
             data: {
                 _token: '{{ csrf_token() }}'

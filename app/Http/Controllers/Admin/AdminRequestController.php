@@ -63,7 +63,7 @@ class AdminRequestController extends Controller
                         'id' => $req->id,
                         'request_number' => $req->request_number,
                         'category' => is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?? 'N/A'),
-                        'pickup_location' => $req->house_no . ', ' . Str::limit($req->address, 30),
+                        'pickup_location' => $req->house_no . ($req->floor ? ' (Floor: ' . $req->floor . ')' : '') . ', ' . Str::limit($req->address, 30),
                         'constituency' => $req->constituency?->name ?? 'N/A',
                         'applicant_name' => $req->applicant_name,
                         'mobile_number' => $req->mobile_number,
@@ -106,10 +106,14 @@ class AdminRequestController extends Controller
     {
         $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
+            'remarks' => 'nullable|string|max:1000',
         ]);
 
         $wasteRequest = WasteRequest::findOrFail($id);
         $wasteRequest->vehicle_id = $request->vehicle_id;
+        if ($request->filled('remarks')) {
+            $wasteRequest->remarks = $request->remarks;
+        }
         $wasteRequest->assigned_at = now();
         if ($wasteRequest->status === 'pending') {
             $wasteRequest->status = 'assigned';

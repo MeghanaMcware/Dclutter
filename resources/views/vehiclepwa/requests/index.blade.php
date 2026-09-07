@@ -602,12 +602,13 @@
                 beforePickupDone: {{ (!empty($req->before_pickup_images) || !empty($req->approx_weight_kg)) ? 'true' : 'false' }},
                 beforePhotos: {!! json_encode(array_map(function($img) { return Str::startsWith($img, 'http') ? $img : asset('storage/' . $img); }, $req->before_pickup_images ?? [])) !!},
                 afterPhotos: {!! json_encode(array_map(function($img) { return Str::startsWith($img, 'http') ? $img : asset('storage/' . $img); }, $req->picked_up_images ?? [])) !!},
-                category: '{{ is_array($req->category_ids) ? implode(", ", $req->category_ids) : ($req->category_ids ?? "N/A") }}',
-                subCategory: '{{ is_array($req->subcategory_ids) ? implode(", ", $req->subcategory_ids) : ($req->subcategory_ids ?? "N/A") }}',
+                category: {!! json_encode(is_array($req->category_ids) ? implode(", ", $req->category_ids) : ($req->category_ids ?? "N/A")) !!},
+                subCategory: {!! json_encode(is_array($req->subcategory_ids) ? implode(", ", array_map(function($s) { return Str::contains($s, ': ') ? explode(': ', $s)[1] : $s; }, $req->subcategory_ids)) : ($req->subcategory_ids ?? "N/A")) !!},
                 applicant: '{{ addslashes($req->applicant_name) }}',
                 mobile: '{{ $req->mobile_number }}',
                 date: '{{ $req->created_at->format("d-M-Y") }}',
                 houseNo: '{{ addslashes($req->house_no) }}',
+                floor: '{{ addslashes($req->floor ?? "") }}',
                 ward: '{{ $req->ward?->name ?? "Ward" }}',
                 constituency: '{{ $req->constituency?->name ?? "Constituency" }}',
                 pincode: '{{ $req->pincode }}',
@@ -715,7 +716,7 @@
             document.getElementById('modalApplicantName').innerText = item.applicant;
             document.getElementById('modalMobile').innerText = item.mobile;
             document.getElementById('modalMobileLink').href = 'tel:' + item.mobile;
-            document.getElementById('modalHouseNo').innerText = item.houseNo;
+            document.getElementById('modalHouseNo').innerText = item.houseNo + (item.floor ? ' (Floor: ' + item.floor + ')' : '');
             document.getElementById('modalAddress').innerText = item.location;
             document.getElementById('modalWard').innerText = item.ward;
             document.getElementById('modalConstituency').innerText = item.constituency;
@@ -792,11 +793,11 @@
                     pickupBtn.className = 'btn btn-secondary w-50 d-flex align-items-center justify-content-center py-2 disabled';
                 } else if (item.beforePickupDone) {
                     pickupBtnText.innerText = 'After Pickup';
-                    pickupBtn.href = '/vehicle/after-pickup/' + item.id;
+                    pickupBtn.href = "{{ url('/vehicle/after-pickup') }}/" + item.id;
                     pickupBtn.className = 'btn btn-primary w-50 d-flex align-items-center justify-content-center py-2';
                 } else {
                     pickupBtnText.innerText = 'Before Pickup';
-                    pickupBtn.href = '/vehicle/before-pickup/' + item.id;
+                    pickupBtn.href = "{{ url('/vehicle/before-pickup') }}/" + item.id;
                     pickupBtn.className = 'btn btn-success w-50 d-flex align-items-center justify-content-center py-2';
                 }
             }
@@ -891,7 +892,7 @@
         notAvailableSubmitBtn.disabled = true;
         notAvailableSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
-        fetch('/vehicle/not-available/' + item.id, {
+        fetch("{{ url('/vehicle/not-available') }}/" + item.id, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',

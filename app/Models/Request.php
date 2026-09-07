@@ -25,6 +25,7 @@ class Request extends Model
         'before_pickup_images',
         'approx_weight_kg',
         'house_no',
+        'floor',
         'address',
         'landmark',
         'pincode',
@@ -46,9 +47,11 @@ class Request extends Model
         'remarks',
         'not_available_reason',
         'not_available_at',
+        'terms_accepted',
     ];
 
     protected $casts = [
+        'terms_accepted' => 'boolean',
         'category_ids' => 'array',
         'subcategory_ids' => 'array',
         'waste_images' => 'array',

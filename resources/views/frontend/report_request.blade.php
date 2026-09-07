@@ -769,6 +769,12 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter house number.</div>
                     </div>
 
+                    <!-- Floor / Level -->
+                    <div>
+                        <label>Floor / Level <span class="text-muted" style="font-weight:400;">(Optional)</span></label>
+                        <input type="text" id="floorInput" name="floor" placeholder="e.g. Ground Floor, 2nd Floor">
+                    </div>
+
                     <!-- Ward (Readonly - Auto-Mapped from GPS) -->
                     <div>
                         <label>Ward (Auto-Mapped from Map Pin) <span class="req">*</span></label>
@@ -903,6 +909,19 @@ textarea.is-invalid ~ .invalid-feedback,
                         </div>
                         <div style="font-size: 13px; color: #2b3930;">
                             All Waste should be dismantled & should be available on the ground floor.
+                        </div>
+                    </div>
+
+                    <!-- Terms & Conditions Checkbox -->
+                    <div class="mb-3 mt-3 p-3 rounded" style="background: #ffffff; border: 1px solid var(--line);">
+                        <div class="form-check d-flex align-items-start gap-2">
+                            <input class="form-check-input mt-1" type="checkbox" id="termsAccepted" name="terms_accepted" value="1" required style="width: 18px; height: 18px; cursor: pointer;">
+                            <label class="form-check-label text-dark mb-0" for="termsAccepted" style="font-size: 13px; cursor: pointer; line-height: 1.4;">
+                                I agree to the <strong>Terms &amp; Conditions</strong>. I confirm that all waste items will be dismantled and placed on the ground floor for pickup. <span class="req">*</span>
+                            </label>
+                        </div>
+                        <div id="terms-error" class="invalid-feedback mt-1" style="color: #dc3545 !important; display: none;">
+                            You must accept the Terms &amp; Conditions before submitting.
                         </div>
                     </div>
                 </div>
@@ -1343,6 +1362,18 @@ function validateStep(step) {
         return validateSundayDate(dateInput);
     }
 
+    if (step === 4) {
+        const termsCb = document.getElementById('termsAccepted');
+        const termsErr = document.getElementById('terms-error');
+        if (termsCb && !termsCb.checked) {
+            if (termsErr) termsErr.style.display = 'block';
+            return false;
+        } else {
+            if (termsErr) termsErr.style.display = 'none';
+        }
+        return true;
+    }
+
     return true;
 }
 
@@ -1588,7 +1619,7 @@ window.fetchCurrentLocation = function(options = {}) {
 };
 
 function handleFormSubmit(event) {
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
         event.preventDefault();
         return;
     }

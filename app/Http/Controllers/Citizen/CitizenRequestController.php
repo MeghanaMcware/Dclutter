@@ -35,6 +35,7 @@ class CitizenRequestController extends Controller
             'applicant_name' => 'nullable|string|max:255',
             'mobile_number' => 'required|string|regex:/^[0-9]{10}$/',
             'house_no' => 'required|string|max:255',
+            'floor' => 'nullable|string|max:100',
             'address' => 'required|string',
             'landmark' => 'nullable|string|max:255',
             'pincode' => 'required|string|size:6',
@@ -42,6 +43,7 @@ class CitizenRequestController extends Controller
             'longitude' => 'nullable|numeric',
             'ward_id' => 'nullable|exists:wards,id',
             'preferred_pickup_date' => 'required|date',
+            'terms_accepted' => 'nullable',
             'waste_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
         ]);
 
@@ -90,6 +92,7 @@ class CitizenRequestController extends Controller
             'subcategory_ids' => $request->input('pickup_subitems', []),
             'waste_images' => $uploadedImagePaths,
             'house_no' => $request->input('house_no'),
+            'floor' => $request->input('floor'),
             'address' => $request->input('address'),
             'landmark' => $request->input('landmark'),
             'pincode' => $request->input('pincode'),
@@ -99,6 +102,7 @@ class CitizenRequestController extends Controller
             'constituency_id' => $constituencyId,
             'ward_id' => $wardId,
             'preferred_pickup_date' => $request->input('preferred_pickup_date'),
+            'terms_accepted' => ($request->has('terms_accepted') || $request->input('terms_accepted') == 1 || $request->input('terms_accepted') === 'on') ? 1 : 0,
             'status' => 'pending',
         ]);
 

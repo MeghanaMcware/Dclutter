@@ -469,6 +469,18 @@
                 </div>
 
 
+                <!-- REMARKS -->
+                <div class="mb-3">
+                    <label class="assign-label">
+                        Approval / Assignment Remarks <span class="text-muted font-11 fw-normal">(Optional)</span>
+                    </label>
+                    <textarea id="assignRemarks"
+                              class="form-control filter-input"
+                              rows="2"
+                              placeholder="Enter any notes or remarks for this approval/assignment..."></textarea>
+                </div>
+
+
             </div>
 
 
@@ -793,12 +805,15 @@ $('#assignVehicleSubmit').on('click', function() {
 
     const dbRequestId = currentRequestRow.attr('data-db-id') || currentRequestRow.find('.edit-request').attr('data-db-id') || currentRequestRow.find('a[href*="/admin/requests/"]').attr('href').split('/').pop();
 
+    const remarks = $('#assignRemarks').val();
+
     $.ajax({
-        url: '/admin/requests/' + dbRequestId + '/assign-vehicle',
+        url: "{{ url('/admin/requests') }}/" + dbRequestId + '/assign-vehicle',
         type: 'POST',
         data: {
             _token: '{{ csrf_token() }}',
-            vehicle_id: vehicleId
+            vehicle_id: vehicleId,
+            remarks: remarks
         },
         success: function(response) {
             const statusHtml = '<span class="status-badge status-assigned">Assigned</span>';

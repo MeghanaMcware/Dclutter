@@ -223,7 +223,7 @@
 
             const reqId = '{{ $wasteRequest->id ?? 1 }}';
 
-            fetch('/vehicle/before-pickup/' + reqId, {
+            fetch("{{ url('/vehicle/before-pickup') }}/" + reqId, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -234,7 +234,7 @@
             .then(async res => {
                 const data = await res.json();
                 if (res.ok && data.success) {
-                    window.location.href = data.next_url || '/vehicle/after-pickup/' + reqId;
+                    window.location.href = data.next_url || ("{{ url('/vehicle/after-pickup') }}/" + reqId);
                 } else {
                     saveBeforeBtn.disabled = false;
                     saveBeforeBtn.innerHTML = '<i class="fa-solid fa-camera"></i> <span>Save Before Details</span>';

@@ -203,11 +203,15 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <div class="detail-label">House No</div>
                                 <div class="detail-value">{{ $wasteRequest->house_no }}</div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
+                                <div class="detail-label">Floor / Level</div>
+                                <div class="detail-value">{{ $wasteRequest->floor ?? 'N/A' }}</div>
+                            </div>
+                            <div class="col-sm-4">
                                 <div class="detail-label">Landmark</div>
                                 <div class="detail-value">{{ $wasteRequest->landmark ?? 'N/A' }}</div>
                             </div>
@@ -246,6 +250,14 @@
                                 <div class="detail-label">Complete Address</div>
                                 <div class="detail-value">{{ $wasteRequest->address }}</div>
                             </div>
+                            @if(!empty($wasteRequest->remarks))
+                                <div class="col-sm-12 mt-2">
+                                    <div class="detail-label">Approval / Assignment Remarks</div>
+                                    <div class="detail-value p-2 bg-light rounded border-start border-4 border-primary">
+                                        <i class="fa fa-comment-dots text-primary me-1"></i> {{ $wasteRequest->remarks }}
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -358,6 +370,10 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="remarks">Approval / Assignment Remarks <span class="text-muted font-11 fw-normal">(Optional)</span></label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Enter any notes or remarks for this approval/assignment...">{{ old('remarks', $wasteRequest->remarks) }}</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

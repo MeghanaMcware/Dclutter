@@ -287,7 +287,7 @@
 
         const reqId = '{{ $wasteRequest->id ?? 1 }}';
 
-        fetch('/vehicle/after-pickup/' + reqId, {
+        fetch("{{ url('/vehicle/after-pickup') }}/" + reqId, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
