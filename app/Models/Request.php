@@ -25,7 +25,7 @@ class Request extends Model
         'before_pickup_images',
         'approx_weight_kg',
         'house_no',
-        'floor',
+        'floor_no',
         'address',
         'landmark',
         'pincode',
@@ -189,5 +189,10 @@ class Request extends Model
     public function dumpRecord(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Dump::class, 'request_id')->latestOfMany();
+    }
+
+    public function getFloorAttribute()
+    {
+        return $this->attributes['floor_no'] ?? null;
     }
 }

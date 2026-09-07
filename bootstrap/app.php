@@ -12,10 +12,40 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->validateCsrfTokens(except: [
+            'user/send-otp',
+            'user/verify-otp',
+            'user/send_otp',
+            'user/verify_otp',
+            'user/report-request',
+            'citizen/send-otp',
+            'citizen/verify-otp',
+            'report-request',
+        ]);
+
+        $middleware->redirectTo(
+            guests: function (Request $request) {
+                if ($request->is('vehicle*')) {
+                    return route('vehicle.login');
+                }
+                if ($request->is('admin*')) {
+                    return route('admin.login');
+                }
+                return route('user.login');
+            },
+            users: function (Request $request) {
+                if ($request->is('vehicle*')) {
+                    return route('vehicle.dashboard');
+                }
+                if ($request->is('admin*')) {
+                    return route('admin.dashboard');
+                }
+                return route('user.dashboard');
+            }
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->expectsJson() || $request->ajax() || $request->is('api/*') || $request->is('user/*') || $request->is('citizen/*'),
         );
     })->create();

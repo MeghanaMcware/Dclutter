@@ -6,10 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Request as WasteRequest;
 use App\Models\Ward;
+use App\Services\OtpService;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CitizenRequestController extends Controller
 {
+    protected OtpService $otpService;
+    protected WhatsAppService $whatsappService;
+
+    public function __construct(OtpService $otpService, WhatsAppService $whatsappService)
+    {
+        $this->otpService = $otpService;
+        $this->whatsappService = $whatsappService;
+    }
+
     /**
      * Display the report waste request wizard form.
      */
@@ -25,6 +37,77 @@ class CitizenRequestController extends Controller
     }
 
     /**
+     * Send WhatsApp OTP for Citizen Report Request
+     */
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'mobile_number' => 'required|digits:10',
+        ]);
+
+        $mobile = $request->input('mobile_number');
+        $name = $request->input('applicant_name') ?: 'Citizen';
+
+        try {
+            $result = $this->otpService->sendOtp(
+                $mobile,
+                $name,
+                $request->ip(),
+                $request->userAgent()
+            );
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'] ?? 'Failed to send OTP.',
+                    'code' => $result['code'] ?? 'ERROR',
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'A 6-digit verification code has been sent to your WhatsApp number.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Citizen Send OTP Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage() ?: 'Error sending OTP. Please try again.',
+            ], 422);
+        }
+    }
+
+    /**
+     * Verify WhatsApp OTP for Citizen Report Request
+     */
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'mobile_number' => 'required|digits:10',
+            'otp' => 'required|digits:6',
+        ]);
+
+        $mobile = $request->input('mobile_number');
+        $otp = $request->input('otp');
+
+        $result = $this->otpService->verifyOtp($mobile, $otp);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+            ], 422);
+        }
+
+        session()->put('verified_citizen_mobile', $mobile);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mobile number verified successfully.',
+        ]);
+    }
+
+    /**
      * Store a newly created waste request in the database.
      */
     public function store(Request $request)
@@ -36,6 +119,7 @@ class CitizenRequestController extends Controller
             'mobile_number' => 'required|string|regex:/^[0-9]{10}$/',
             'house_no' => 'required|string|max:255',
             'floor' => 'nullable|string|max:100',
+            'floor_no' => 'nullable|string|max:100',
             'address' => 'required|string',
             'landmark' => 'nullable|string|max:255',
             'pincode' => 'required|string|size:6',
@@ -92,7 +176,7 @@ class CitizenRequestController extends Controller
             'subcategory_ids' => $request->input('pickup_subitems', []),
             'waste_images' => $uploadedImagePaths,
             'house_no' => $request->input('house_no'),
-            'floor' => $request->input('floor'),
+            'floor_no' => $request->input('floor_no') ?? $request->input('floor'),
             'address' => $request->input('address'),
             'landmark' => $request->input('landmark'),
             'pincode' => $request->input('pincode'),

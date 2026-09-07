@@ -230,7 +230,9 @@
 .item-option input[type="checkbox"] {
     position: absolute;
     opacity: 0;
-    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    pointer-events: auto;
 }
 
 .category-icon {
@@ -749,8 +751,8 @@ textarea.is-invalid ~ .invalid-feedback,
                                 $colors = ['#0e7a43', '#4d7cda', '#d97706', '#8b5cf6', '#0f9bb4', '#b45309', '#e05d3b', '#64748b'];
                                 $tileColor = $colors[$index % count($colors)];
                             @endphp
-                            <label class="item-option" style="--tile-color: {{ $tileColor }};">
-                                <input type="checkbox" name="pickup_items[]" value="{{ $category->name }}" data-id="{{ $category->id }}" onchange="onCategoryItemChange(this)">
+                            <div class="item-option" style="--tile-color: {{ $tileColor }};" onclick="toggleCategory(this)">
+                                <input type="checkbox" name="pickup_items[]" value="{{ $category->name }}" data-id="{{ $category->id }}" style="display:none;">
                                 <span class="category-icon">
                                     @if($category->icon)
                                         @if(str_starts_with($category->icon, 'fa-') || str_starts_with($category->icon, 'fa'))
@@ -763,7 +765,7 @@ textarea.is-invalid ~ .invalid-feedback,
                                     @endif
                                 </span>
                                 <span class="item-option-text"><strong>{{ $category->name }}</strong></span>
-                            </label>
+                            </div>
                         @empty
                             <p class="text-muted col-span-3">No categories active currently.</p>
                         @endforelse
@@ -964,9 +966,8 @@ textarea.is-invalid ~ .invalid-feedback,
 
                     <!-- Floor No -->
                     <div>
-                        <label>Floor No <span class="req">*</span></label>
-                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. #123" required oninput="validateSingleField(this)">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
+                        <label>Floor No / Level <span class="text-muted" style="font-weight:400;">(Optional)</span></label>
+                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. Ground Floor, 2nd Floor" oninput="validateSingleField(this)">
                     </div>
 
                     <!-- Ward (Readonly - Auto-Mapped from GPS) -->
@@ -1163,12 +1164,7 @@ dbCategories.forEach((cat, index) => {
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof hideLoader === 'function') hideLoader();
-
     initSundayDatePicker();
-    setTimeout(() => {
-        initLeafletMap();
-    }, 100);
-    fetchCurrentLocation({ silent: true });
 });
 
 function handleImageSelection(event) {
@@ -1243,7 +1239,6 @@ function renderSubcategories() {
     const checked = Array.from(document.querySelectorAll('input[name="pickup_items[]"]:checked')).map(cb => cb.value);
     const container = document.getElementById('subcategory-container');
     const section = document.getElementById('subcategory-section');
-    const selectedCount = document.getElementById('selected-subcategory-count');
     
     container.innerHTML = '';
     
@@ -1277,10 +1272,13 @@ function renderSubcategories() {
             subcategoriesMap[category].forEach(subcatObj => {
                 const subcatName = subcatObj.name;
                 const subcatIcon = subcatObj.icon;
+                const valueString = `${category}: ${subcatName}`;
+                const isSelected = previouslySelectedSubitems.includes(valueString);
 
-                const label = document.createElement('label');
-                label.className = 'item-option';
-                label.style.setProperty('--tile-color', tileColor);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-option' + (isSelected ? ' selected' : '');
+                itemDiv.style.setProperty('--tile-color', tileColor);
+                itemDiv.setAttribute('role', 'button');
                 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
@@ -1295,8 +1293,6 @@ function renderSubcategories() {
                     } else {
                         label.classList.remove('selected');
                     }
-
-                    updateSubcategoryCount();
                 };
                 
                 const iconSpan = document.createElement('span');
@@ -1314,10 +1310,19 @@ function renderSubcategories() {
                 textSpan.className = 'item-option-text';
                 textSpan.innerHTML = `<strong>${subcatName}</strong>`;
                 
-                label.appendChild(input);
-                label.appendChild(iconSpan);
-                label.appendChild(textSpan);
-                optionsDiv.appendChild(label);
+                itemDiv.onclick = function() {
+                    input.checked = !input.checked;
+                    itemDiv.classList.toggle('selected', input.checked);
+                    const err = document.getElementById('step1-subcat-error');
+                    if (document.querySelectorAll('input[name="pickup_subitems[]"]:checked').length > 0 && err) {
+                        err.style.display = 'none';
+                    }
+                };
+                
+                itemDiv.appendChild(input);
+                itemDiv.appendChild(iconSpan);
+                itemDiv.appendChild(textSpan);
+                optionsDiv.appendChild(itemDiv);
             });
             
             catDiv.appendChild(optionsDiv);
@@ -1326,23 +1331,20 @@ function renderSubcategories() {
     });
 }
 
-function onCategoryItemChange(cb) {
-    const parentLabel = cb.closest('.item-option');
-    if (parentLabel) {
-        if (cb.checked) {
-            parentLabel.classList.add('selected');
-        } else {
-            parentLabel.classList.remove('selected');
-        }
-    }
+function toggleCategory(el) {
+    const cb = el.querySelector('input[name="pickup_items[]"]');
+    if (!cb) return;
+    cb.checked = !cb.checked;
+    el.classList.toggle('selected', cb.checked);
+    
     const checked = document.querySelectorAll('input[name="pickup_items[]"]:checked');
     const selectedCount = document.getElementById('selected-category-count');
     if (selectedCount) {
         selectedCount.textContent = `${checked.length} selected`;
     }
     const err = document.getElementById('step1-error');
-    if (checked.length > 0) {
-        if (err) err.style.display = 'none';
+    if (checked.length > 0 && err) {
+        err.style.display = 'none';
     }
 
     renderSubcategories();
@@ -1541,6 +1543,12 @@ function validateStep(step) {
 
         let valid = true;
         
+        // Sync selectedWasteFiles if input element has files
+        const wasteInput = document.getElementById('wasteImagesInput');
+        if (selectedWasteFiles.length === 0 && wasteInput && wasteInput.files && wasteInput.files.length > 0) {
+            selectedWasteFiles = Array.from(wasteInput.files);
+        }
+
         const imageError = document.getElementById('fileUploadError');
         const imageBox = document.getElementById('fileUploadBox');
         if (selectedWasteFiles.length === 0) {
@@ -1566,12 +1574,34 @@ function validateStep(step) {
             }
         });
 
+        if (floorNo && floorNo.value && floorNo.value.trim() !== '') {
+            floorNo.classList.remove('is-invalid');
+            floorNo.classList.add('is-valid');
+        }
+
         if (!wardId || !wardId.value) {
             if (wardDisplay) {
                 wardDisplay.classList.remove('is-valid');
                 wardDisplay.classList.add('is-invalid');
             }
             valid = false;
+        }
+
+        if (!otpVerified) {
+            const otpSection = document.getElementById('otpSection');
+            if (otpSection) otpSection.style.display = 'block';
+            const otpMessage = document.getElementById('otpMessage');
+            if (otpMessage) {
+                otpMessage.style.display = 'block';
+                otpMessage.style.color = '#dc3545';
+                otpMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your mobile number with WhatsApp OTP before proceeding.';
+            }
+            const mobileEl = document.getElementById('mobileInput');
+            if (mobileEl) {
+                mobileEl.focus();
+                mobileEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
         }
 
         return valid;
@@ -1634,7 +1664,10 @@ function buildReviewSummary() {
     }
     
     document.getElementById('review-applicant-name').innerText = document.getElementById('applicantNameInput').value || '-';
-    document.getElementById('review-house-no').innerText = document.getElementById('houseNoInput').value || '-';
+    const houseVal = document.getElementById('houseNoInput').value || '-';
+    const floorEl = document.getElementById('floorNoInput');
+    const floorVal = (floorEl && floorEl.value) ? floorEl.value.trim() : '';
+    document.getElementById('review-house-no').innerText = houseVal + (floorVal ? ` (Floor: ${floorVal})` : '');
     document.getElementById('review-address').innerText = document.getElementById('addressInput').value || '-';
     
     const wardDisplay = document.getElementById('wardDisplayInput');
@@ -1839,13 +1872,9 @@ window.fetchCurrentLocation = function(options = {}) {
 };
 
 function handleFormSubmit(event) {
-    const form = event.currentTarget;
-    const isValid = validateStep(1) && validateStep(2) && validateStep(3) && validateStep(4);
-    form.classList.toggle('was-validated', !isValid);
-
-    if (!isValid) {
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
         event.preventDefault();
-        return;
+        return false;
     }
     
     if (typeof showLoader === 'function') {
@@ -1853,19 +1882,10 @@ function handleFormSubmit(event) {
     }
 }
 
-
-
-
 /* =========================================================
-   OTP PROTECTION
+   OTP PROTECTION & VERIFICATION
 ========================================================= */
-
 let otpVerified = false;
-
-
-/* ---------------------------------------------------------
-   FIELDS THAT REQUIRE OTP VERIFICATION
---------------------------------------------------------- */
 
 const otpProtectedFieldIds = [
     'wasteImagesInput',
@@ -1880,207 +1900,196 @@ const otpProtectedFieldIds = [
     'pincodeInput'
 ];
 
-
-/* ---------------------------------------------------------
-   LOCK ALL FIELDS INITIALLY
---------------------------------------------------------- */
-
 function lockOtpProtectedFields() {
-
     otpProtectedFieldIds.forEach(function(id) {
-
         const field = document.getElementById(id);
-
-        if (field) {
-            field.disabled = true;
-        }
-
+        if (field) { field.disabled = true; }
     });
-
-    // Disable buttons related to location/map
-    document.querySelectorAll(
-        '.btn-fetch-loc'
-    ).forEach(function(button) {
+    document.querySelectorAll('.btn-fetch-loc').forEach(function(button) {
         button.disabled = true;
     });
-
 }
-
-
-/* ---------------------------------------------------------
-   UNLOCK AFTER OTP VERIFICATION
---------------------------------------------------------- */
 
 function unlockOtpProtectedFields() {
-
     otpProtectedFieldIds.forEach(function(id) {
-
         const field = document.getElementById(id);
-
-        if (field) {
-            field.disabled = false;
-        }
-
+        if (field) { field.disabled = false; }
     });
-
-    document.querySelectorAll(
-        '.btn-fetch-loc'
-    ).forEach(function(button) {
+    document.querySelectorAll('.btn-fetch-loc').forEach(function(button) {
         button.disabled = false;
     });
-
     otpVerified = true;
-
 }
-
-
-/* ---------------------------------------------------------
-   CHECK MOBILE NUMBER
---------------------------------------------------------- */
 
 function validateMobileAndShowOtp() {
+    const mobileEl = document.getElementById('mobileInput');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const mobileError = document.getElementById('mobileError');
 
-    const mobile =
-        document.getElementById('mobileInput').value.trim();
+    if (!mobileEl) return;
+    mobileEl.value = mobileEl.value.replace(/\D/g, '').substring(0, 10);
 
-    const sendOtpBtn =
-        document.getElementById('sendOtpBtn');
-
-    const mobileError =
-        document.getElementById('mobileError');
-
-    // Only numbers
-    document.getElementById('mobileInput').value =
-        mobile.replace(/\D/g, '').substring(0, 10);
-
-    if (/^[0-9]{10}$/.test(
-        document.getElementById('mobileInput').value
-    )) {
-
-        sendOtpBtn.style.display = 'block';
-        mobileError.style.display = 'none';
-
+    if (/^[0-9]{10}$/.test(mobileEl.value)) {
+        if (sendOtpBtn) sendOtpBtn.style.display = 'inline-flex';
+        if (mobileError) mobileError.style.display = 'none';
     } else {
-
-        sendOtpBtn.style.display = 'none';
-        mobileError.style.display = 'none';
-
+        if (sendOtpBtn && !otpVerified) sendOtpBtn.style.display = 'none';
+        if (mobileError && mobileEl.value.length > 0) {
+            mobileError.style.display = 'block';
+        } else if (mobileError) {
+            mobileError.style.display = 'none';
+        }
     }
-
 }
-
-
-/* ---------------------------------------------------------
-   SEND WHATSAPP OTP
---------------------------------------------------------- */
 
 function sendWhatsAppOTP() {
-
-    const mobile =
-        document.getElementById('mobileInput').value.trim();
-
+    const mobileInput = document.getElementById('mobileInput');
+    const mobile = mobileInput ? mobileInput.value.trim() : '';
+    const mobileError = document.getElementById('mobileError');
     if (!/^[0-9]{10}$/.test(mobile)) {
-
-        document.getElementById('mobileError').style.display =
-            'block';
-
+        if (mobileError) mobileError.style.display = 'block';
         return;
     }
+    if (mobileError) mobileError.style.display = 'none';
 
-    const sendBtn =
-        document.getElementById('sendOtpBtn');
+    const sendBtn = document.getElementById('sendOtpBtn');
+    const otpSection = document.getElementById('otpSection');
+    const otpMessage = document.getElementById('otpMessage');
 
-    const otpSection =
-        document.getElementById('otpSection');
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
+    }
+    if (typeof showLoader === 'function') showLoader('Sending WhatsApp OTP...');
 
-    /*
-     * IMPORTANT:
-     * Replace this section with your Laravel AJAX request
-     * when WhatsApp OTP backend is connected.
-     */
-
-    sendBtn.disabled = true;
-    sendBtn.innerHTML = 'Sending...';
-
-    setTimeout(function() {
-
-        otpSection.style.display = 'block';
-
-        sendBtn.innerHTML = 'OTP Sent';
-
-        document.getElementById('otpInput').focus();
-
-    }, 800);
-
+    fetch("{{ route('citizen.send_otp') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            mobile_number: mobile,
+            applicant_name: document.getElementById('applicantNameInput')?.value || ''
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (typeof hideLoader === 'function') hideLoader();
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Resend OTP';
+        }
+        if (data.success) {
+            if (otpSection) otpSection.style.display = 'block';
+            if (otpMessage) {
+                otpMessage.style.display = 'block';
+                otpMessage.style.color = '#198754';
+                otpMessage.textContent = data.message || 'OTP sent successfully to your WhatsApp!';
+            }
+            const otpInput = document.getElementById('otpInput');
+            if (otpInput) otpInput.focus();
+        } else {
+            if (otpMessage) {
+                otpMessage.style.display = 'block';
+                otpMessage.style.color = '#dc3545';
+                otpMessage.textContent = data.message || 'Failed to send OTP. Please check mobile number.';
+            }
+        }
+    })
+    .catch(err => {
+        if (typeof hideLoader === 'function') hideLoader();
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = 'Send OTP';
+        }
+        if (otpMessage) {
+            otpMessage.style.display = 'block';
+            otpMessage.style.color = '#dc3545';
+            otpMessage.textContent = 'Server error sending OTP. Please try again.';
+        }
+    });
 }
-
-
-/* ---------------------------------------------------------
-   VERIFY WHATSAPP OTP
---------------------------------------------------------- */
 
 function verifyWhatsAppOTP() {
-
-    const otp =
-        document.getElementById('otpInput').value.trim();
-
-    const message =
-        document.getElementById('otpMessage');
+    const mobile = document.getElementById('mobileInput').value.trim();
+    const otpInput = document.getElementById('otpInput');
+    const otp = otpInput ? otpInput.value.trim() : '';
+    const message = document.getElementById('otpMessage');
 
     if (!/^[0-9]{6}$/.test(otp)) {
-
-        message.style.display = 'block';
-        message.style.color = '#dc3545';
-
-        message.innerHTML =
-            'Please enter a valid 6-digit OTP.';
-
+        if (message) {
+            message.style.display = 'block';
+            message.style.color = '#dc3545';
+            message.innerHTML = 'Please enter a valid 6-digit OTP.';
+        }
         return;
     }
 
-    /*
-     * TEMPORARY FRONTEND DEMO
-     *
-     * Replace this with Laravel OTP verification.
-     */
-
-    const verifyBtn =
-        document.getElementById('verifyOtpBtn');
-
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = 'Verifying...';
-
-    setTimeout(function() {
-
-        otpVerified = true;
-
-        message.style.display = 'block';
-        message.style.color = '#198754';
-
-        message.innerHTML =
-            '<i class="bi bi-check-circle-fill"></i> ' +
-            'Mobile number verified successfully.';
-
-        verifyBtn.innerHTML = 'Verified';
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    if (verifyBtn) {
         verifyBtn.disabled = true;
+        verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
+    }
+    if (typeof showLoader === 'function') showLoader('Verifying OTP...');
 
-        document.getElementById('otpInput').disabled = true;
-
-        unlockOtpProtectedFields();
-
-    }, 700);
-
+    fetch("{{ route('citizen.verify_otp') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({ mobile_number: mobile, otp: otp })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (typeof hideLoader === 'function') hideLoader();
+        if (data.success) {
+            otpVerified = true;
+            if (message) {
+                message.style.display = 'block';
+                message.style.color = '#198754';
+                message.innerHTML = '<i class="bi bi-check-circle-fill"></i> Mobile number verified successfully.';
+            }
+            if (verifyBtn) {
+                verifyBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Verified';
+                verifyBtn.disabled = true;
+            }
+            if (otpInput) otpInput.disabled = true;
+            const sendBtn = document.getElementById('sendOtpBtn');
+            if (sendBtn) sendBtn.disabled = true;
+            unlockOtpProtectedFields();
+        } else {
+            if (verifyBtn) {
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = 'Verify OTP';
+            }
+            if (message) {
+                message.style.display = 'block';
+                message.style.color = '#dc3545';
+                message.innerHTML = data.message || 'Invalid or expired OTP. Please try again.';
+            }
+        }
+    })
+    .catch(err => {
+        if (typeof hideLoader === 'function') hideLoader();
+        if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = 'Verify OTP';
+        }
+        if (message) {
+            message.style.display = 'block';
+            message.style.color = '#dc3545';
+            message.innerHTML = 'Error verifying OTP. Please try again.';
+        }
+    });
 }
 
-
-/* ---------------------------------------------------------
-   INITIAL LOCK
---------------------------------------------------------- */
-
 document.addEventListener('DOMContentLoaded', function() {
-
     lockOtpProtectedFields();
-
+    validateMobileAndShowOtp();
 });
 </script>
 @endsection

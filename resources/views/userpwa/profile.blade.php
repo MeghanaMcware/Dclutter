@@ -128,7 +128,7 @@
         </div>
     </div>
 
-    <a href="/user/login" class="logout-btn">
+    <a href="{{ route('user.logout') }}" class="logout-btn">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
     </a>
 </div>

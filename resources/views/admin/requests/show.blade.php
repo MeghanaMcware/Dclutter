@@ -209,7 +209,7 @@
                             </div>
                             <div class="col-sm-4">
                                 <div class="detail-label">Floor / Level</div>
-                                <div class="detail-value">{{ $wasteRequest->floor ?? 'N/A' }}</div>
+                                <div class="detail-value">{{ $wasteRequest->floor_no ?? $wasteRequest->floor ?? 'N/A' }}</div>
                             </div>
                             <div class="col-sm-4">
                                 <div class="detail-label">Landmark</div>
