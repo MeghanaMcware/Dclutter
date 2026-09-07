@@ -1059,6 +1059,18 @@
         },
         {
             "name": "laravel/framework",
+<<<<<<< HEAD
+            "version": "v13.24.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "6d481710375d2aa67656922ef760cdd2b18bcfe0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/6d481710375d2aa67656922ef760cdd2b18bcfe0",
+                "reference": "6d481710375d2aa67656922ef760cdd2b18bcfe0",
+=======
             "version": "v13.25.0",
             "source": {
                 "type": "git",
@@ -1069,6 +1081,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/ed36fe882bd4eed4e6ff75343cbad8dbda03fdba",
                 "reference": "ed36fe882bd4eed4e6ff75343cbad8dbda03fdba",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -1282,7 +1295,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
+<<<<<<< HEAD
+            "time": "2026-08-04T15:54:59+00:00"
+=======
             "time": "2026-08-11T13:56:22+00:00"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
         },
         {
             "name": "laravel/prompts",
@@ -1475,6 +1492,18 @@
         },
         {
             "name": "league/commonmark",
+<<<<<<< HEAD
+            "version": "2.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/commonmark.git",
+                "reference": "5703d83ba3da3b2e356a5fedc848ed6d8ffb6529"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/5703d83ba3da3b2e356a5fedc848ed6d8ffb6529",
+                "reference": "5703d83ba3da3b2e356a5fedc848ed6d8ffb6529",
+=======
             "version": "2.10.0",
             "source": {
                 "type": "git",
@@ -1485,6 +1514,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/d2d1aa8b35e072966c89bc0c66cf926e56767dc4",
                 "reference": "d2d1aa8b35e072966c89bc0c66cf926e56767dc4",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -1521,7 +1551,11 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
+<<<<<<< HEAD
+                    "dev-main": "2.10-dev"
+=======
                     "dev-main": "2.11-dev"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 }
             },
             "autoload": {
@@ -1578,7 +1612,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< HEAD
+            "time": "2026-08-03T13:42:31+00:00"
+=======
             "time": "2026-08-11T16:06:25+00:00"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
         },
         {
             "name": "league/config",
@@ -3535,6 +3573,18 @@
         },
         {
             "name": "symfony/console",
+<<<<<<< HEAD
+            "version": "v7.4.15",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/console.git",
+                "reference": "088ec6fe0ef6819cbc301174093b6bfa4ad26930"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/console/zipball/088ec6fe0ef6819cbc301174093b6bfa4ad26930",
+                "reference": "088ec6fe0ef6819cbc301174093b6bfa4ad26930",
+=======
             "version": "v7.4.16",
             "source": {
                 "type": "git",
@@ -3545,6 +3595,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/console/zipball/f4c69c9aed03abf933b294257d618bdd9b30a06d",
                 "reference": "f4c69c9aed03abf933b294257d618bdd9b30a06d",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -3609,7 +3660,11 @@
                 "terminal"
             ],
             "support": {
+<<<<<<< HEAD
+                "source": "https://github.com/symfony/console/tree/v7.4.15"
+=======
                 "source": "https://github.com/symfony/console/tree/v7.4.16"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
             },
             "funding": [
                 {
@@ -3629,7 +3684,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< HEAD
+            "time": "2026-07-27T13:51:00+00:00"
+=======
             "time": "2026-07-31T12:37:14+00:00"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
         },
         {
             "name": "symfony/css-selector",
@@ -4088,6 +4147,18 @@
         },
         {
             "name": "symfony/http-foundation",
+<<<<<<< HEAD
+            "version": "v7.4.15",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/http-foundation.git",
+                "reference": "1f898ee8188adda9417fb52cf8425a8342c254e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/1f898ee8188adda9417fb52cf8425a8342c254e7",
+                "reference": "1f898ee8188adda9417fb52cf8425a8342c254e7",
+=======
             "version": "v7.4.16",
             "source": {
                 "type": "git",
@@ -4098,6 +4169,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/http-foundation/zipball/b676451bb638e99a7d34d8a2be90406822e301eb",
                 "reference": "b676451bb638e99a7d34d8a2be90406822e301eb",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -4146,7 +4218,11 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
+<<<<<<< HEAD
+                "source": "https://github.com/symfony/http-foundation/tree/v7.4.15"
+=======
                 "source": "https://github.com/symfony/http-foundation/tree/v7.4.16"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
             },
             "funding": [
                 {
@@ -4166,6 +4242,22 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< HEAD
+            "time": "2026-07-29T07:12:33+00:00"
+        },
+        {
+            "name": "symfony/http-kernel",
+            "version": "v7.4.15",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/http-kernel.git",
+                "reference": "403275d94f94d5626c3288c599b3b48093ba24f7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/403275d94f94d5626c3288c599b3b48093ba24f7",
+                "reference": "403275d94f94d5626c3288c599b3b48093ba24f7",
+=======
             "time": "2026-08-07T11:50:27+00:00"
         },
         {
@@ -4180,6 +4272,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/http-kernel/zipball/f5e728670fa2218ae8be8ea91f2b44b7d6e5304c",
                 "reference": "f5e728670fa2218ae8be8ea91f2b44b7d6e5304c",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -4265,7 +4358,11 @@
             "description": "Provides a structured process for converting a Request into a Response",
             "homepage": "https://symfony.com",
             "support": {
+<<<<<<< HEAD
+                "source": "https://github.com/symfony/http-kernel/tree/v7.4.15"
+=======
                 "source": "https://github.com/symfony/http-kernel/tree/v7.4.16"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
             },
             "funding": [
                 {
@@ -4285,7 +4382,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< HEAD
+            "time": "2026-07-29T11:40:42+00:00"
+=======
             "time": "2026-08-07T18:00:13+00:00"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
         },
         {
             "name": "symfony/mailer",
@@ -4373,6 +4474,18 @@
         },
         {
             "name": "symfony/mime",
+<<<<<<< HEAD
+            "version": "v7.4.15",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/mime.git",
+                "reference": "0c1daf58bc931628df0bea26840d1fc8b9a3d34b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/0c1daf58bc931628df0bea26840d1fc8b9a3d34b",
+                "reference": "0c1daf58bc931628df0bea26840d1fc8b9a3d34b",
+=======
             "version": "v7.4.16",
             "source": {
                 "type": "git",
@@ -4383,6 +4496,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/mime/zipball/20094b76a7106dbe978d31cd3bd7aa1ed248d0e5",
                 "reference": "20094b76a7106dbe978d31cd3bd7aa1ed248d0e5",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -4438,7 +4552,11 @@
                 "mime-type"
             ],
             "support": {
+<<<<<<< HEAD
+                "source": "https://github.com/symfony/mime/tree/v7.4.15"
+=======
                 "source": "https://github.com/symfony/mime/tree/v7.4.16"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
             },
             "funding": [
                 {
@@ -4458,7 +4576,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< HEAD
+            "time": "2026-07-29T07:59:49+00:00"
+=======
             "time": "2026-08-07T14:56:57+00:00"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -6588,6 +6710,18 @@
         },
         {
             "name": "laravel/pao",
+<<<<<<< HEAD
+            "version": "v1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/pao.git",
+                "reference": "322f22095f3639551b64db9a13dfd8ab09c8206b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/pao/zipball/322f22095f3639551b64db9a13dfd8ab09c8206b",
+                "reference": "322f22095f3639551b64db9a13dfd8ab09c8206b",
+=======
             "version": "v1.1.4",
             "source": {
                 "type": "git",
@@ -6598,6 +6732,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/pao/zipball/5aee99c8c37565e9c457c33f4d36aa363a389dc8",
                 "reference": "5aee99c8c37565e9c457c33f4d36aa363a389dc8",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -6611,6 +6746,17 @@
                 "phpunit/phpunit": "<12.5.23 || >=13.0.0 <13.1.7 || >=14.0.0"
             },
             "require-dev": {
+<<<<<<< HEAD
+                "brianium/paratest": "^7.23.0",
+                "laravel/pint": "^1.30.0",
+                "orchestra/testbench": "^10.11.0 || ^11.1.0",
+                "pestphp/pest": "^4.7.2 || ^5.0.1",
+                "pestphp/pest-plugin-type-coverage": "^4.0.4 || ^5.0.0",
+                "phpstan/phpstan": "^2.2.7",
+                "rector/rector": "^2.5.8",
+                "symfony/process": "^7.4.8 || ^8.1.0",
+                "symfony/var-dumper": "^7.4.8 || ^8.1.2"
+=======
                 "brianium/paratest": "^7.20.0",
                 "laravel/pint": "^1.30.5",
                 "orchestra/testbench": "^10.11.0 || ^11.1.0",
@@ -6620,6 +6766,7 @@
                 "rector/rector": "^2.6.1",
                 "symfony/process": "^7.4.13 || ^8.1.0",
                 "symfony/var-dumper": "^7.4.15 || ^8.1.2"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
             },
             "type": "library",
             "extra": {
@@ -6669,6 +6816,22 @@
                 "issues": "https://github.com/laravel/pao/issues",
                 "source": "https://github.com/laravel/pao"
             },
+<<<<<<< HEAD
+            "time": "2026-07-29T18:38:14+00:00"
+        },
+        {
+            "name": "laravel/pint",
+            "version": "v1.30.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/pint.git",
+                "reference": "a96cb6eee2961905d2fce7207aefb80945bf6b28"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/a96cb6eee2961905d2fce7207aefb80945bf6b28",
+                "reference": "a96cb6eee2961905d2fce7207aefb80945bf6b28",
+=======
             "time": "2026-08-10T23:45:44+00:00"
         },
         {
@@ -6683,6 +6846,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/pint/zipball/fe4148c503a0e266353d61396b79bbf7f35122df",
                 "reference": "fe4148c503a0e266353d61396b79bbf7f35122df",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "shasum": ""
             },
             "require": {
@@ -6695,14 +6859,22 @@
             "require-dev": {
                 "composer/semver": "^3.4.4",
                 "friendsofphp/php-cs-fixer": "^3.95.18",
+<<<<<<< HEAD
+                "illuminate/view": "^12.65.0",
+=======
                 "illuminate/view": "^13.24.0",
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
                 "larastan/larastan": "^3.10.0",
                 "laravel-zero/framework": "^13.0.0",
                 "laravel/agent-detector": "^2.0.2",
                 "laravel/prompts": "^0.3.22",
                 "mockery/mockery": "^1.6.12",
                 "nunomaduro/termwind": "^2.4.0",
+<<<<<<< HEAD
+                "pestphp/pest": "^3.8.7"
+=======
                 "pestphp/pest": "^4.7.8"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
             },
             "bin": [
                 "builds/pint"
@@ -6739,7 +6911,11 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
+<<<<<<< HEAD
+            "time": "2026-08-05T16:47:22+00:00"
+=======
             "time": "2026-08-10T15:35:50+00:00"
+>>>>>>> 8f33ae0708159f9b4c1255d6d43473508c08e84d
         },
         {
             "name": "mockery/mockery",

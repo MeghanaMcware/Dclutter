@@ -1,5 +1,9 @@
-@extends('layouts.app')
+@extends('userpwa.layout.app')
 
+@section('title', 'Report Request')
+@section('heading', 'Report Request')
+
+@section('style')
 <style>
 :root {
     --green: #087d45;
@@ -11,60 +15,32 @@
 }
 
 .request-ui {
-    max-width: auto;
+    max-width: 1080px;
     margin: 0 auto;
-    padding: 34px 24px 64px;
+    padding: 25px 10px 15px;
     color: var(--ink);
     font-family: 'Inter', sans-serif;
 }
 
 .crumb {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    margin-bottom: 20px;
-    padding: 8px 12px 8px 9px;
-    border: 1px solid #dce8e0;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #f7fcf8, #ffffff);
-    color: #819087;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    box-shadow: 0 4px 12px rgba(23, 50, 32, 0.04);
+    font-size: 13px;
+    color: #738078;
+    margin-bottom: 18px;
+    font-weight: 500;
 }
 
 .crumb a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--green);
+    color: #738078;
     text-decoration: none;
-    transition: color 0.2s ease;
 }
 
 .crumb a:hover {
-    color: var(--green-dark);
-}
-
-.crumb a i {
-    font-size: 14px;
-}
-
-.crumb > i {
-    color: #afbeb4;
-    font-size: 11px;
-}
-
-.crumb-current {
-    color: var(--ink);
-    font-weight: 700;
+    color: var(--green);
 }
 
 .request-ui h1 {
-    font-size: clamp(26px, 3vw, 36px);
+    font-size: 26px;
     font-weight: 800;
-    letter-spacing: -0.02em;
     margin: 0 0 22px;
     color: var(--ink);
 }
@@ -72,7 +48,7 @@
 .card-ui {
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 24px;
+    padding: 10px;
     background: #ffffff;
     box-shadow: 0 2px 12px rgba(23, 50, 32, 0.04);
 }
@@ -192,7 +168,7 @@
 
 .category-options-grid {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
 }
 
@@ -253,41 +229,16 @@
     transform: scale(1.05);
 }
 
-.item-option::before {
-    content: '';
-    position: absolute;
-    top: 9px;
-    right: 9px;
-    width: 19px;
-    height: 19px;
-    border: 2px solid #b8c9bf;
-    border-radius: 50%;
-    background: #ffffff;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.item-option:hover::before {
-    border-color: var(--tile-color, var(--green));
-}
-
-.item-option.selected::before {
-    border-color: var(--tile-color, var(--green));
-    background: radial-gradient(circle, var(--tile-color, var(--green)) 0 5px, #ffffff 6px);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color, var(--green)) 12%, transparent);
-}
-
 .item-option-text strong {
     display: block;
     font-size: 12.5px;
     font-weight: 700;
     line-height: 1.25;
-        margin-top: 5px;
     color: #1f2937;
 }
 
 .item-option::after {
-    content: '\f26a';
+    content: '\f00c';
     position: absolute;
     top: 9px;
     right: 9px;
@@ -298,7 +249,8 @@
     color: #ffffff;
     background: var(--tile-color, var(--green));
     border-radius: 50%;
-    font-family: 'bootstrap-icons';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     font-size: 12px;
     opacity: 0;
     transform: scale(0.5);
@@ -693,18 +645,111 @@ textarea.is-invalid ~ .invalid-feedback,
     line-height: 18px;
     cursor: pointer;
 }
+
+/* Shared loading state for wizard actions */
+.request-page-loader {
+    position: fixed;
+    z-index: 2000;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.request-page-loader.show {
+    display: flex;
+}
+
+.request-page-loader__content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 170px;
+    justify-content: center;
+    padding: 14px 18px;
+    border: 1px solid #dcebe0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 8px 25px rgba(20, 56, 38, 0.16);
+}
+
+.request-ui button.is-loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.camera-modal {
+    position: fixed;
+    z-index: 2100;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(10, 24, 16, 0.72);
+}
+
+.camera-modal.show {
+    display: flex;
+}
+
+.camera-modal__panel {
+    width: min(100%, 480px);
+    overflow: hidden;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.camera-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.camera-modal__close {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#cameraVideo {
+    display: block;
+    width: 100%;
+    max-height: 65vh;
+    min-height: 240px;
+    background: #101412;
+    object-fit: cover;
+}
+
+.camera-modal__actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px 16px;
+}
+
+@media (max-width: 480px) {
+    .camera-modal { align-items: flex-end; padding: 0; }
+    .camera-modal__panel { border-radius: 14px 14px 0 0; }
+    #cameraVideo { max-height: 62vh; }
+}
 </style>
+@endsection
 
 @section('content')
 <main class="request-ui">
-    <nav class="crumb" aria-label="Breadcrumb">
-        <a href="{{ url('/') }}"><i class="bi bi-house-door-fill" aria-hidden="true"></i><span>Home</span></a>
-        <i class="bi bi-chevron-right" aria-hidden="true"></i>
-        <span class="crumb-current" aria-current="page">Report Request</span>
-    </nav>
-    <h1>Report D-Clutter Waste</h1>
-
-    <div class="card-ui">
+    <div class="card-ui" style="margin-top:-20px;">
         <!-- Stepper Progress Bar -->
         <div class="progress-ui">
             <span id="step-nav-1" class="active"><b>1</b>Category Select</span>
@@ -717,17 +762,9 @@ textarea.is-invalid ~ .invalid-feedback,
             <i class="bi bi-info-circle-fill me-1"></i> Step 1 of 4: Category Select
         </div>
 
-        @if ($errors->any())
-            <div class="alert alert-danger mb-4" role="alert">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
-        <form id="cdWasteForm" action="{{ route('citizen.report.store') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate onsubmit="handleFormSubmit(event)">
+
+        <form id="cdWasteForm" action="#" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate onsubmit="handleFormSubmit(event)">
             @csrf
             <input type="hidden" name="latitude" id="latitudeInput" value="12.9716">
             <input type="hidden" name="longitude" id="longitudeInput" value="77.5946">
@@ -738,35 +775,27 @@ textarea.is-invalid ~ .invalid-feedback,
                     <div class="category-intro">
                         <div>
                             <h2>Choose items for pickup</h2>
-                            <p class="subtitle">Choose the old furniture and used household items you want to give for pickup. You can select one or more categories.</p>
+                            <p class="subtitle">Choose the old furniture and used household items you want to give for pickup.</p>
                         </div>
                         <span class="category-count" id="selected-category-count">0 selected</span>
                     </div>
 
                     <div class="category-options-grid">
-                        @forelse($categories as $index => $category)
-                            @php
-                                $colors = ['#0e7a43', '#4d7cda', '#d97706', '#8b5cf6', '#0f9bb4', '#b45309', '#e05d3b', '#64748b'];
-                                $tileColor = $colors[$index % count($colors)];
-                            @endphp
-                            <label class="item-option" style="--tile-color: {{ $tileColor }};">
-                                <input type="checkbox" name="pickup_items[]" value="{{ $category->name }}" data-id="{{ $category->id }}" onchange="onCategoryItemChange(this)">
-                                <span class="category-icon">
-                                    @if($category->icon)
-                                        @if(str_starts_with($category->icon, 'fa-') || str_starts_with($category->icon, 'fa'))
-                                            <i class="fa-solid {{ $category->icon }}"></i>
-                                        @else
-                                            <img src="{{ str_starts_with($category->icon, 'http') || str_starts_with($category->icon, '/') ? $category->icon : asset('storage/' . $category->icon) }}" width="24" height="24" class="rounded object-fit-cover" onerror="this.src='https://placehold.co/24x24'">
-                                        @endif
-                                    @else
-                                        <i class="fa-solid fa-box-open"></i>
-                                    @endif
-                                </span>
-                                <span class="item-option-text"><strong>{{ $category->name }}</strong></span>
+                            <label class="item-option" style="--tile-color: #0e7a43;">
+                                <input type="checkbox" name="pickup_items[]" value="Furniture" data-id="1" onchange="onCategoryItemChange(this)">
+                                <span class="category-icon"><i class="fa-solid fa-couch"></i></span>
+                                <span class="item-option-text"><strong>Furniture</strong></span>
                             </label>
-                        @empty
-                            <p class="text-muted col-span-3">No categories active currently.</p>
-                        @endforelse
+                            <label class="item-option" style="--tile-color: #4d7cda;">
+                                <input type="checkbox" name="pickup_items[]" value="Electronics" data-id="2" onchange="onCategoryItemChange(this)">
+                                <span class="category-icon"><i class="fa-solid fa-tv"></i></span>
+                                <span class="item-option-text"><strong>Electronics</strong></span>
+                            </label>
+                            <label class="item-option" style="--tile-color: #d97706;">
+                                <input type="checkbox" name="pickup_items[]" value="Mattress" data-id="3" onchange="onCategoryItemChange(this)">
+                                <span class="category-icon"><i class="fa-solid fa-bed"></i></span>
+                                <span class="item-option-text"><strong>Mattress</strong></span>
+                            </label>
                     </div>
 
                     <!-- Dynamic Subcategory Section -->
@@ -785,12 +814,9 @@ textarea.is-invalid ~ .invalid-feedback,
                     <i class="bi bi-exclamation-triangle-fill me-1"></i> Please select at least one specific subcategory/detail.
                 </div>
 
-                <div class="d-flex flex-column align-items-center mt-4 justify-content-center">
-
-                <button type="button" class="btn-ui continue-btn w-auto" onclick="goToStep(2)">
+                <button type="button" class="btn-ui continue-btn" onclick="goToStep(2)">
                     Next: Location Details <i class="bi bi-arrow-right"></i>
                 </button>
-</div>
             </div>
 
             <!-- ================= STEP 2: LOCATION ================= -->
@@ -910,9 +936,14 @@ textarea.is-invalid ~ .invalid-feedback,
                         <label>Upload Waste Images <span class="req">*</span></label>
                         <div class="custom-file-upload">
                             <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
-                            <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
-                                <div class="file-upload-btn">Choose Files</div>
+                            <div class="file-upload-box" id="fileUploadBox">
+                                <button type="button" class="file-upload-btn" onclick="document.getElementById('wasteImagesInput').click()">
+                                    <i class="bi bi-folder2-open me-1"></i> Choose Files
+                                </button>
                                 <div class="file-upload-text" id="fileUploadText">No files selected</div>
+                                <button type="button" class="btn-fetch-loc me-2" onclick="openCamera()">
+                                    <i class="bi bi-camera-fill"></i> Camera
+                                </button>
                                 <i class="bi bi-check-lg text-success file-upload-check" style="display:none;" id="fileUploadCheck"></i>
                             </div>
                             <div class="invalid-feedback" id="fileUploadError" style="color: #dc3545 !important; display:none; margin-top:4px;">Please select at least one image.</div>
@@ -936,10 +967,10 @@ textarea.is-invalid ~ .invalid-feedback,
 
                     <!-- Map -->
                     <div class="wide">
-                        <label>Pin location on map (Click map to position marker &amp; auto-map Ward)</label>
+                        <label>Pin location on map</label>
                         <div class="map-container-box">
                             <div class="map-search-bar">
-                                <input type="text" id="mapSearchInput" placeholder="Search location e.g. Indiranagar, Bengaluru">
+                                <input type="text" id="mapSearchInput" placeholder="Search location">
                                 <button type="button" class="btn-ui" onclick="searchOnMap()" style="padding: 6px 14px; font-size: 12px;">Search</button>
                                 <button type="button" class="btn-fetch-loc" onclick="fetchCurrentLocation()" style="padding: 6px 12px; font-size: 12px;">
                                     <i class="bi bi-geo-alt-fill"></i> GPS
@@ -962,34 +993,34 @@ textarea.is-invalid ~ .invalid-feedback,
                     <!-- Floor No -->
                     <div>
                         <label>Floor No <span class="req">*</span></label>
-                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. #123" required oninput="validateSingleField(this)">
+                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. 1st" required oninput="validateSingleField(this)">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
                     </div>
 
-                    <!-- Ward (Readonly - Auto-Mapped from GPS) -->
+                    <!-- Ward -->
                     <div>
-                        <label>Ward (Auto-Mapped from Map Pin) <span class="req">*</span></label>
+                        <label>Ward <span class="req">*</span></label>
                         <input type="hidden" name="ward_id" id="wardIdInput" required>
                         <input type="text" id="wardDisplayInput" placeholder="Pin location on map to map Ward..." readonly required style="background-color: #f8f9fa; cursor: not-allowed; font-weight: 700; color: var(--green);">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please pin your location on the map to auto-map Ward.</div>
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please pin your location.</div>
                     </div>
 
-                    <!-- Constituency (Readonly - Auto-Mapped) -->
+                    <!-- Constituency -->
                     <div>
-                        <label>Constituency (Auto-Mapped)</label>
-                        <input type="text" id="constituencyInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                        <label>Constituency</label>
+                        <input type="text" id="constituencyInput" placeholder="Auto-mapped..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
                     </div>
 
-                    <!-- Corporation (Readonly - Auto-Mapped) -->
+                    <!-- Corporation -->
                     <div>
-                        <label>Corporation (Auto-Mapped)</label>
-                        <input type="text" id="corporationInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                        <label>Corporation</label>
+                        <input type="text" id="corporationInput" placeholder="Auto-mapped..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
                     </div>
 
                     <!-- Landmark -->
                     <div>
                         <label>Landmark <span class="req">*</span></label>
-                        <input type="text" id="landmarkInput" name="landmark" placeholder="Enter nearby landmark (e.g. Near Metro Station)" required oninput="validateSingleField(this)">
+                        <input type="text" id="landmarkInput" name="landmark" placeholder="Enter nearby landmark" required oninput="validateSingleField(this)">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a landmark.</div>
                     </div>
 
@@ -1003,11 +1034,11 @@ textarea.is-invalid ~ .invalid-feedback,
 </div>
                 </div>
 
-                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
-                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(1)" style="width: 30%;">
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(1)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(3)" style="width: 70%;">
+                    <button type="button" class="btn-ui continue-btn mt-0" onclick="goToStep(3)" style="width: 70%;">
                         Next: Pickup Day <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>
@@ -1025,11 +1056,20 @@ textarea.is-invalid ~ .invalid-feedback,
                     </div>
                 </div>
 
+                <div style="background: #e8f5ed; border: 1px solid #bce4c8; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                    <div style="font-weight: 700; color: var(--green); margin-bottom: 4px;">
+                        <i class="bi bi-info-circle-fill"></i> Note:
+                    </div>
+                    <div style="font-size: 13px; color: #2b3930;">
+                       All Bulky Waste shall be dismantled & should be kept in the ground floor for the pickup failing which the waste shall not be picked up and Request shall be closed.
+                    </div>
+                </div>
+                
                 <div class="d-flex gap-3 mt-4">
                     <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(2)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(4)" style="width: 70%;">
+                    <button type="button" class="btn-ui continue-btn mt-0" onclick="goToStep(4)" style="width: 70%;">
                         Next: Review &amp; Submit <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>
@@ -1110,24 +1150,54 @@ All Bulky Waste shall be dismantled & should be kept in the ground floor for the
 
                 </div>
 
-                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
-                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(3)" style="width: 30%;">
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(3)" style="width: 30%;">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="submit" class="btn-ui continue-btn mt-0" style="width: 70%;">
-                        <i class="bi bi-check-circle-fill"></i> Submit D-Clutter Request
-                    </button>
+                   <button
+    type="submit"
+    id="submitBtn"
+    class="btn-ui continue-btn mt-0"
+    style="width: 70%;"
+    disabled
+>
+    <i class="bi bi-check-circle-fill"></i>
+    Submit D-Clutter Request
+</button>
                 </div>
             </div>
 
         </form>
     </div>
 </main>
+<div id="requestPageLoader" class="request-page-loader" role="status" aria-live="polite" aria-hidden="true">
+    <div class="request-page-loader__content">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span id="requestPageLoaderText">Please wait...</span>
+    </div>
+</div>
+<div id="cameraModal" class="camera-modal" role="dialog" aria-modal="true" aria-labelledby="cameraModalTitle" aria-hidden="true">
+    <div class="camera-modal__panel">
+        <div class="camera-modal__header">
+            <span id="cameraModalTitle">Take waste photo</span>
+            <button type="button" class="camera-modal__close" onclick="closeCamera()" aria-label="Close camera">&times;</button>
+        </div>
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" hidden></canvas>
+        <div class="camera-modal__actions">
+            <button type="button" class="btn-ui btn-secondary-ui" onclick="closeCamera()">Cancel</button>
+            <button type="button" class="btn-ui" id="capturePhotoBtn" onclick="capturePhoto()">
+                <i class="bi bi-camera-fill"></i> Capture Photo
+            </button>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 let globalMap = null;
@@ -1137,9 +1207,60 @@ let fpInstance = null;
 let updateLocationDebounceTimer = null;
 let selectedWasteFiles = [];
 let isProgrammaticSync = false;
+let requestLoaderTimer = null;
+
+function showLoader(message = 'Please wait...') {
+    const loader = document.getElementById('requestPageLoader');
+    const text = document.getElementById('requestPageLoaderText');
+    if (!loader) return;
+
+    if (text) text.textContent = message;
+    loader.classList.add('show');
+    loader.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('overflow-hidden');
+}
+
+function hideLoader() {
+    const loader = document.getElementById('requestPageLoader');
+    if (!loader) return;
+
+    loader.classList.remove('show');
+    loader.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('overflow-hidden');
+}
+
+function setButtonLoading(button, loading, label = 'Please wait...') {
+    if (!button) return;
+
+    if (loading) {
+        button.dataset.originalContent = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ' + label;
+        button.classList.add('is-loading');
+        button.disabled = true;
+    } else {
+        button.innerHTML = button.dataset.originalContent || button.innerHTML;
+        button.classList.remove('is-loading');
+        button.disabled = false;
+    }
+}
+
+function showButtonLoader(button, message, callback, delay = 250) {
+    setButtonLoading(button, true, message);
+    showLoader(message);
+    window.clearTimeout(requestLoaderTimer);
+    requestLoaderTimer = window.setTimeout(function() {
+        hideLoader();
+        if (callback) callback();
+        setButtonLoading(button, false);
+    }, delay);
+}
 
 // Dynamic Categories & Subcategories from Backend Database
-const dbCategories = @json($categories);
+const dbCategories = [
+    { id: 1, name: 'Furniture', icon: 'fa-couch', subcategories: [{id: 101, name: 'Sofa'}, {id: 102, name: 'Dining Table'}] },
+    { id: 2, name: 'Electronics', icon: 'fa-tv', subcategories: [{id: 201, name: 'Television'}, {id: 202, name: 'Refrigerator'}] },
+    { id: 3, name: 'Mattress', icon: 'fa-bed', subcategories: [{id: 301, name: 'Single Bed Mattress'}, {id: 302, name: 'Double Bed Mattress'}] }
+];
 const subcategoriesMap = {};
 const categoryStyles = {};
 
@@ -1161,6 +1282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initLeafletMap();
     }, 100);
     fetchCurrentLocation({ silent: true });
+    lockOtpProtectedFields();
 });
 
 function handleImageSelection(event) {
@@ -1169,17 +1291,13 @@ function handleImageSelection(event) {
     const newFiles = event.target.files;
     if (!newFiles || newFiles.length === 0) return;
 
-    // Reset array to exact files picked in dialog
     selectedWasteFiles = Array.from(newFiles);
-
     updateImagePreview();
 }
 
 function removeImage(index) {
     if (index >= 0 && index < selectedWasteFiles.length) {
         selectedWasteFiles.splice(index, 1);
-
-        // Sync remaining files back to input.files using DataTransfer with guard flag
         isProgrammaticSync = true;
         const dt = new DataTransfer();
         selectedWasteFiles.forEach(file => dt.items.add(file));
@@ -1188,7 +1306,6 @@ function removeImage(index) {
             input.files = dt.files;
         }
         isProgrammaticSync = false;
-
         updateImagePreview();
     }
 }
@@ -1436,34 +1553,42 @@ function validateSundayDate(input) {
 function goToStep(stepNum) {
     if (stepNum > currentStep) {
         if (!validateStep(currentStep)) {
+            hideLoader();
             return;
         }
     }
 
-    currentStep = stepNum;
+    const clickedButton = document.activeElement && document.activeElement.tagName === 'BUTTON'
+        ? document.activeElement
+        : null;
+    const direction = stepNum > currentStep ? 'Loading next step...' : 'Loading previous step...';
 
-    for (let i = 1; i <= 4; i++) {
-        const stepEl = document.getElementById(`step-${i}`);
-        const navEl = document.getElementById(`step-nav-${i}`);
-        if (stepEl) {
-            stepEl.style.display = (i === stepNum) ? 'block' : 'none';
+    showButtonLoader(clickedButton, direction, function() {
+        currentStep = stepNum;
+
+        for (let i = 1; i <= 4; i++) {
+            const stepEl = document.getElementById(`step-${i}`);
+            const navEl = document.getElementById(`step-nav-${i}`);
+            if (stepEl) {
+                stepEl.style.display = (i === stepNum) ? 'block' : 'none';
+            }
+            if (navEl) {
+                navEl.className = (i === stepNum) ? 'active' : (i < stepNum ? 'completed' : '');
+            }
         }
-        if (navEl) {
-            navEl.className = (i === stepNum) ? 'active' : (i < stepNum ? 'completed' : '');
+
+        if (stepNum === 2 && globalMap) {
+            setTimeout(() => {
+                globalMap.invalidateSize();
+            }, 200);
         }
-    }
 
-    if (stepNum === 2 && globalMap) {
-        setTimeout(() => {
-            globalMap.invalidateSize();
-        }, 200);
-    }
+        if (stepNum === 4) {
+            buildReviewSummary();
+        }
 
-    if (stepNum === 4) {
-        buildReviewSummary();
-    }
-
-    window.scrollTo({ top: 100, behavior: 'smooth' });
+        window.scrollTo({ top: 100, behavior: 'smooth' });
+    });
 }
 
 function validateStep(step) {
@@ -1544,18 +1669,6 @@ function validateStep(step) {
     if (step === 3) {
         const dateInput = document.getElementById('preferredDateInput');
         return validateSundayDate(dateInput);
-    }
-
-    if (step === 4) {
-        const termsCb = document.getElementById('termsAccepted');
-        const termsErr = document.getElementById('terms-error');
-        if (termsCb && !termsCb.checked) {
-            if (termsErr) termsErr.style.display = 'block';
-            return false;
-        } else {
-            if (termsErr) termsErr.style.display = 'none';
-        }
-        return true;
     }
 
     return true;
@@ -1654,7 +1767,16 @@ function initLeafletMap() {
 
     window.searchOnMap = function() {
         const query = document.getElementById('mapSearchInput').value;
-        if (!query) return;
+        const searchButton = document.querySelector('.map-search-bar button.btn-ui');
+        if (!query) {
+            document.getElementById('mapSearchInput').classList.add('is-invalid');
+            return;
+        }
+
+        document.getElementById('mapSearchInput').classList.remove('is-invalid');
+        showLoader('Searching location...');
+        if (searchButton) setButtonLoading(searchButton, true, 'Searching...');
+
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bengaluru')}`)
             .then(res => res.json())
             .then(data => {
@@ -1667,7 +1789,11 @@ function initLeafletMap() {
                     updatePickupLocation(lat, lon);
                 }
             })
-            .catch(err => console.error('Map search failed', err));
+            .catch(err => console.error('Map search failed', err))
+            .finally(function() {
+                hideLoader();
+                setButtonLoading(searchButton, false);
+            });
     };
 }
 
@@ -1682,29 +1808,7 @@ function updatePickupLocation(lat, lng) {
         const constInput = document.getElementById('constituencyInput');
         const corpInput = document.getElementById('corporationInput');
 
-        // 1. Fast local Laravel Spatial Ward Lookup (<20ms)
-        fetch(`{{ route('citizen.lookup-ward') }}?lat=${lat}&lng=${lng}`)
-            .then(r => r.json())
-            .then(wardRes => {
-                if (wardRes.success && wardRes.ward) {
-                    if (wardIdInput) wardIdInput.value = wardRes.ward.id;
-                    if (wardDisplay) {
-                        wardDisplay.value = `${wardRes.ward.name} (${wardRes.ward.constituency_name || 'Ward ' + wardRes.ward.ward_number})`;
-                        validateSingleField(wardDisplay);
-                    }
-                    if (constInput) {
-                        constInput.value = wardRes.ward.constituency_name || 'N/A';
-                        validateSingleField(constInput);
-                    }
-                    if (corpInput) {
-                        corpInput.value = wardRes.ward.corporation_name || 'N/A';
-                        validateSingleField(corpInput);
-                    }
-                }
-            })
-            .catch(e => console.error('Ward spatial lookup error', e));
-
-        // 2. Safe reverse geocoding with 2.5s AbortController timeout
+        // Safe reverse geocoding with 2.5s AbortController timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2500);
 
@@ -1719,24 +1823,29 @@ function updatePickupLocation(lat, lng) {
         })
         .then(data => {
             const addrEl = document.getElementById('addressInput');
-            if (data && data.display_name && addrEl && !addrEl.value) {
+            if (data && data.display_name && addrEl) {
                 addrEl.value = data.display_name;
                 validateSingleField(addrEl);
             }
 
             const pinEl = document.getElementById('pincodeInput');
-            if (data && data.address && data.address.postcode && pinEl && !pinEl.value) {
+            if (data && data.address && data.address.postcode && pinEl) {
                 pinEl.value = data.address.postcode;
                 validateSingleField(pinEl);
             }
+            
+            if (wardIdInput) wardIdInput.value = 'DummyWard1';
+            if (wardDisplay) wardDisplay.value = 'Demo Ward';
         })
         .catch(err => {
             clearTimeout(timeoutId);
             const addrEl = document.getElementById('addressInput');
-            if (addrEl && !addrEl.value) {
+            if (addrEl) {
                 addrEl.value = `Site Location near ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E, Bengaluru`;
                 validateSingleField(addrEl);
             }
+            if (wardIdInput) wardIdInput.value = 'DummyWard1';
+            if (wardDisplay) wardDisplay.value = 'Demo Ward';
         });
     }, 200);
 }
@@ -1803,29 +1912,50 @@ window.fetchCurrentLocation = function(options = {}) {
 };
 
 function handleFormSubmit(event) {
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
-        event.preventDefault();
+    event.preventDefault();
+
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
         return;
     }
     
-    if (typeof showLoader === 'function') {
-        showLoader('Submitting D-Clutter request...');
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        setButtonLoading(submitBtn, true, 'Submitting...');
     }
+    showLoader('Submitting request...');
+    
+    setTimeout(() => {
+        if (typeof Swal !== 'undefined') {
+            hideLoader();
+            Swal.fire({
+                icon: 'success',
+                title: 'Request Submitted!',
+                text: 'Your D-Clutter pickup request has been received successfully. You can now track its status.',
+                confirmButtonColor: '#087d45',
+                confirmButtonText: 'Track Request',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "/user/track-request";
+                }
+            });
+        } else {
+            hideLoader();
+            alert('Your D-Clutter pickup request has been received successfully.');
+            window.location.href = "/user/track-request";
+        }
+        
+        if (submitBtn) {
+            setButtonLoading(submitBtn, false);
+        }
+    }, 1200);
 }
-
-
 
 
 /* =========================================================
    OTP PROTECTION
 ========================================================= */
-
 let otpVerified = false;
-
-
-/* ---------------------------------------------------------
-   FIELDS THAT REQUIRE OTP VERIFICATION
---------------------------------------------------------- */
 
 const otpProtectedFieldIds = [
     'wasteImagesInput',
@@ -1840,207 +1970,93 @@ const otpProtectedFieldIds = [
     'pincodeInput'
 ];
 
-
-/* ---------------------------------------------------------
-   LOCK ALL FIELDS INITIALLY
---------------------------------------------------------- */
-
 function lockOtpProtectedFields() {
-
     otpProtectedFieldIds.forEach(function(id) {
-
         const field = document.getElementById(id);
-
-        if (field) {
-            field.disabled = true;
-        }
-
+        if (field) { field.disabled = true; }
     });
-
-    // Disable buttons related to location/map
-    document.querySelectorAll(
-        '.btn-fetch-loc'
-    ).forEach(function(button) {
+    document.querySelectorAll('.btn-fetch-loc').forEach(function(button) {
         button.disabled = true;
     });
-
 }
-
-
-/* ---------------------------------------------------------
-   UNLOCK AFTER OTP VERIFICATION
---------------------------------------------------------- */
 
 function unlockOtpProtectedFields() {
-
     otpProtectedFieldIds.forEach(function(id) {
-
         const field = document.getElementById(id);
-
-        if (field) {
-            field.disabled = false;
-        }
-
+        if (field) { field.disabled = false; }
     });
-
-    document.querySelectorAll(
-        '.btn-fetch-loc'
-    ).forEach(function(button) {
+    document.querySelectorAll('.btn-fetch-loc').forEach(function(button) {
         button.disabled = false;
     });
-
     otpVerified = true;
-
 }
-
-
-/* ---------------------------------------------------------
-   CHECK MOBILE NUMBER
---------------------------------------------------------- */
 
 function validateMobileAndShowOtp() {
+    const mobile = document.getElementById('mobileInput').value.trim();
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const mobileError = document.getElementById('mobileError');
 
-    const mobile =
-        document.getElementById('mobileInput').value.trim();
+    document.getElementById('mobileInput').value = mobile.replace(/\D/g, '').substring(0, 10);
 
-    const sendOtpBtn =
-        document.getElementById('sendOtpBtn');
-
-    const mobileError =
-        document.getElementById('mobileError');
-
-    // Only numbers
-    document.getElementById('mobileInput').value =
-        mobile.replace(/\D/g, '').substring(0, 10);
-
-    if (/^[0-9]{10}$/.test(
-        document.getElementById('mobileInput').value
-    )) {
-
+    if (/^[0-9]{10}$/.test(document.getElementById('mobileInput').value)) {
         sendOtpBtn.style.display = 'block';
         mobileError.style.display = 'none';
-
     } else {
-
         sendOtpBtn.style.display = 'none';
         mobileError.style.display = 'none';
-
     }
-
 }
-
-
-/* ---------------------------------------------------------
-   SEND WHATSAPP OTP
---------------------------------------------------------- */
 
 function sendWhatsAppOTP() {
-
-    const mobile =
-        document.getElementById('mobileInput').value.trim();
-
+    const mobile = document.getElementById('mobileInput').value.trim();
     if (!/^[0-9]{10}$/.test(mobile)) {
-
-        document.getElementById('mobileError').style.display =
-            'block';
-
+        document.getElementById('mobileError').style.display = 'block';
         return;
     }
+    const sendBtn = document.getElementById('sendOtpBtn');
+    const otpSection = document.getElementById('otpSection');
 
-    const sendBtn =
-        document.getElementById('sendOtpBtn');
-
-    const otpSection =
-        document.getElementById('otpSection');
-
-    /*
-     * IMPORTANT:
-     * Replace this section with your Laravel AJAX request
-     * when WhatsApp OTP backend is connected.
-     */
-
-    sendBtn.disabled = true;
-    sendBtn.innerHTML = 'Sending...';
+    setButtonLoading(sendBtn, true, 'Sending...');
+    showLoader('Sending OTP...');
 
     setTimeout(function() {
-
+        hideLoader();
         otpSection.style.display = 'block';
-
-        sendBtn.innerHTML = 'OTP Sent';
-
+        setButtonLoading(sendBtn, false);
+        sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> OTP Sent';
+        sendBtn.disabled = true;
         document.getElementById('otpInput').focus();
-
     }, 800);
-
 }
-
-
-/* ---------------------------------------------------------
-   VERIFY WHATSAPP OTP
---------------------------------------------------------- */
 
 function verifyWhatsAppOTP() {
-
-    const otp =
-        document.getElementById('otpInput').value.trim();
-
-    const message =
-        document.getElementById('otpMessage');
+    const otp = document.getElementById('otpInput').value.trim();
+    const message = document.getElementById('otpMessage');
 
     if (!/^[0-9]{6}$/.test(otp)) {
-
         message.style.display = 'block';
         message.style.color = '#dc3545';
-
-        message.innerHTML =
-            'Please enter a valid 6-digit OTP.';
-
+        message.innerHTML = 'Please enter a valid 6-digit OTP.';
         return;
     }
 
-    /*
-     * TEMPORARY FRONTEND DEMO
-     *
-     * Replace this with Laravel OTP verification.
-     */
-
-    const verifyBtn =
-        document.getElementById('verifyOtpBtn');
-
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = 'Verifying...';
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    setButtonLoading(verifyBtn, true, 'Verifying...');
+    showLoader('Verifying OTP...');
 
     setTimeout(function() {
-
+        hideLoader();
         otpVerified = true;
-
         message.style.display = 'block';
         message.style.color = '#198754';
-
-        message.innerHTML =
-            '<i class="bi bi-check-circle-fill"></i> ' +
-            'Mobile number verified successfully.';
-
-        verifyBtn.innerHTML = 'Verified';
+        message.innerHTML = '<i class="bi bi-check-circle-fill"></i> Mobile number verified successfully.';
+        setButtonLoading(verifyBtn, false);
+        verifyBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Verified';
         verifyBtn.disabled = true;
-
         document.getElementById('otpInput').disabled = true;
-
         unlockOtpProtectedFields();
-
     }, 700);
-
 }
 
-
-/* ---------------------------------------------------------
-   INITIAL LOCK
---------------------------------------------------------- */
-
-document.addEventListener('DOMContentLoaded', function() {
-
-    lockOtpProtectedFields();
-
-});
 </script>
 @endsection

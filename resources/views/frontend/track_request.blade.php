@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
-@section('content')
 <style>
 :root {
     --green: #087d45;
@@ -12,54 +11,82 @@
 }
 
 .request-ui {
-    max-width: 1080px;
+    max-width: auto;
     margin: 0 auto;
-    padding: 30px 20px 50px;
+    padding: 34px 24px 64px;
     color: var(--ink);
     font-family: 'Inter', sans-serif;
 }
 
 .crumb {
-    font-size: 13px;
-    color: #738078;
-    margin-bottom: 18px;
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 20px;
+    padding: 8px 12px 8px 9px;
+    border: 1px solid #dce8e0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f7fcf8, #ffffff);
+    color: #819087;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 12px rgba(23, 50, 32, 0.04);
 }
 
 .crumb a {
-    color: #738078;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .crumb a:hover {
-    color: var(--green);
+    color: var(--green-dark);
+}
+
+.crumb a i {
+    font-size: 14px;
+}
+
+.crumb > i {
+    color: #afbeb4;
+    font-size: 11px;
+}
+
+.crumb-current {
+    color: var(--ink);
+    font-weight: 700;
 }
 
 .request-ui h1 {
-    font-size: 26px;
+    font-size: clamp(26px, 3vw, 36px);
     font-weight: 800;
-    margin: 0 0 22px;
+    letter-spacing: -0.02em;
+    margin: 0 0 24px;
     color: var(--ink);
 }
 
 .card-ui {
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 24px;
-    background: #ffffff;
-    box-shadow: 0 2px 12px rgba(23, 50, 32, 0.04);
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(145deg, #ffffff 0%, #fbfefc 100%);
+    box-shadow: 0 14px 34px rgba(23, 50, 32, 0.07);
 }
 
 /* Track Search Input */
 .search-ui {
-    padding: 6px 10px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid #d7e5db;
+    border-radius: 12px;
     display: flex;
     gap: 12px;
     background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    margin-bottom: 24px;
+    box-shadow: 0 8px 22px rgba(23, 50, 32, 0.06);
+    margin-bottom: 28px;
 }
 
 .search-ui input {
@@ -69,10 +96,18 @@
     height: 42px;
     padding: 0 14px;
     outline: none;
+    color: var(--ink);
+    background: transparent;
+}
+
+.search-ui:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(8, 125, 69, 0.1), 0 8px 22px rgba(23, 50, 32, 0.06);
 }
 
 .search-ui .btn-ui {
-    padding: 10px 32px;
+    min-width: 112px;
+    padding: 10px 24px;
 }
 
 /* Status Card */
@@ -84,6 +119,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 20px;
 }
 
 .ref {
@@ -100,17 +136,13 @@
 
 .pill {
     font-size: 11px;
+    background: #e3f3e8;
+    color: var(--green);
     border-radius: 20px;
     padding: 6px 14px;
     font-weight: 700;
-    text-transform: uppercase;
-    display: inline-block;
+    border: 1px solid #bce4c8;
 }
-.pill-pending { background: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
-.pill-assigned { background: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
-.pill-picked_up { background: #fff4e5; color: #ff9800; border: 1px solid #ffcc80; }
-.pill-dumped { background: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
-.pill-rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
 /* Status Flow Stepper */
 .status-flow {
@@ -137,10 +169,10 @@
     position: absolute;
     top: 18px;
     left: 8%;
+    width: 60%;
     height: 3px;
     background: var(--green);
     z-index: 1;
-    transition: width 0.3s ease;
 }
 
 .status-flow span {
@@ -168,8 +200,8 @@
     box-shadow: 0 2px 6px rgba(8, 125, 69, 0.2);
 }
 
-.status-flow span.pending-step::before {
-    content: '•';
+.status-flow span.pending-last::before {
+    content: '5';
     background: #ffffff;
     border: 2px solid #aebbb4;
     color: var(--muted);
@@ -230,138 +262,106 @@
 }
 
 @media (max-width: 768px) {
+    .request-ui { padding: 24px 16px 44px; }
+    .card-ui { padding: 20px 16px; border-radius: 14px; }
+    .crumb { margin-bottom: 16px; }
+    .search-ui { gap: 6px; }
+    .search-ui input { min-width: 0; padding: 0 10px; font-size: 13px; }
+    .search-ui .btn-ui { min-width: auto; padding: 10px 16px; }
+    .topline { align-items: flex-start; }
+    .ref { font-size: 16px; }
     .facts { grid-template-columns: 1fr 1fr; }
     .status-flow { overflow-x: auto; justify-content: flex-start; gap: 16px; padding-bottom: 8px; }
     .status-flow::before, .status-flow-line-fill { display: none; }
 }
 </style>
 
+@section('content')
 <main class="request-ui">
-    <div class="crumb"><a href="{{ url('/') }}">Home</a> / Track Request</div>
+    <nav class="crumb" aria-label="Breadcrumb">
+        <a href="{{ url('/') }}"><i class="bi bi-house-door-fill" aria-hidden="true"></i><span>Home</span></a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span class="crumb-current" aria-current="page">Track Request</span>
+    </nav>
     <h1>Track Your Request</h1>
 
-    <!-- Search Form -->
-    <form action="{{ route('citizen.track') }}" method="GET" class="search-ui">
-        <input type="text" name="id" id="trackInput" 
-               placeholder="Enter Request ID (e.g. #DCL-2026-000001) or Mobile Number" 
-               value="{{ request('id') ?? request('query') ?? ($wasteRequest?->request_number ?? '') }}" required>
-        <button type="submit" class="btn-ui">Track</button>
-    </form>
+    <div class="search-ui">
+        <input type="text" id="trackInput" placeholder="Enter Request ID (e.g. DCL-2025-000123) or Mobile Number" value="{{ request('id', 'DCL-2025-000123') }}">
+        <button class="btn-ui" onclick="doTrackSearch()">Track</button>
+    </div>
 
-    @if($wasteRequest)
-        @php
-            $status = $wasteRequest->status;
-            
-            // Stepper logic
-            $stepFillWidth = '20%';
-            if ($status == 'assigned') $stepFillWidth = '45%';
-            elseif ($status == 'picked_up') $stepFillWidth = '70%';
-            elseif ($status == 'dumped') $stepFillWidth = '100%';
-
-            $pillMap = [
-                'pending' => 'pill-pending',
-                'assigned' => 'pill-assigned',
-                'picked_up' => 'pill-picked_up',
-                'dumped' => 'pill-dumped',
-                'rejected' => 'pill-rejected',
-            ];
-        @endphp
-
-        <div class="card-ui track-box">
-            <div class="topline">
-                <div>
-                    <div class="ref" id="trackReqId">{{ $wasteRequest->request_number }}</div>
-                    <div class="sub" id="trackReqDate">
-                        Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
-                    </div>
-                    <div class="sub" id="trackCategory">
-                        Category: 
-                        @if(is_array($wasteRequest->category_ids))
-                            {{ implode(', ', $wasteRequest->category_ids) }}
-                        @else
-                            {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
-                        @endif
-                    </div>
-                </div>
-                <span class="pill {{ $pillMap[$status] ?? 'pill-pending' }}">
-                    {{ ucfirst(str_replace('_', ' ', $status)) }}
-                </span>
+    <div class="card-ui track-box">
+        <div class="topline">
+            <div>
+                <div class="ref" id="trackReqId">{{ request('id', 'DCL-2025-000123') }}</div>
+                <div class="sub" id="trackReqDate">Requested on: 23 May 2025, 10:30 AM</div>
+                <div class="sub" id="trackCategory">Category: D-Clutter Rubble</div>
             </div>
+            <span class="pill" id="trackStatusPill">In Progress</span>
+        </div>
 
-            <!-- Stepper Progress Flow -->
-            <div class="status-flow">
-                <div class="status-flow-line-fill" style="width: {{ $stepFillWidth }};"></div>
-                
-                <span class="completed">Request<br>Submitted</span>
-                
-                <span class="{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? 'completed' : ($status == 'pending' ? 'active-stage' : 'pending-step') }}">
-                    Verified
-                </span>
-                
-                <span class="{{ in_array($status, ['picked_up', 'dumped']) ? 'completed' : ($status == 'assigned' ? 'active-stage' : 'pending-step') }}">
-                    Assigned
-                </span>
-                
-                <span class="{{ $status == 'dumped' ? 'completed' : ($status == 'picked_up' ? 'active-stage' : 'pending-step') }}">
-                    Picked Up
-                </span>
-                
-                <span class="{{ $status == 'dumped' ? 'completed active-stage' : 'pending-step' }}">
-                    Disposed
-                </span>
+        <div class="status-flow">
+            <div class="status-flow-line-fill"></div>
+            <span class="completed">Request<br>Submitted</span>
+            <span class="completed">Verified</span>
+            <span class="completed">Assigned</span>
+            <span class="completed active-stage">Pickup</span>
+            <span class="pending-last">Disposed</span>
+        </div>
+
+        <div class="facts">
+            <div>
+                <small>Estimated Pickup Time</small>
+                <b>Today, 2:00 PM – 4:00 PM</b>
             </div>
-
-            <!-- Facts Grid -->
-            <div class="facts">
-                <div>
-                    <small>Scheduled Pickup Date</small>
-                    <b>{{ $wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d M Y (l)') : 'Sunday Scheduled' }}</b>
-                </div>
-                <div>
-                    <small>Assigned Vehicle</small>
-                    <b>
-                        @if($wasteRequest->vehicle)
-                            {{ $wasteRequest->vehicle->vehicle_number }}
-                        @else
-                            Pending Assignment
-                        @endif
-                    </b>
-                </div>
-                <div>
-                    <small>Driver Details</small>
-                    <b>
-                        @if($wasteRequest->vehicle)
-                            {{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }}
-                            @if($wasteRequest->vehicle->driver_phone || $wasteRequest->vehicle->owner?->mobile_number)
-                                ({{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number }})
-                            @endif
-                        @else
-                            Not Assigned
-                        @endif
-                    </b>
-                </div>
-                <div>
-                    <small>Pickup Address</small>
-                    <b>{{ $wasteRequest->house_no }}, {{ Str::limit($wasteRequest->address, 30) }}</b>
-                </div>
+            <div>
+                <small>Assigned Contractor</small>
+                <b id="trackContractor">GreenBuild Infra Solutions</b>
             </div>
-
-            <div style="margin-top: 20px;">
-                <a class="btn-ui" href="{{ route('citizen.details', ['id' => $wasteRequest->request_number]) }}">View Full Details</a>
+            <div>
+                <small>Vehicle No.</small>
+                <b id="trackVehicle">KA 01 AB 1234</b>
+            </div>
+            <div>
+                <small>Driver Contact</small>
+                <b>+91 98765 43210</b>
             </div>
         </div>
-    @else
-        <div class="card-ui track-box text-center py-5">
-            <i class="fa fa-search fa-3x text-muted mb-3"></i>
-            <h4 class="fw-bold" style="color: #2c3e50;">No Waste Request Found</h4>
-            <p class="text-muted mb-0" style="font-size: 14px;">
-                @if($searchId)
-                    We couldn't find any request matching "<strong>{{ $searchId }}</strong>". Please double-check your Request ID or Mobile Number.
-                @else
-                    Enter your Request ID or registered Mobile Number above to track your waste pickup status.
-                @endif
-            </p>
+
+        <div style="margin-top: 20px;">
+            <a class="btn-ui" id="viewDetailsBtn" href="{{ route('citizen.details') }}?id={{ request('id', 'DCL-2025-000123') }}">View Details</a>
         </div>
-    @endif
+    </div>
 </main>
+@endsection
+
+@section('script')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof hideLoader === 'function') hideLoader();
+
+    // Check if matching record in localStorage
+    const searchId = new URLSearchParams(window.location.search).get('id') || 'DCL-2025-000123';
+    const saved = JSON.parse(localStorage.getItem('dclutter_requests') || '[]');
+    const found = saved.find(r => r.id === searchId);
+
+    if (found) {
+        document.getElementById('trackReqId').innerText = found.id;
+        document.getElementById('trackReqDate').innerText = `Requested on: ${found.dateSubmitted}`;
+        document.getElementById('trackCategory').innerText = `Category: D-Clutter (${found.wasteType})`;
+        document.getElementById('viewDetailsBtn').href = `{{ route('citizen.details') }}?id=${found.id}`;
+    }
+});
+
+function doTrackSearch() {
+    const val = document.getElementById('trackInput').value.trim();
+    if (!val) return;
+    if (typeof showLoader === 'function') {
+        showLoader('Tracking request status...');
+    }
+    setTimeout(() => {
+        window.location.href = `{{ route('citizen.track') }}?id=${encodeURIComponent(val)}`;
+    }, 400);
+}
+</script>
 @endsection

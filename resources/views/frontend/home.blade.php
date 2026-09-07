@@ -268,7 +268,7 @@
 </style>
 
 @section('content')
-<div class="container my-4">
+<div class="container-fuild my-4 ms-4 me-3">
     <!-- HERO BANNER -->
     <section class="heronew d-flex align-items-center">
         <div class="row w-100">

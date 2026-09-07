@@ -161,7 +161,7 @@ class CitizenRequestController extends Controller
                 ->first();
         }
 
-        return view('frontend.track_request', compact('wasteRequest', 'searchId'));
+        return view('frontend.track.track_request', compact('wasteRequest', 'searchId'));
     }
 
     /**
@@ -187,7 +187,7 @@ class CitizenRequestController extends Controller
                 ->first();
         }
 
-        return view('frontend.request_details', compact('wasteRequest', 'reqId'));
+        return view('frontend.track.show', compact('wasteRequest', 'reqId'));
     }
 
     /**
