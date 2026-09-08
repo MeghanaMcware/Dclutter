@@ -79,6 +79,20 @@
                                 <div class="invalid-feedback">Please enter the plant location name.</div>
                             </div>
 
+
+                             <!-- Plant Latitude -->
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="latitude" class="dump-form-label mb-0">Latitude <span class="text-danger">*</span></label>
+                                <input type="text" id="latitude" name="latitude" class="dump-form-control" placeholder="Enter latitude" required>
+                                <div class="invalid-feedback">Please enter the latitude.</div>
+                            </div>
+                             <!-- Plant Longitude -->
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="longitude" class="dump-form-label mb-0">Longitude <span class="text-danger">*</span></label>
+                                <input type="text" id="longitude" name="longitude" class="dump-form-control" placeholder="Enter longitude" required>
+                                <div class="invalid-feedback">Please enter the longitude.</div>
+                            </div>
+
                             <!-- Plant Address -->
                             <div class="mb-4 col-lg-6 col-md-6 col-12">
                                 <label for="address" class="dump-form-label">Plant Place Address <span class="text-danger">*</span></label>

@@ -3,7 +3,7 @@
         <i class="fa-solid fa-house"></i>Home
     </a>
     <a href="{{ route('user.report') }}" class="{{ request()->routeIs('user.report*') ? 'active' : '' }}">
-        <i class="fa-solid fa-camera"></i>Report
+        <i class="fa-solid fa-camera"></i>Raise
     </a>
     <a href="{{ route('user.track') }}" class="{{ request()->routeIs('user.track*') ? 'active' : '' }}">
         <i class="fa-solid fa-map-location-dot"></i>Track

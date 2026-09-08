@@ -13,16 +13,20 @@
         border-bottom: 1px solid #eaebf0;
     }
     .detail-label {
-        font-size: 13px;
-        color: #6c757d;
-        font-weight: 500;
-        margin-bottom: 4px;
-    }
-    .detail-value {
         font-size: 14px;
         color: #2c3e50;
         font-weight: 600;
+        
+    }
+    .detail-value {
+font-size: 13px;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 4px;
         margin-bottom: 15px;
+
+
+        
     }
     .card-custom {
         border: 1px solid #eaebf0;

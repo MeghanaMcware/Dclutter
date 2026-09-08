@@ -2,7 +2,8 @@
     <div class="user-footer__skyline" aria-hidden="true"></div>
     <div class="user-footer__content">
         <div class="user-footer__brand">
-            <span class="user-footer__logo"><i class="fa-solid fa-leaf" aria-hidden="true"></i></span>
+            <span class="user-footer__logo"><img class="hero-truck1"
+                    src="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}" width="100%" alt=""></span>
             <strong>DCLUTTER</strong>
         </div>
         <div class="user-footer__tagline">BENGALURU'S CLEAN STREETS</div>

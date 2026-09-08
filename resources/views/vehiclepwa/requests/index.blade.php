@@ -254,13 +254,15 @@
         }
 
         .card-info-label {
-            color: #4b5563;
-            font-weight: 500;
+          color: #111827;
+            font-weight: 800;
         }
 
         .card-info-value {
-            color: #111827;
-            font-weight: 800;
+           
+
+               color: #4b5563;
+            font-weight: 500;
         }
 
         /* Bottom View Button */
@@ -448,7 +450,7 @@
 
                     <div class="row mb-3">
                         <div class="col-6">
-                            <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Applicant Name</label>
+                            <label class=" text-uppercase d-block mb-1">Applicant Name</label>
                             <strong class="fs-6 text-dark" id="modalApplicantName">Ramesh Kumar</strong>
                         </div>
                         <div class="col-6">
@@ -554,7 +556,15 @@
             <option value="asking_next_date">Asking for Next Date</option>
 
         </select>
-<button type="button"
+
+        <div id="nextDateSection" class="modal-reason-section" style="display: none;">
+            <label class="modal-reason-label d-block" for="nextPickupDate">Next Pickup Date</label>
+            <input type="date"
+               id="nextPickupDate"
+               class="modal-reason-select"
+               min="{{ now()->format('Y-m-d') }}">
+        </div>
+    <button type="button"
         id="notAvailableSubmitBtn"
         class="modal-submit-btn"
         disabled>
@@ -820,6 +830,8 @@
     const directionsBtn = document.getElementById('modalDirectionsBtn');
     const notAvailableSection = document.getElementById('notAvailableSection');
     const notAvailableReason = document.getElementById('notAvailableReason');
+    const nextDateSection = document.getElementById('nextDateSection');
+    const nextPickupDate = document.getElementById('nextPickupDate');
     const notAvailableSubmitBtn = document.getElementById('notAvailableSubmitBtn');
     const availablePickupSection = document.getElementById('availablePickupSection');
 
@@ -828,6 +840,9 @@
     // Reset every time modal opens
     availabilitySelect.value = '';
     notAvailableReason.value = '';
+    nextPickupDate.value = '';
+    nextPickupDate.min = new Date().toISOString().split('T')[0];
+    nextDateSection.style.display = 'none';
     notAvailableSection.style.display = 'none';
     availablePickupSection.style.display = 'none';
     notAvailableSubmitBtn.disabled = true;
@@ -877,15 +892,23 @@
 
     // Enable Submit only after reason is selected
     notAvailableReason.onchange = function () {
+        const asksForNextDate = this.value === 'asking_next_date';
+        nextDateSection.style.display = asksForNextDate ? 'block' : 'none';
+        nextPickupDate.required = asksForNextDate;
+        notAvailableSubmitBtn.disabled = this.value === '' || (asksForNextDate && !nextPickupDate.value);
 
-        notAvailableSubmitBtn.disabled = this.value === '';
+    };
 
+    nextPickupDate.onchange = function () {
+        const asksForNextDate = notAvailableReason.value === 'asking_next_date';
+        notAvailableSubmitBtn.disabled = notAvailableReason.value === '' || (asksForNextDate && !this.value);
     };
 
     // Not Available Submit
     notAvailableSubmitBtn.onclick = function () {
         const reason = notAvailableReason.value;
         if (!reason) return;
+        if (reason === 'asking_next_date' && !nextPickupDate.value) return;
 
         const reasonText = notAvailableReason.options[notAvailableReason.selectedIndex].text;
 
@@ -900,7 +923,8 @@
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                reason: reasonText
+                reason: reasonText,
+                next_date: reason === 'asking_next_date' ? nextPickupDate.value : null
             })
         })
         .then(async res => {

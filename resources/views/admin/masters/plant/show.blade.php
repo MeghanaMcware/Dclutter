@@ -43,6 +43,12 @@
                                     <td><strong>{{ $plant->name }}</strong></td>
                                 </tr>
                                 <tr>
+                                    <th>Latitude & Longitude</th>
+                                    <td>
+                                        <strong>66.88, 12.34</strong>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>Plant Place Address</th>
                                     <td>{{ $plant->address }}</td>
                                 </tr>

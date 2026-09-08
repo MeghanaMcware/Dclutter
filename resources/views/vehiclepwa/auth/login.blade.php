@@ -470,7 +470,7 @@
                                    placeholder="+91 98765 43210" 
                                    maxlength="10" 
                                    pattern="[0-9]{10}"
-                                   required>
+                                   required oninput="this.value = this.value.replace(/[^0-9]/g, '')"> 
                         </div>
 
                         <!-- Password Field -->

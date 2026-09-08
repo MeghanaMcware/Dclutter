@@ -435,7 +435,7 @@ class VehiclePwaController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'dump_photos' => 'nullable|array',
-            'dump_photos.*' => 'image|max:10240',
+            'dump_photos.*' => 'image|max:1024',
         ]);
 
         // Match request by request_id OR pickup_id (request_number)
