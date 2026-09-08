@@ -205,6 +205,10 @@
 .select2-dropdown {
     font-size: 13px;
 }
+
+.text-start1{
+    color: black !important;
+}
 </style>
 @endsection
 
@@ -222,7 +226,7 @@
                     <div class="row g-3 mb-4">
                         <!-- Row 1: Dropdown Selection Filters -->
                         <div class="col-md-4">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Status</label>
+                            <label class="form-label mb-0" ><b>Status</b></label>
                             <select id="statusFilter" class="form-select filter-input">
                                 <option value="">All Status</option>
                                 <option value="Pending">Pending</option>
@@ -233,7 +237,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Corporation</label>
+                            <label class="form-label mb-0" ><b>Corporation</b></label>
                             <select id="corporationFilter" class="form-select filter-input">
                                 <option value="">All Corporations</option>
                                 @foreach($corporations as $corp)
@@ -242,7 +246,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Constituency</label>
+                            <label class="form-label mb-0" ><b>Constituency</b></label>
                             <select id="constituencyFilter" class="form-select filter-input">
                                 <option value="">All Constituencies</option>
                                 @foreach($constituencies as $constituency)
@@ -253,11 +257,11 @@
 
                         <!-- Row 2: Date Filters & Action Buttons -->
                         <div class="col-md-4">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">From Date</label>
+                            <label class="form-label mb-0" ><b>From Date</b></label>
                             <input id="fromDateFilter" class="form-control filter-input" type="date">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">To Date</label>
+                            <label class="form-label mb-0" ><b>To Date</b></label>
                             <input id="toDateFilter" class="form-control filter-input" type="date">
                         </div>
                         <div class="col-md-4 d-flex align-items-end justify-content-end gap-2">
@@ -276,26 +280,34 @@
                         <table class="table table-bordered table-striped text-center align-middle" id="admin-waste-requests-table">
                             <thead>
                                 <tr>
-                                    <th class="text-start">Request ID</th>
-                                    <th class="text-start">Category</th>
-                                    <th class="text-start">Pickup Location</th>
-                                    <th class="text-start">Constituency</th>
-                                    <th class="text-start">Requested By</th>
-                                    <th class="text-start">Mobile</th>
-                                    <th>Status</th>
-                                    <th class="text-start">Created At</th>
-                                    <th class="text-center">Actions</th>
+                                    <th class="text-start text-start1" >Request ID</th>
+                                    <th class="text-start text-start1">Category</th>
+                                    <th class="text-start text-start1">Sub-Category</th>
+                                    <th class="text-start text-start1">Pickup Location</th>
+                                    <th class="text-start text-start1">Constituency</th>
+                                    <th class="text-start text-start1">Requested By</th>
+                                    <th class="text-start text-start1">Mobile</th>
+                                    <th class="text-start text-start1">Status</th>
+                                    <th class="text-start text-start1">Created At</th>
+                                    <th class="text-center text-start1">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($requests as $req)
                                     <tr>
-                                        <td class="text-start text-dark fw-bold">{{ $req->request_number }}</td>
+                                        <td class="text-start">{{ $req->request_number }}</td>
                                         <td class="text-start">
                                             @if(is_array($req->category_ids))
                                                 {{ implode(', ', $req->category_ids) }}
                                             @else
                                                 {{ $req->category_ids }}
+                                            @endif
+                                        </td>
+                                        <td class="text-start">
+                                            @if(is_array($req->subcategory_ids))
+                                                {{ implode(', ', $req->subcategory_ids) }}
+                                            @else
+                                                {{ $req->subcategory_ids }}
                                             @endif
                                         </td>
                                         <td class="text-start">{{ $req->house_no }}, {{ Str::limit($req->address, 30) }}</td>

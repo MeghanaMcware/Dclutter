@@ -50,7 +50,8 @@
                                 {{-- Left branding --}}
                                 <div class="col-lg-6 col-12 mb-3">
                                     <div class="d-flex flex-column gap-1 align-items-center justify-content-center gap-2">
-                                       <img src="{{ asset('frontend/pwa/images/clearitlogo.jpeg') }}" width="75%" alt="">
+                                       <img src="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}" width="40%" alt="">
+                                       <h6 class="text-dark fw-bold text-center"><b>D-Clutter</b></h6>
                                     </div>
                                 </div>
 

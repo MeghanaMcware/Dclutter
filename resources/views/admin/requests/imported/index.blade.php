@@ -137,12 +137,12 @@
                         <div class="row g-3 mb-4">
                             <!-- Row 1: Dropdown Selection Filters -->
                             <div class="col-md-4">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Search</label>
+                                <label class="form-label mb-0" ><b>Search</b></label>
                                 <input type="text" name="search" class="form-control filter-input" placeholder="Search applicant, mobile, address..." value="{{ request('search') }}">
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Corporation</label>
+                                <label class="form-label mb-0" ><b>Corporation</b></label>
                                 <select name="corporation_id" class="form-select filter-input">
                                     <option value="">All Corporations</option>
                                     @foreach($corporations as $corp)
@@ -152,7 +152,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #6c757d;">Constituency</label>
+                                <label class="form-label mb-0" ><b>Constituency</b></label>
                                 <select name="constituency_id" class="form-select filter-input">
                                     <option value="">All Constituencies</option>
                                     @foreach($constituencies as $constituency)
@@ -179,22 +179,22 @@
                         <table class="table table-bordered table-striped text-center align-middle" id="admin-imported-requests-table">
                             <thead>
                                 <tr>
-                                    <th class="text-start">Request ID</th>
-                                    <th class="text-start">Applicant Name</th>
-                                    <th class="text-start">Mobile</th>
-                                    <th class="text-start">Corporation</th>
-                                    <th class="text-start">Constituency</th>
-                                    <th class="text-start">Ward</th>
-                                    <th class="text-start">Address</th>
-                                    <th>Status</th>
-                                    <th class="text-center">Actions</th>
+                                    <th class="text-start text-start1">Request ID</th>
+                                    <th class="text-start text-start1">Applicant Name</th>
+                                    <th class="text-start text-start1">Mobile</th>
+                                    <th class="text-start text-start1">Corporation</th>
+                                    <th class="text-start text-start1">Constituency</th>
+                                    <th class="text-start text-start1">Ward</th>
+                                    <th class="text-start text-start1">Address</th>
+                                    <th class="text-start text-start1">Status</th>
+                                    <th class="text-center text-start1">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($importedRequests as $req)
                                     <tr>
-                                        <td class="text-start text-dark fw-bold">#{{ $req->id }}</td>
-                                        <td class="text-start text-dark fw-bold">{{ $req->applicant_name ?? 'N/A' }}</td>
+                                        <td class="text-start ">#{{ $req->id }}</td>
+                                        <td class="text-start ">{{ $req->applicant_name ?? 'N/A' }}</td>
                                         <td class="text-start">{{ $req->mobile_number ?? 'N/A' }}</td>
                                         <td class="text-start">{{ $req->corporation?->name ?? ($req->corporation_name ?? 'N/A') }}</td>
                                         <td class="text-start">{{ $req->constituency?->name ?? ($req->division_name ?? 'N/A') }}</td>
@@ -220,6 +220,9 @@
                                                 <a href="{{ route('admin.imported-requests.show', $req->id) }}" class="btn btn-primary" title="View">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
+                                                <a data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-secondary" title="Assign Vehicle">
+                                                    <i class="fa fa-truck"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -231,6 +234,44 @@
                             </tbody>
                         </table>
                     </div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+     <div class="modal-content">
+            <form action="" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="assignVehicleModalLabel">
+                        <i class="fa fa-truck text-primary me-2"></i> Assign Vehicle to Request ##DCL-2026-000022
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="vehicle_id">Select Vehicle <span class="text-danger">*</span></label>
+                        <select class="form-select" id="vehicle_id" name="vehicle_id" required>
+                            <option value="" disabled selected>-- Choose Available Vehicle --</option>
+                           
+                                <option value="">
+                                   KA07S7242 - Truck (Driver: suprith)
+                                </option>
+                            
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="remarks">Approval / Assignment Remarks <span class="text-muted font-11 fw-normal">(Optional)</span></label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Enter any notes or remarks for this approval/assignment...">Remarks</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save me-1"></i> Assign Vehicle</button>
+                </div>
+            </form>
+        </div>
+  </div>
+</div>
 
                     <!-- Clean Bootstrap 5 Server-Side Pagination Bar -->
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">

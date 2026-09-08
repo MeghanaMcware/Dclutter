@@ -35,7 +35,7 @@ class AdminAuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('admin.requests.index'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()->withInput($request->only('email', 'remember'))
