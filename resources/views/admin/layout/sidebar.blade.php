@@ -2,8 +2,8 @@
   <div>
     <div class="logo-wrapper">
       <a href="{{ route('admin.dashboard') }}" class="d-flex flex-row align-items-center gap-2 text-decoration-none">
-        <img class="img-fluid for-light" src="/theme/images/logoicon2.png" alt="CLEARIT logo" style="max-height: 40px;">
-        <img class="img-fluid for-dark" src="/theme/images/logoicon2.png" alt="CLEARIT logo" style="max-height: 40px;">
+        <img class="img-fluid for-light" src="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}" alt="CLEARIT logo" style="max-height: 40px;">
+        <img class="img-fluid for-dark" src="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}" alt="CLEARIT logo" style="max-height: 40px;">
         <span class="fw-bold text-dark font-14">Admin - Dclutter</span>
       </a>
       <div class="back-btn"><i class="fa fa-angle-left"></i></div>
