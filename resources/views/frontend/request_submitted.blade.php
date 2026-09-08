@@ -143,7 +143,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
-            <a class="btn-ui" href="{{ url('/') }}" style="width: 100%; text-align: center;">Go to Dashboard</a>
+            <a class="btn-ui" href="{{ url('/') }}" style="width: 100%; text-align: center;">Go to Home</a>
             <a href="{{ route('citizen.report') }}" style="color: var(--green); text-decoration: none; font-weight: 700; font-size: 13px;">Create Another Request</a>
         </div>
     </div>

@@ -6,10 +6,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="CLEARIT">
-    <meta name="keywords" content="CLEARIT">
+    <meta name="description" content="D-Clutter">
+    <meta name="keywords" content="D-Clutter">
      <link rel="icon" href="{{asset('pwa/images/GBA-removebg-preview.png')}}">
-    <title>Admin Login | CLEARIT</title>
+    <title>Admin Login | D-Clutter</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('/theme/css/vendors/bootstrap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('/theme/css/style.css') }}">
     <link id="color" rel="stylesheet" href="{{ asset('/theme/css/color-1.css') }}" media="screen">

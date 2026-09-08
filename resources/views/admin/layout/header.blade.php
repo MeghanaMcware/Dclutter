@@ -5,7 +5,7 @@
       <div class="logo-wrapper">
         <a href="" class="d-flex align-items-center text-decoration-none">
           <img class="img-fluid" src="{{ asset('/theme/images/logoicon2.png') }}" alt="GBA Logo" style="max-height: 40px;">
-          <span class="fw-bold text-white font-15 ms-2">Admin - C&D Waste</span>
+          <span class="fw-bold text-white font-15 ms-2">Admin - D-Clutter</span>
         </a>
       </div>
       <div class="toggle-sidebar ms-2">

@@ -31,10 +31,10 @@
             <nav id="navmenu" class="navmenu">
                 <ul>
                     <li><a href="{{ url('/') }}" class="nav-link-page {{ request()->is('/') ? 'bt-bottom' : '' }}">Home</a></li>
-                    <li><a href="{{ route('citizen.report') }}" class="nav-link-page {{ request()->is('report-request') ? 'bt-bottom' : '' }}">Report Request</a></li>
+                    <li><a href="{{ route('citizen.report') }}" class="nav-link-page {{ request()->is('report-request') ? 'bt-bottom' : '' }}">Raise Request</a></li>
                     <li><a href="{{ route('citizen.track') }}" class="nav-link-page {{ request()->is('track-request') ? 'bt-bottom' : '' }}">Track Request</a></li>
                     <li><a href="{{ url('/#processflow') }}" class="nav-link-section">Process Flow</a></li>
-                    <li><a href="{{ route('citizen.report') }}" class="cta-btn" style="background:#007f4b !important; color:#fff !important;">Report D-Clutter Waste</a></li>
+                    <li><a href="{{ route('citizen.report') }}" class="cta-btn" style="background:#007f4b !important; color:#fff !important;">Raise D-Clutter Waste</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>

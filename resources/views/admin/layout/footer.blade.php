@@ -10,7 +10,7 @@
       <div class="container-fluid">
           <div class="row">
               <div class="col-md-12 footer-copyright text-center">
-                  <p class="mb-0">Copyright 2026 © Dclutter </p>
+                  <p class="mb-0">Copyright 2026 © D-Clutter </p>
                    <p class="mb-0">
                       <span class="text-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" style="cursor: pointer;">
                         Version 1.0.0

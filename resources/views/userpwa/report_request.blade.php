@@ -1,7 +1,7 @@
 @extends('userpwa.layout.app')
 
-@section('title', 'Report Request')
-@section('heading', 'Report Request')
+@section('title', 'Raise Request')
+@section('heading', 'Raise Request')
 
 @section('style')
 <style>

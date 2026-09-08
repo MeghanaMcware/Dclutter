@@ -702,9 +702,9 @@ textarea.is-invalid ~ .invalid-feedback,
     <nav class="crumb" aria-label="Breadcrumb">
         <a href="{{ url('/') }}"><i class="bi bi-house-door-fill" aria-hidden="true"></i><span>Home</span></a>
         <i class="bi bi-chevron-right" aria-hidden="true"></i>
-        <span class="crumb-current" aria-current="page">Report Request</span>
+        <span class="crumb-current" aria-current="page">Raise Request</span>
     </nav>
-    <h1>Report D-Clutter Waste</h1>
+    <h1>Raise D-Clutter Waste</h1>
 
     <div class="card-ui">
         <!-- Stepper Progress Bar -->
@@ -966,8 +966,9 @@ textarea.is-invalid ~ .invalid-feedback,
 
                     <!-- Floor No -->
                     <div>
-                        <label>Floor No / Level <span class="text-muted" style="font-weight:400;">(Optional)</span></label>
-                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. Ground Floor, 2nd Floor" oninput="validateSingleField(this)">
+                        <label>Floor No / Level <span class="text-danger" >*</span></label>
+                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. Ground Floor, 2nd Floor" required oninput="validateSingleField(this)">
+                          <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
                     </div>
 
                     <!-- Ward (Readonly - Auto-Mapped from GPS) -->
@@ -1146,6 +1147,7 @@ let fpInstance = null;
 let updateLocationDebounceTimer = null;
 let selectedWasteFiles = [];
 let isProgrammaticSync = false;
+const previouslySelectedSubitems = [];
 
 // Dynamic Categories & Subcategories from Backend Database
 const dbCategories = @json($categories);
@@ -1243,7 +1245,6 @@ function renderSubcategories() {
     container.innerHTML = '';
     
     if (checked.length === 0) {
-        if (selectedCount) selectedCount.textContent = '0 selected';
         section.style.display = 'none';
         return;
     }
@@ -1287,12 +1288,13 @@ function renderSubcategories() {
                 
                 input.onchange = function() {
                     if (this.checked) {
-                        label.classList.add('selected');
+                        itemDiv.classList.add('selected');
                         const err = document.getElementById('step1-subcat-error');
                         if (err) err.style.display = 'none';
                     } else {
-                        label.classList.remove('selected');
+                        itemDiv.classList.remove('selected');
                     }
+                    updateSubcategoryCount();
                 };
                 
                 const iconSpan = document.createElement('span');
@@ -1317,6 +1319,7 @@ function renderSubcategories() {
                     if (document.querySelectorAll('input[name="pickup_subitems[]"]:checked').length > 0 && err) {
                         err.style.display = 'none';
                     }
+                    updateSubcategoryCount();
                 };
                 
                 itemDiv.appendChild(input);
@@ -1486,9 +1489,13 @@ function goToStep(stepNum) {
         }
     }
 
-    if (stepNum === 2 && globalMap) {
+    if (stepNum === 2) {
         setTimeout(() => {
-            globalMap.invalidateSize();
+            if (!globalMap) {
+                initLeafletMap();
+            } else {
+                globalMap.invalidateSize();
+            }
         }, 200);
     }
 
