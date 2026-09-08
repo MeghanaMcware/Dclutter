@@ -2,6 +2,16 @@
 
 @section('title', 'Add Subcategory')
 
+@section('style')
+<style>
+    .form-label {
+    color: #2c3e50 !important;
+    opacity: inherit !important;
+
+}
+    </style>
+@endsection
+
 @section('content')
 <div class="content-body">
     <div class="container-fluid">
@@ -26,11 +36,8 @@
     </div>
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-6 offset-xl-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Add Subcategory</h4>
-                    <a href="{{ route('admin.masters.subcategories.index') }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
-                </div>
+            <div class="col-sm-12 col-lg-12">
+                
 
                 <div class="card">
                     <div class="card-body">
@@ -38,7 +45,7 @@
                             @csrf
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold" for="categoryId">Category <span class="text-danger">*</span></label>
+                                <label class="form-label  mb-0" for="categoryId"><b>Category</b> <span class="text-danger">*</span></label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="categoryId" name="category_id" required>
                                     <option value="" selected disabled>Select Category</option>
                                     @foreach($categories as $category)
@@ -53,7 +60,7 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold" for="subcategoryName">Subcategory Name <span class="text-danger">*</span></label>
+                                <label class="form-label  mb-0" for="subcategoryName"><b>Subcategory Name</b> <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="subcategoryName" name="name" value="{{ old('name') }}" placeholder="Enter Subcategory Name" required>
                                 @error('name')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -63,7 +70,7 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label class="form-label fw-bold" for="subcategoryIcon">Icon</label>
+                                <label class="form-label  mb-0" for="subcategoryIcon"><b>Icon</b></label>
                                 <input type="file" class="form-control @error('icon') is-invalid @enderror" id="subcategoryIcon" name="icon" accept="image/*">
                                 @error('icon')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>

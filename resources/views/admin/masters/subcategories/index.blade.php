@@ -51,8 +51,8 @@
                 <div class="card" style="border: 1px solid #eaebf0; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border-radius: 8px;">
                     <div class="card-body p-3">
                         <div class="table-responsive">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Subcategory List</h4>
+                            <div class="d-flex justify-content-end align-items-center mb-3">
+                                <!-- <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Subcategory List</h4> -->
                                 <a href="{{ route('admin.masters.subcategories.create') }}" class="btn btn-primary">
                                     <i class="fa fa-plus me-1"></i> Add Subcategory
                                 </a>

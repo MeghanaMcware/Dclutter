@@ -2,6 +2,17 @@
 
 @section('title', 'Add Category')
 
+
+@section('style')
+<style>
+    .form-label {
+    color: #2c3e50 !important;
+    opacity: inherit !important;
+
+}
+    </style>
+@endsection
+
 @section('content')
 
 <div class="container-fluid">
@@ -28,11 +39,8 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-6 offset-xl-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Add Category</h4>
-                    <a href="{{ route('admin.masters.categories.index') }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
-                </div>
+            <div class="col-sm-12 col-lg-12">
+                
 
                 <div class="card">
                     <div class="card-body">
@@ -40,7 +48,7 @@
                             @csrf
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold" for="categoryName">Category Name <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold mb-0" for="categoryName"><b>Category Name</b> <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="categoryName" name="name" value="{{ old('name') }}" placeholder="Enter Category Name" required>
                                 @error('name')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -50,7 +58,7 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label class="form-label fw-bold" for="categoryIcon">Icon</label>
+                                <label class="form-label fw-bold mb-0" for="categoryIcon"><b>Icon</b></label>
                                 <input type="file" class="form-control @error('icon') is-invalid @enderror" id="categoryIcon" name="icon" accept="image/*">
                                 @error('icon')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>

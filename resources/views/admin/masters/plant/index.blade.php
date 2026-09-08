@@ -130,6 +130,14 @@
         padding: 0;
     }
 
+
+.card .card-header{
+    padding:10px 20px !important;
+}
+.card .card-body{
+    
+    padding:10px 20px !important;
+}
 </style>
 
 @endsection
@@ -215,14 +223,8 @@
                          CARD HEADER
                     =========================================== --}}
 
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-end align-items-center">
 
-                        <h4
-                            class="mb-0"
-                            style="color:#1e293b; font-weight:700;"
-                        >
-                            Plant Locations
-                        </h4>
 
 
                         <a
@@ -335,9 +337,9 @@
                                                     <span class="status-slider"></span>
                                                 </label>
 
-                                                <span class="status-text {{ $plant->status ? 'status-active' : 'status-inactive' }}">
+                                                <!-- <span class="status-text {{ $plant->status ? 'status-active' : 'status-inactive' }}">
                                                     {{ $plant->status ? 'Active' : 'Inactive' }}
-                                                </span>
+                                                </span> -->
                                             </td>
 
                                             {{-- ACTION --}}

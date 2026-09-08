@@ -54,6 +54,9 @@
         border-radius: 4px;
         border: 1px solid #ced4da;
     }
+    .text-start1{
+    color: black !important;
+}
 </style>
 @endsection
 
@@ -101,13 +104,13 @@
                         <table class="table table-bordered table-striped text-center align-middle" id="data-source-1" style="font-size: 13px;">
                             <thead style="background: #f8f9fa;">
                                 <tr>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Vehicle No.</th>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Type</th>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Capacity</th>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Owner</th>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Driver</th>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none;">Status</th>
-                                    <th style="padding: 12px 20px; font-weight: 600; color: #495057; border-bottom: 2px solid #eaebf0; border-top: none; text-align: right;">Action</th>
+                                    <th class="text-start text-start1">Vehicle No.</th>
+                                    <th class="text-start text-start1">Type</th>
+                                    <th class="text-start text-start1">Capacity</th>
+                                    <th class="text-start text-start1">Owner</th>
+                                    <th class="text-start text-start1">Driver</th>
+                                    <th class="text-start text-start1">Status</th>
+                                    <th class="text-start text-start1 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,20 +119,20 @@
                                         <td style="padding: 15px 20px; vertical-align: middle;">
                                             <span style="font-weight: 600; color: #2c3e50;">{{ $vehicle->vehicle_number }}</span>
                                         </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                        <td style="font-weight: 600; color: #2c3e50;">
                                             {{ $vehicle->vehicle_type ?? 'N/A' }}
                                         </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                        <td style="font-weight: 600; color: #2c3e50;">
                                             @if($vehicle->capacity_tons)
                                                 {{ (float)$vehicle->capacity_tons * 1000 }} kg
                                             @else
                                                 N/A
                                             @endif
                                         </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                        <td style="font-weight: 600; color: #2c3e50;">
                                             {{ $vehicle->owner?->name ?? 'N/A' }}
                                         </td>
-                                        <td style="padding: 15px 20px; vertical-align: middle; color: #5a5a5a;">
+                                        <td style="font-weight: 600; color: #2c3e50;">
                                             {{ $vehicle->driver_name ?? 'N/A' }}
                                         </td>
                                         <td style="padding: 15px 20px; vertical-align: middle;">
@@ -143,7 +146,7 @@
                                             </div>
                                         </td>
                                         <td style="padding: 15px 20px; vertical-align: middle; text-align: right;">
-                                            <div class="d-flex justify-content-end gap-1">
+                                            <div class="d-flex justify-content-center gap-1">
                                                 <a href="{{ route('admin.vehicles.show', $vehicle->id) }}" class="btn btn-info text-white" title="View" style="background: #e3f2fd; color: #2196f3;">
                                                     <i class="fa fa-eye"></i>
                                                 </a>

@@ -39,6 +39,11 @@
     .was-validated .form-select:invalid ~ .invalid-feedback {
         display: block;
     }
+    .form-label {
+    color: #2c3e50 !important;
+    opacity: inherit !important;
+
+}
 </style>
 @endsection
 
@@ -67,11 +72,8 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-10 offset-xl-1">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Edit User Details</h4>
-                    <a href="{{ route('admin.masters.users.index') }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
-                </div>
+            <div class="col-sm-12 col-lg-12">
+               
 
                 <div class="card">
                     <div class="card-body">
@@ -97,12 +99,12 @@
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold" for="name">Name <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="name"><b>Name</b> <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" placeholder="Enter Name" required>
                                     <div class="invalid-feedback">Please enter the name.</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold" for="phone">Phone Number <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="phone"><b>Phone Number</b> <span class="text-danger">*</span></label>
                                     <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $user->mobile_number) }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
                                     <div class="invalid-feedback">Please enter the phone number.</div>
                                 </div>
@@ -110,16 +112,16 @@
 
                             <div class="row mb-3">
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold" for="email">Email <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="email"><b>Email</b> <span class="text-danger">*</span></label>
                                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" placeholder="Enter Email" required>
                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold" for="password">Password</label>
+                                    <label class="form-label mb-0" for="password"><b>Password</b></label>
                                     <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Leave blank to keep unchanged">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="role"><b>Role</b> <span class="text-danger">*</span></label>
                                     <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
                                         <option value="" disabled>Select Role</option>
                                         <option value="agm" {{ $userRole == 'agm' ? 'selected' : '' }}>AGM (Additional General Manager)</option>
@@ -132,7 +134,7 @@
                             <!-- Dynamic Jurisdiction Scoping Row -->
                             <div class="row mb-3">
                                 <div class="col-md-6" id="corporationCol" style="display: none;">
-                                    <label class="form-label fw-bold" for="corporation">Corporation (DGM Jurisdiction) <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="corporation"><b>Corporation (DGM Jurisdiction)</b> <span class="text-danger">*</span></label>
                                     <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple">
                                         @foreach($corporations as $corp)
                                             <option value="{{ $corp->id }}" {{ in_array($corp->id, $userCorpIds) ? 'selected' : '' }}>
@@ -143,7 +145,7 @@
                                     <div class="invalid-feedback">Please select at least one corporation for DGM.</div>
                                 </div>
                                 <div class="col-md-6" id="constituencyCol" style="display: none;">
-                                    <label class="form-label fw-bold" for="constituency">Constituency (AGM Jurisdiction) <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="constituency"><b>Constituency (AGM Jurisdiction)</b> <span class="text-danger">*</span></label>
                                     <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple">
                                         @foreach($constituencies as $const)
                                             <option value="{{ $const->id }}" {{ in_array($const->id, $userConstIds) ? 'selected' : '' }}>
@@ -157,7 +159,7 @@
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold" for="role">Role <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="role"><b>Role</b> <span class="text-danger">*</span></label>
                                     <select class="form-select" id="role" name="role" required>
                                         <option value="" disabled selected>Select Role</option>
                                         <option value="DGM">DGM</option>

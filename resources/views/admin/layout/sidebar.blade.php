@@ -42,7 +42,7 @@
           </li>
 
           <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav" href="#map">
+            <a class="sidebar-link sidebar-title link-nav" href="{{ url('/gis') }}">
               <i data-feather="map-pin"></i>
               <span>GIS Overview Map</span>
             </a>

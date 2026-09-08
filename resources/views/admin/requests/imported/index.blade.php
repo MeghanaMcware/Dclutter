@@ -116,6 +116,9 @@
     .pagination .page-item.disabled .page-link {
         color: #94a3b8;
     }
+    .text-start1{
+    color: black !important;
+}
 </style>
 @endsection
 
