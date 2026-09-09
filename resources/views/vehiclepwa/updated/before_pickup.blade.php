@@ -24,6 +24,11 @@
 @endsection
 
 @section('content')
+    <div id="pageLoader" role="status" aria-live="polite">
+        <div class="spin"></div>
+        <p>Saving before pickup details...</p>
+    </div>
+
     <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
         
         <!-- Form Section -->
@@ -55,7 +60,7 @@
                 <form id="beforeStatusForm">
                     <div class="form-group">
                         <label>Before Photo<span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="beforePhoto" accept="image/*" multiple required>
+                        <input type="file" class="form-control" id="beforePhoto"  capture="environment" multiple required>
                         <div class="invalid-feedback">Please capture or upload at least one before photo.</div>
                         <div id="beforePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                     </div>
@@ -210,6 +215,9 @@
         if (isValid) {
             saveBeforeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Processing...</span>';
             saveBeforeBtn.disabled = true;
+            if (typeof showPageLoader === 'function') {
+                showPageLoader();
+            }
 
             const formData = new FormData();
             formData.append('_token', '{{ csrf_token() }}');
@@ -236,6 +244,7 @@
                 if (res.ok && data.success) {
                     window.location.href = data.next_url || ("{{ url('/vehicle/after-pickup') }}/" + reqId);
                 } else {
+                    if (typeof hidePageLoader === 'function') hidePageLoader();
                     saveBeforeBtn.disabled = false;
                     saveBeforeBtn.innerHTML = '<i class="fa-solid fa-camera"></i> <span>Save Before Details</span>';
                     Swal.fire({
@@ -247,6 +256,7 @@
                 }
             })
             .catch(err => {
+                if (typeof hidePageLoader === 'function') hidePageLoader();
                 saveBeforeBtn.disabled = false;
                 saveBeforeBtn.innerHTML = '<i class="fa-solid fa-camera"></i> <span>Save Before Details</span>';
                 Swal.fire('Error', 'An unexpected network error occurred.', 'error');

@@ -633,6 +633,12 @@ textarea.is-invalid ~ .invalid-feedback,
         padding: 0 4px;
     }
 
+    .request-ui{
+        padding: 15px 10px 64px;
+    }
+    .card-ui{
+        padding: 5px;
+    }
     .progress-ui::before {
         top: 15px;
         left: 10%;
@@ -1154,6 +1160,16 @@ const dbCategories = @json($categories);
 const subcategoriesMap = {};
 const categoryStyles = {};
 
+function rememberSubcategory(value, selected) {
+    const index = previouslySelectedSubitems.indexOf(value);
+
+    if (selected && index === -1) {
+        previouslySelectedSubitems.push(value);
+    } else if (!selected && index !== -1) {
+        previouslySelectedSubitems.splice(index, 1);
+    }
+}
+
 dbCategories.forEach((cat, index) => {
     const colors = ['#0e7a43', '#4d7cda', '#d97706', '#8b5cf6', '#0f9bb4', '#b45309', '#e05d3b', '#64748b'];
     categoryStyles[cat.name] = { color: colors[index % colors.length] };
@@ -1238,6 +1254,12 @@ function updateImagePreview() {
 }
 
 function renderSubcategories() {
+    document.querySelectorAll('input[name="pickup_subitems[]"]:checked').forEach(input => {
+        if (!previouslySelectedSubitems.includes(input.value)) {
+            previouslySelectedSubitems.push(input.value);
+        }
+    });
+
     const checked = Array.from(document.querySelectorAll('input[name="pickup_items[]"]:checked')).map(cb => cb.value);
     const container = document.getElementById('subcategory-container');
     const section = document.getElementById('subcategory-section');
@@ -1285,8 +1307,10 @@ function renderSubcategories() {
                 input.type = 'checkbox';
                 input.name = 'pickup_subitems[]';
                 input.value = `${category}: ${subcatName}`;
+                input.checked = isSelected;
                 
                 input.onchange = function() {
+                    rememberSubcategory(this.value, this.checked);
                     if (this.checked) {
                         itemDiv.classList.add('selected');
                         const err = document.getElementById('step1-subcat-error');
@@ -1295,6 +1319,10 @@ function renderSubcategories() {
                         itemDiv.classList.remove('selected');
                     }
                     updateSubcategoryCount();
+                };
+
+                input.onclick = function(event) {
+                    event.stopPropagation();
                 };
                 
                 const iconSpan = document.createElement('span');
@@ -1314,6 +1342,7 @@ function renderSubcategories() {
                 
                 itemDiv.onclick = function() {
                     input.checked = !input.checked;
+                    rememberSubcategory(input.value, input.checked);
                     itemDiv.classList.toggle('selected', input.checked);
                     const err = document.getElementById('step1-subcat-error');
                     if (document.querySelectorAll('input[name="pickup_subitems[]"]:checked').length > 0 && err) {

@@ -5,11 +5,16 @@
 @section('style')
 <style>
     .dump-form-card { border-radius: 12px; border: 1px solid #e5e7eb; }
-    .dump-form-label { font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 7px; }
-    .dump-form-control { width: 100%; min-height: 42px; border: 1px solid #ced4da; border-radius: 6px; padding: 8px 12px; font-size: 14px; outline: none; }
+    .dump-form-label { font-weight: 600; font-size: 14px; color: #000 !important; margin-bottom: 0px !important;opacity: inherit !important; }
+    .dump-form-control { width: 100%;    color: #2c3e50; min-height: 42px; border: 1px solid #ced4da; border-radius: 6px; padding: 8px 12px; font-size: 14px; outline: none; }
     .dump-form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08); }
     textarea.dump-form-control { min-height: 110px; resize: vertical; }
     .btn-submit-dump { min-width: 120px; font-weight: 600; }
+    .form-label {
+    color: #2c3e50 !important;
+    opacity: inherit !important;
+
+}
 </style>
 @endsection
 
@@ -37,17 +42,14 @@
             <div class="col-sm-12">
                 <div class="card dump-form-card">
                     <div class="card-body">
-                        <div class="mb-4">
-                            <h5 class="mb-1">Add Plant Location</h5>
-                            <p class="text-muted mb-0">Enter the details of the waste processing plant location.</p>
-                        </div>
+                        
 
                         <form id="plantForm" action="{{ route('admin.masters.plants.store') }}" method="POST" class="needs-validation" novalidate>
                             @csrf
-
+<div class="d-flex row m-0">
                             <!-- Dynamic Corporation -->
-                            <div class="mb-3">
-                                <label for="corporation_id" class="dump-form-label">Corporation <span class="text-danger">*</span></label>
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="corporation_id" class="dump-form-label mb-0">Corporation <span class="text-danger">*</span></label>
                                 <select id="corporation_id" name="corporation_id" class="dump-form-control" required>
                                     <option value="" selected disabled>Select Corporation</option>
                                     @foreach($corporations as $corp)
@@ -58,8 +60,8 @@
                             </div>
 
                             <!-- Dynamic Constituency -->
-                            <div class="mb-3">
-                                <label for="constituency_id" class="dump-form-label">Constituency <span class="text-danger">*</span></label>
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="constituency_id" class="dump-form-label mb-0">Constituency <span class="text-danger">*</span></label>
                                 <select id="constituency_id" name="constituency_id" class="dump-form-control" required>
                                     <option value="" selected disabled>Select Constituency</option>
                                     @foreach($constituencies as $const)
@@ -70,19 +72,34 @@
                             </div>
 
                             <!-- Plant Name -->
-                            <div class="mb-3">
-                                <label for="name" class="dump-form-label">Plant Location Name <span class="text-danger">*</span></label>
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="name" class="dump-form-label mb-0">Plant Location Name <span class="text-danger">*</span></label>
                                 <input type="text" id="name" name="name" class="dump-form-control" placeholder="Enter plant location name (e.g., Kannahalli Plant)" required>
                                 <div class="invalid-feedback">Please enter the plant location name.</div>
                             </div>
 
+
+
+                             <!-- Plant Latitude -->
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="latitude" class="dump-form-label mb-0">Latitude <span class="text-danger">*</span></label>
+                                <input type="text" id="latitude" name="latitude" class="dump-form-control" placeholder="Enter latitude" required>
+                                <div class="invalid-feedback">Please enter the latitude.</div>
+                            </div>
+                             <!-- Plant Longitude -->
+                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                                <label for="longitude" class="dump-form-label mb-0">Longitude <span class="text-danger">*</span></label>
+                                <input type="text" id="longitude" name="longitude" class="dump-form-control" placeholder="Enter longitude" required>
+                                <div class="invalid-feedback">Please enter the longitude.</div>
+                            </div>
+
                             <!-- Plant Address -->
-                            <div class="mb-4">
-                                <label for="address" class="dump-form-label">Plant Place Address <span class="text-danger">*</span></label>
+                            <div class="mb-4 col-lg-6 col-md-6 col-12">
+                                <label for="address" class="dump-form-label mb-0">Plant Place Address <span class="text-danger">*</span></label>
                                 <textarea id="address" name="address" class="dump-form-control" placeholder="Enter full plant location address" required></textarea>
                                 <div class="invalid-feedback">Please enter the plant place address.</div>
                             </div>
-
+</div>
                             <div class="text-center">
                                 <a href="{{ route('admin.masters.plants.index') }}" class="btn btn-secondary me-2">Cancel</a>
                                 <button type="submit" class="btn btn-primary btn-submit-dump">

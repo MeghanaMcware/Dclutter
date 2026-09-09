@@ -47,7 +47,7 @@
     }
 
     .login-card {
-        padding: 22px 34px 20px;
+        padding: 20px 10px 20px;
         text-align: center;
     }
 
@@ -135,7 +135,7 @@
     .welcome-header {
         position: relative;
         z-index: 3;
-        margin-top: -7px;
+        margin-top: 5px;
     }
 
     .welcome-header h2 {
@@ -446,11 +446,11 @@
                         <button type="submit" class="btn btn-primary" data-loading-label="Sending OTP..."><i class="fa-solid fa-shield-halved"></i> Send
                             OTP</button>
                     </form>
-                    <div class="or-divider">or continue with</div>
-                    <div class="alt-actions"><button type="button" class="alt-button google"><i
+                    <!-- <div class="or-divider">or continue with</div> -->
+                    {{-- <div class="alt-actions"><button type="button" class="alt-button google"><i
                                 class="fa-brands fa-google"></i> Continue with Google</button><button type="button"
                             class="alt-button phone"><i class="fa-brands fa-whatsapp"></i> Continue with Phone</button>
-                    </div>
+                    </div> --}}
                     <div class="privacy"><i class="fa-solid fa-lock"></i><span>Your number is safe with us. We don't
                             share it<br>with anyone.</span></div>
                 </div>

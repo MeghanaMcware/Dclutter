@@ -235,21 +235,39 @@
     color: #1f2937;
 }
 
-.item-option::after {
-    content: '\f00c';
+.item-option::before {
+    content: '';
     position: absolute;
     top: 9px;
     right: 9px;
-    display: grid;
+    width: 19px;
+    height: 19px;
+    border: 2px solid #b8c9bf;
+    border-radius: 50%;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-option:hover::before {
+    border-color: var(--tile-color, var(--green));
+}
+
+.item-option.selected::before {
+    border-color: var(--tile-color, var(--green));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color, var(--green)) 12%, transparent);
+}
+
+.item-option::after {
+    content: '';
+    position: absolute;
+    top: 9px;
+    right: 9px;
     width: 21px;
     height: 21px;
-    place-items: center;
-    color: #ffffff;
-    background: var(--tile-color, var(--green));
     border-radius: 50%;
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 12px;
+    background: radial-gradient(circle, var(--tile-color, var(--green)) 0 5px, #ffffff 6px);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color, var(--green)) 12%, transparent);
     opacity: 0;
     transform: scale(0.5);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -338,6 +356,7 @@
     font-weight: 500;
     color: var(--ink);
     border-right: 1px solid var(--line);
+        border-radius: 16px 0px 0px 16px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -857,15 +876,6 @@ textarea.is-invalid ~ .invalid-feedback,
                                 value="{{ auth()->user()->mobile_number ?? '' }}"
                             >
 
-                            <button
-                                type="button"
-                                id="sendOtpBtn"
-                                class="btn-ui"
-                                onclick="sendWhatsAppOTP()"
-                                style="white-space:nowrap; padding:9px 14px; font-size:13px; display:inline-flex; align-items:center; gap:6px;"
-                            >
-                                <i class="bi bi-whatsapp"></i> Send OTP
-                            </button>
                         </div>
 
                         <div
@@ -876,64 +886,6 @@ textarea.is-invalid ~ .invalid-feedback,
                             Please enter a valid 10-digit mobile number.
                         </div>
 
-                        <!-- OTP Verification Section -->
-                        <div
-                            id="otpSection"
-                            style="
-                                display:none;
-                                margin-top:12px;
-                                padding:14px;
-                                background:#f0fdf4;
-                                border:1.5px solid #86efac;
-                                border-radius:8px;
-                            "
-                        >
-                            <div
-                                style="
-                                    color:var(--green);
-                                    font-size:13px;
-                                    font-weight:700;
-                                    margin-bottom:8px;
-                                    display:flex;
-                                    align-items:center;
-                                    gap:6px;
-                                "
-                            >
-                                <i class="bi bi-whatsapp" style="font-size:16px;"></i>
-                                Enter OTP sent to your WhatsApp number
-                            </div>
-
-                            <div style="display:flex; gap:8px;">
-                                <input
-                                    type="text"
-                                    id="otpInput"
-                                    maxlength="6"
-                                    inputmode="numeric"
-                                    placeholder="Enter 6-digit OTP"
-                                    style="flex:1; font-weight:700; letter-spacing:2px; text-align:center; background:#ffffff;"
-                                >
-
-                                <button
-                                    type="button"
-                                    class="btn-ui"
-                                    id="verifyOtpBtn"
-                                    onclick="verifyWhatsAppOTP()"
-                                    style="white-space:nowrap; padding:9px 16px; font-size:13px;"
-                                >
-                                    Verify OTP
-                                </button>
-                            </div>
-
-                            <div
-                                id="otpMessage"
-                                style="
-                                    display:none;
-                                    margin-top:8px;
-                                    font-size:12px;
-                                    font-weight:600;
-                                "
-                            ></div>
-                        </div>
                     </div>
 
 <div id="otpProtectedFields" style="display:contents;">
@@ -941,15 +893,13 @@ textarea.is-invalid ~ .invalid-feedback,
                     <div class="wide">
                         <label>Upload Waste Images <span class="req">*</span></label>
                         <div class="custom-file-upload">
-                            <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" multiple style="display:none;" onchange="handleImageSelection(event)">
+                            <input type="file" id="wasteImagesInput" name="waste_images[]" capture="environment" multiple style="display:none;" onchange="handleImageSelection(event)">
                             <div class="file-upload-box" id="fileUploadBox">
                                 <button type="button" class="file-upload-btn" onclick="document.getElementById('wasteImagesInput').click()">
                                     <i class="bi bi-folder2-open me-1"></i> Choose Files
                                 </button>
                                 <div class="file-upload-text" id="fileUploadText">No files selected</div>
-                                <button type="button" class="btn-fetch-loc me-2" onclick="openCamera()">
-                                    <i class="bi bi-camera-fill"></i> Camera
-                                </button>
+                              
                                 <i class="bi bi-check-lg text-success file-upload-check" style="display:none;" id="fileUploadCheck"></i>
                             </div>
                             <div class="invalid-feedback" id="fileUploadError" style="color: #dc3545 !important; display:none; margin-top:4px;">Please select at least one image.</div>
@@ -1285,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
     fetchCurrentLocation({ silent: true });
 
-    lockOtpProtectedFields();
+    otpVerified = true;
     validateMobileAndShowOtp();
 });
 
@@ -2020,7 +1970,7 @@ window.fetchCurrentLocation = function(options = {}) {
 /* =========================================================
    OTP PROTECTION & VERIFICATION
 ========================================================= */
-let otpVerified = false;
+let otpVerified = true;
 
 const otpProtectedFieldIds = [
     'wasteImagesInput',

@@ -177,3 +177,7 @@ Route::prefix('user')->name('user.')->group(function () {
     });
 });
 
+
+ Route::get('/gis', function () {
+        return view('admin.gis.index');
+    })->name('gis');

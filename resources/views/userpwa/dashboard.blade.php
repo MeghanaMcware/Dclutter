@@ -211,8 +211,8 @@
                 <i class="fa-solid fa-file-circle-exclamation"></i>
             </div>
             <div class="btn-content">
-                <span class="btn-title">Report an Issue</span>
-                <span class="btn-subtitle">Report debris or waste issues</span>
+                <span class="btn-title">Raise an Issue</span>
+                <span class="btn-subtitle">Raise debris or waste issues</span>
             </div>
         </a>
 

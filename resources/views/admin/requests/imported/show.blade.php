@@ -23,14 +23,9 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-9 offset-xl-1">
+            <div class="col-sm-12 col-lg-12">
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 fw-bold text-dark">Legacy Pickup Request Details</h4>
-                    <a href="{{ route('admin.imported-requests.index') }}" class="btn btn-light btn-sm">
-                        <i class="fa fa-arrow-left me-1"></i> Back to List
-                    </a>
-                </div>
+                
 
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">

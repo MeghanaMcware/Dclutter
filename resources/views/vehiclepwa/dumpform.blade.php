@@ -23,7 +23,7 @@
         border-radius: 16px;
         padding: 18px;
         box-shadow: 0 2px 10px rgba(0,0,0,.04);
-        margin-bottom: 70px;
+        /* margin-bottom: 70px; */
     }
 
     .pickup-id-box {
@@ -37,15 +37,15 @@
     }
 
     .form-label {
-        font-size: 12px;
-        font-weight: 700;
-        color: #475569;
-        margin-bottom: 5px;
+            font-size: 14px;
+    font-weight: 700;
+    color: #20252c;
+    margin-bottom: 0px;
     }
 
     .form-control,
     .form-select {
-        min-height: 44px;
+        min-height: 33px;
         border-radius: 9px;
         border: 1px solid #cbd5e1;
         font-size: 13px;
@@ -56,7 +56,7 @@
         border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 12px;
-        margin-top: 10px;
+        margin-bottom: 10px;
     }
 
     .location-row .value {
@@ -123,6 +123,11 @@
 
 @section('content')
 
+<div id="pageLoader" role="status" aria-live="polite">
+    <div class="spin"></div>
+    <p>Submitting dump details...</p>
+</div>
+
 <div class="container py-2" style="max-width:440px;margin:0 auto;">
 
     <div class="form-card">
@@ -143,7 +148,7 @@
             <input type="hidden" id="pickupId" name="pickup_id">
 
             <div class="mb-3">
-                <label class="form-label">Dump Location *</label>
+                <label class="form-label">Dump Location <span class="text-danger">*</span></label>
 
                 <select class="form-select" id="dumpLocation" required>
                     <option value="">Select Dump Location</option>
@@ -154,13 +159,13 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Upload Photos *</label>
+                <label class="form-label">Upload Photos <span class="text-danger">*</span></label>
 
                 <input
                     type="file"
                     class="form-control"
                     id="dumpPhotos"
-                    accept="image/*"
+                    capture="environment"
                     multiple
                     required
                 >
@@ -241,7 +246,20 @@
 
     dumpPhotosInput.addEventListener('change', function() {
         const newFiles = Array.from(this.files);
-        selectedFiles = selectedFiles.concat(newFiles);
+        const maxFileSize = 1024 * 1024;
+        const validFiles = newFiles.filter(file => file.size <= maxFileSize);
+        const oversizedFiles = newFiles.filter(file => file.size > maxFileSize);
+
+        if (oversizedFiles.length > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Image too large',
+                text: 'Each dump image must be 1 MB or smaller.',
+                confirmButtonColor: '#0e7a43'
+            });
+        }
+
+        selectedFiles = selectedFiles.concat(validFiles);
         renderThumbnails();
         dumpPhotosInput.value = '';
     });
@@ -286,6 +304,7 @@
 
     document.getElementById('dumpForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        const submitButton = this.querySelector('button[type="submit"]');
 
         if (selectedFiles.length === 0 && dumpPhotosInput.files.length === 0) {
             Swal.fire({
@@ -296,6 +315,19 @@
             });
             return;
         }
+
+        if (!document.getElementById('dumpLocation').value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Dump Location Required',
+                text: 'Please select a dump location before submitting.',
+                confirmButtonColor: '#0e7a43'
+            });
+            return;
+        }
+
+        submitButton.disabled = true;
+        if (typeof showPageLoader === 'function') showPageLoader();
 
         const formData = new FormData();
         formData.append('_token', '{{ csrf_token() }}');
@@ -328,6 +360,7 @@
         })
         .then(res => res.json())
         .then(data => {
+            if (typeof hidePageLoader === 'function') hidePageLoader();
             if (data.success) {
                 Swal.fire({
                     icon: 'success',
@@ -338,6 +371,7 @@
                     window.location.href = data.redirect_url || "{{ route('vehicle.dump') }}";
                 });
             } else {
+                submitButton.disabled = false;
                 Swal.fire({
                     icon: 'error',
                     title: 'Submission Failed',
@@ -348,6 +382,8 @@
         })
         .catch(err => {
             console.error(err);
+            if (typeof hidePageLoader === 'function') hidePageLoader();
+            submitButton.disabled = false;
             Swal.fire({
                 icon: 'error',
                 title: 'Submission Error',

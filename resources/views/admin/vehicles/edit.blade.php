@@ -17,6 +17,21 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         border-radius: 8px;
     }
+
+
+    .form-label {
+    color: #2c3e50 !important;
+    opacity: inherit !important;
+
+}
+
+.form-select {
+    color: #2125299e !important;
+}
+
+.select2-container .select2-selection--single {
+    border-color: #c5cbd2 !important;
+}
 </style>
 @endsection
 
@@ -52,15 +67,15 @@
                             @csrf
                             
                             <!-- Vehicle Information -->
-                            <h5 class="form-section-title mt-2">Vehicle Information</h5>
+                            <h5 class="form-section-title mt-2 d-flex flex-row gap-1"><span>  <i class="bi bi-truck me-2"></i></span><span>Vehicle Information</span></h5>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="vehicleNumber">Vehicle Number <span class="text-danger">*</span></label>
+                                <div class="col-md-6 mb-3 ">
+                                    <label class="form-label mb-0" for="vehicleNumber"><b>Vehicle Number</b> <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="vehicleNumber" name="vehicle_number" value="KA-01-AB-1234" required>
                                     <div class="invalid-feedback">Please enter the vehicle number.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="vehicleType">Vehicle Type <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="vehicleType"><b>Vehicle Type</b> <span class="text-danger">*</span></label>
                                     <select class="form-select form-control" id="vehicleType" name="vehicle_type" required>
                                         <option value="" disabled>Select Type</option>
                                         <option value="Truck" selected>Truck</option>
@@ -72,12 +87,12 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="capacity">Capacity (in kg) <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="capacity"><b>Capacity (in kg)</b> <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="capacity" name="capacity" value="1000" min="1" required>
                                     <div class="invalid-feedback">Please enter a valid capacity.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="vehiclePhoto">Vehicle Photo (Leave blank to keep current)</label>
+                                    <label class="form-label mb-0" for="vehiclePhoto"><b>Vehicle Photo</b> (Leave blank to keep current)</label>
                                     <input type="file" class="form-control" id="vehiclePhoto" name="vehicle_photo" accept="image/*">
                                     <small class="text-muted d-block mt-1">Current file: vehicle_photo.jpg</small>
                                 </div>
@@ -87,19 +102,19 @@
                             <h5 class="form-section-title mt-4">Documents</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="rcDocument">RC Document (Leave blank to keep current)</label>
+                                    <label class="form-label mb-0" for="rcDocument"><b>RC Document</b> (Leave blank to keep current)</label>
                                     <input type="file" class="form-control" id="rcDocument" name="rc_document" accept="image/*,.pdf">
                                     <small class="text-muted d-block mt-1">Current file: rc_cert.pdf</small>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="fitnessDocument">Fitness Certificate (Leave blank to keep current)</label>
+                                    <label class="form-label mb-0" for="fitnessDocument"><b>Fitness Certificate</b> (Leave blank to keep current)</label>
                                     <input type="file" class="form-control" id="fitnessDocument" name="fitness_document" accept="image/*,.pdf">
                                     <small class="text-muted d-block mt-1">Current file: fitness_cert.pdf</small>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="insuranceDocument">Insurance Document (Leave blank to keep current)</label>
+                                    <label class="form-label mb-0" for="insuranceDocument"><b>Insurance Document</b> (Leave blank to keep current)</label>
                                     <input type="file" class="form-control" id="insuranceDocument" name="insurance_document" accept="image/*,.pdf">
                                     <small class="text-muted d-block mt-1">Current file: insurance.pdf</small>
                                 </div>
@@ -109,12 +124,12 @@
                             <h5 class="form-section-title mt-4">Vehicle Owner Details</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="ownerName">Owner Name <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="ownerName"><b>Owner Name</b> <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="ownerName" name="owner_name" value="John Doe" required>
                                     <div class="invalid-feedback">Please enter the owner's name.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="ownerPhone">Owner Phone Number <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="ownerPhone"><b>Owner Phone Number</b> <span class="text-danger">*</span></label>
                                     <input type="tel" class="form-control" id="ownerPhone" name="owner_phone" value="9876543210" placeholder="Enter owner phone number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
@@ -124,24 +139,24 @@
                             <h5 class="form-section-title mt-4">Driver Details</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="driverName">Driver Name <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="driverName"><b>Driver Name</b> <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="driverName" name="driver_name" value="Jane Smith" required>
                                     <div class="invalid-feedback">Please enter the driver's name.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="driverPhone">Driver Phone Number <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="driverPhone"><b>Driver Phone Number</b> <span class="text-danger">*</span></label>
                                     <input type="tel" class="form-control" id="driverPhone" name="driver_phone" value="9123456780" placeholder="Enter driver phone number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="licenseNumber">License Number <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-0" for="licenseNumber"><b>License Number</b> <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="licenseNumber" name="license_number" value="DL-14-2020-0012345" required>
                                     <div class="invalid-feedback">Please enter the license number.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label" for="licensePhoto">License Photo (Leave blank to keep current)</label>
+                                    <label class="form-label mb-0" for="licensePhoto"><b>License Photo</b> (Leave blank to keep current)</label>
                                     <input type="file" class="form-control" id="licensePhoto" name="license_photo" accept="image/*">
                                     <small class="text-muted d-block mt-1">Current file: license_img.jpg</small>
                                 </div>

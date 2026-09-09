@@ -2,6 +2,16 @@
 
 @section('title', 'Edit Category')
 
+@section('style')
+<style>
+    .form-label {
+    color: #2c3e50 !important;
+    opacity: inherit !important;
+
+}
+    </style>
+@endsection
+
 @section('content')
 
 <div class="container-fluid">
@@ -28,11 +38,8 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-xl-6 offset-xl-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">Edit Category</h4>
-                    <a href="{{ route('admin.masters.categories.index') }}" class="btn btn-light btn-sm"><i class="fa fa-arrow-left me-1"></i> Back</a>
-                </div>
+            <div class="col-sm-12 col-lg-12">
+                
 
                 <div class="card">
                     <div class="card-body">
@@ -41,7 +48,7 @@
                             @method('PUT')
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold" for="categoryName">Category Name <span class="text-danger">*</span></label>
+                                <label class="form-label  mb-0" for="categoryName"><b>Category Name</b> <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="categoryName" name="name" value="{{ old('name', $category->name) }}" placeholder="Enter Category Name" required>
                                 @error('name')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -73,7 +80,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label fw-bold" for="categoryStatus">Status <span class="text-danger">*</span></label>
+                                <label class="form-label  mb-0" for="categoryStatus"><b>Status</b> <span class="text-danger">*</span></label>
                                 <select class="form-select @error('status') is-invalid @enderror" id="categoryStatus" name="status" required>
                                     <option value="1" {{ old('status', $category->status) ? 'selected' : '' }}>Active</option>
                                     <option value="0" {{ !old('status', $category->status) ? 'selected' : '' }}>Inactive</option>

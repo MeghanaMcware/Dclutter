@@ -46,6 +46,7 @@ class Request extends Model
         'dump_id',
         'remarks',
         'not_available_reason',
+        'next_pickup_date',
         'not_available_at',
         'terms_accepted',
     ];
@@ -62,6 +63,7 @@ class Request extends Model
         'assigned_at' => 'datetime',
         'picked_up_at' => 'datetime',
         'not_available_at' => 'datetime',
+        'next_pickup_date' => 'date',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'before_pickup_latitude' => 'decimal:8',

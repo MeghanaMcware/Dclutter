@@ -14,7 +14,7 @@
 <div class="menu-backdrop" data-menu-close></div>
 <aside id="user-menu" class="user-menu" aria-hidden="true" aria-label="User menu">
     <div class="user-menu__header">
-        <strong class="text-center">Sagar</strong>
+        <strong class="text-center">{{ auth()->user()?->name ?? 'User Portal' }}</strong>
     </div>
 
     <nav class="user-menu__links" aria-label="Menu links">
