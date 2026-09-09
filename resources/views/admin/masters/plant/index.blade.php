@@ -315,9 +315,14 @@
                                             </td>
 
                                             <td>
-                                                <strong class="dump-table-name">
+                                                <strong class="dump-table-name d-block">
                                                     {{ $plant->name }}
                                                 </strong>
+                                                @if($plant->latitude && $plant->longitude)
+                                                    <a href="https://www.google.com/maps?q={{ $plant->latitude }},{{ $plant->longitude }}" target="_blank" class="text-primary small text-decoration-none d-inline-flex align-items-center mt-1" style="font-size: 11px;" title="View on Map">
+                                                        <i class="fa fa-map-marker-alt me-1 text-danger"></i> {{ round($plant->latitude, 4) }}, {{ round($plant->longitude, 4) }}
+                                                    </a>
+                                                @endif
                                             </td>
 
                                             <td>

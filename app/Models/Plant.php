@@ -14,7 +14,15 @@ class Plant extends Model
         'corporation_id',
         'constituency_id',
         'address',
+        'latitude',
+        'longitude',
         'status',
+    ];
+
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'status' => 'boolean',
     ];
 
     public function corporation()
