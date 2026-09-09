@@ -238,11 +238,6 @@ class CitizenRequestController extends Controller
                 ->orWhere('mobile_number', $cleanSearch)
                 ->latest()
                 ->first();
-        } else {
-            // Default: Load latest request if available
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->latest()
-                ->first();
         }
 
         return view('frontend.track.track_request', compact('wasteRequest', 'searchId'));
@@ -262,12 +257,6 @@ class CitizenRequestController extends Controller
                 ->where('request_number', $cleanId)
                 ->orWhere('request_number', '#' . $cleanId)
                 ->orWhere('id', $cleanId)
-                ->first();
-        }
-
-        if (!$wasteRequest) {
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->latest()
                 ->first();
         }
 

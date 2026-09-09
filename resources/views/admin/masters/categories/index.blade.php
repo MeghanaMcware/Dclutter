@@ -68,13 +68,27 @@
                                 </thead>
                                 <tbody>
                                     @forelse($categories as $category)
+                                        @php
+                                            $icon = $category->icon;
+                                            $isImage = $icon && (str_contains($icon, '/') || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $icon) || str_starts_with($icon, 'http'));
+                                        @endphp
                                         <tr>
                                             <td class="text-start fw-bold">{{ $category->name }}</td>
                                             <td>
-                                                @if($category->icon)
-                                                    <img src="{{ str_starts_with($category->icon, 'http') || str_starts_with($category->icon, '/') ? $category->icon : asset('storage/' . $category->icon) }}" alt="{{ $category->name }}" width="30" height="30" class="rounded object-fit-cover" onerror="this.src='https://placehold.co/30x30'">
+                                                @if($isImage)
+                                                    <img src="{{ str_starts_with($icon, 'http') || str_starts_with($icon, '/') ? $icon : asset('storage/' . $icon) }}" 
+                                                         alt="{{ $category->name }}" 
+                                                         width="34" height="34" 
+                                                         class="rounded object-fit-cover shadow-sm border" 
+                                                         onerror="this.onerror=null;this.src='https://placehold.co/34x34?text=Icon';">
+                                                @elseif(!empty($icon))
+                                                    <span class="d-inline-flex align-items-center justify-content-center bg-light text-primary rounded border shadow-sm" style="width: 36px; height: 36px; font-size: 16px;">
+                                                        <i class="{{ str_starts_with($icon, 'fa-') ? 'fa-solid ' . $icon : (str_starts_with($icon, 'fa ') || str_starts_with($icon, 'fas ') || str_starts_with($icon, 'fa-solid ') || str_starts_with($icon, 'bi-') ? $icon : 'fa-solid fa-' . $icon) }}"></i>
+                                                    </span>
                                                 @else
-                                                    <img src="https://placehold.co/30x30" alt="No Icon" width="30" height="30" class="rounded">
+                                                    <span class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded border" style="width: 36px; height: 36px; font-size: 15px;">
+                                                        <i class="fa-solid fa-folder-open"></i>
+                                                    </span>
                                                 @endif
                                             </td>
                                             <td>
