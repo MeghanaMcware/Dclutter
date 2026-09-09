@@ -34,9 +34,23 @@ class VehiclePwaController extends Controller
     {
         $vehicleId = $this->getDriverVehicleId();
 
-        $assignedQuery = WasteRequest::where('status', 'assigned');
+        $assignedQuery = WasteRequest::where(function ($q) {
+            $q->where('status', 'assigned')
+              ->orWhere(function ($sub) {
+                  $sub->where('status', 'not_available')
+                      ->whereNotNull('next_pickup_date')
+                      ->whereDate('next_pickup_date', '<=', now()->toDateString());
+              });
+        });
         $pickedUpQuery = WasteRequest::where('status', 'picked_up');
-        $recentQuery = WasteRequest::whereIn('status', ['assigned', 'picked_up']);
+        $recentQuery = WasteRequest::where(function ($q) {
+            $q->whereIn('status', ['assigned', 'picked_up'])
+              ->orWhere(function ($sub) {
+                  $sub->where('status', 'not_available')
+                      ->whereNotNull('next_pickup_date')
+                      ->whereDate('next_pickup_date', '<=', now()->toDateString());
+              });
+        });
 
         if ($vehicleId) {
             $assignedQuery->where('vehicle_id', $vehicleId);
@@ -57,7 +71,14 @@ class VehiclePwaController extends Controller
     public function requests(Request $request)
     {
         $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
-            ->whereIn('status', ['assigned', 'picked_up']);
+            ->where(function ($q) {
+                $q->whereIn('status', ['assigned', 'picked_up'])
+                  ->orWhere(function ($sub) {
+                      $sub->where('status', 'not_available')
+                          ->whereNotNull('next_pickup_date')
+                          ->whereDate('next_pickup_date', '<=', now()->toDateString());
+                  });
+            });
 
         if ($vehicleId = $this->getDriverVehicleId()) {
             $query->where('vehicle_id', $vehicleId);
@@ -73,7 +94,14 @@ class VehiclePwaController extends Controller
      */
     public function route()
     {
-        $query = WasteRequest::whereIn('status', ['assigned', 'picked_up']);
+        $query = WasteRequest::where(function ($q) {
+            $q->whereIn('status', ['assigned', 'picked_up'])
+              ->orWhere(function ($sub) {
+                  $sub->where('status', 'not_available')
+                      ->whereNotNull('next_pickup_date')
+                      ->whereDate('next_pickup_date', '<=', now()->toDateString());
+              });
+        });
         if ($vehicleId = $this->getDriverVehicleId()) {
             $query->where('vehicle_id', $vehicleId);
         }
@@ -119,7 +147,7 @@ class VehiclePwaController extends Controller
     public function beforePickup(Request $request, $id = null)
     {
         $reqId = $id ?? $request->query('id') ?? $request->query('request_id');
-        $wasteRequest = $reqId ? WasteRequest::find($reqId) : WasteRequest::whereIn('status', ['assigned', 'picked_up'])->first();
+        $wasteRequest = $reqId ? WasteRequest::find($reqId) : WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available'])->first();
         $dayInfo = $this->checkPickupDayAllowed();
 
         return view('vehiclepwa.updated.before_pickup', compact('wasteRequest', 'dayInfo'));
@@ -180,7 +208,7 @@ class VehiclePwaController extends Controller
     }
 
     /**
-     * Store Not Available status for a pickup request (Reason submission only).
+     * Store Not Available status for a pickup request (Reason & Next Sunday Date).
      */
     public function storeNotAvailable(Request $request, $id)
     {
@@ -188,7 +216,28 @@ class VehiclePwaController extends Controller
 
         $request->validate([
             'reason' => 'required|string|max:1000',
+            'next_date' => 'nullable|date',
+            'next_pickup_date' => 'nullable|date',
         ]);
+
+        $nextDate = $request->input('next_date') ?? $request->input('next_pickup_date');
+
+        if ($nextDate) {
+            $parsedDate = \Carbon\Carbon::parse($nextDate);
+            if (!$parsedDate->isSunday()) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The next pickup date must be a Sunday. Please select an upcoming Sunday.',
+                        'errors' => [
+                            'next_date' => ['The next pickup date must be a Sunday. Please select an upcoming Sunday.']
+                        ]
+                    ], 422);
+                }
+                return back()->withErrors(['next_date' => 'The next pickup date must be a Sunday. Please select an upcoming Sunday.']);
+            }
+            $wasteRequest->next_pickup_date = $parsedDate->toDateString();
+        }
 
         $wasteRequest->status = 'not_available';
         $wasteRequest->not_available_reason = $request->reason;

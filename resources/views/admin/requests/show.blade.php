@@ -100,13 +100,14 @@
                                         $statusClasses = [
                                             'pending' => 'status-pending',
                                             'assigned' => 'status-assigned',
+                                            'not_available' => 'status-pending',
                                             'picked_up' => 'status-picked_up',
                                             'dumped' => 'status-dumped',
                                             'rejected' => 'status-rejected',
                                         ];
                                     @endphp
                                     <span class="status-badge {{ $statusClasses[$wasteRequest->status] ?? 'status-pending' }}">
-                                        {{ ucfirst(str_replace('_', ' ', $wasteRequest->status)) }}
+                                        {{ $wasteRequest->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $wasteRequest->status)) }}
                                     </span>
                                 </div>
                             </div>
@@ -120,6 +121,25 @@
                                     {{ $wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d M Y (l)') : 'N/A' }}
                                 </div>
                             </div>
+                            @if($wasteRequest->next_pickup_date)
+                                <div class="col-sm-6">
+                                    <div class="detail-label">Rescheduled Pickup Date</div>
+                                    <div class="detail-value text-warning fw-bold">
+                                        <i class="fa fa-calendar-alt me-1"></i> {{ $wasteRequest->next_pickup_date->format('d M Y (l)') }}
+                                    </div>
+                                </div>
+                            @endif
+                            @if($wasteRequest->not_available_reason)
+                                <div class="col-sm-6">
+                                    <div class="detail-label">Not Available Reason</div>
+                                    <div class="detail-value text-danger">
+                                        <i class="fa fa-circle-exclamation me-1"></i> {{ $wasteRequest->not_available_reason }}
+                                        @if($wasteRequest->not_available_at)
+                                            <span class="text-muted small fw-normal">({{ $wasteRequest->not_available_at->format('d M Y, h:i A') }})</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
                             <div class="col-sm-6">
                                 <div class="detail-label">Assigned Vehicle</div>
                                 <div class="detail-value d-flex align-items-center gap-2">

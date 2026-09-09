@@ -282,13 +282,14 @@
             
             // Stepper logic
             $stepFillWidth = '20%';
-            if ($status == 'assigned') $stepFillWidth = '45%';
+            if ($status == 'assigned' || $status == 'not_available') $stepFillWidth = '45%';
             elseif ($status == 'picked_up') $stepFillWidth = '70%';
             elseif ($status == 'dumped') $stepFillWidth = '100%';
 
             $pillMap = [
                 'pending' => 'pill-pending',
                 'assigned' => 'pill-assigned',
+                'not_available' => 'pill-pending',
                 'picked_up' => 'pill-picked_up',
                 'dumped' => 'pill-dumped',
                 'rejected' => 'pill-rejected',
@@ -312,9 +313,21 @@
                     </div>
                 </div>
                 <span class="pill {{ $pillMap[$status] ?? 'pill-pending' }}">
-                    {{ ucfirst(str_replace('_', ' ', $status)) }}
+                    {{ $status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $status)) }}
                 </span>
             </div>
+
+            @if($status == 'not_available' && $wasteRequest->next_pickup_date)
+                <div style="background: #fff8e1; border: 1px solid #ffe082; color: #856404; padding: 12px 16px; border-radius: 8px; margin-top: 16px; font-size: 13px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa fa-calendar-alt" style="font-size: 16px;"></i>
+                    <div>
+                        <strong>Pickup Rescheduled for Sunday:</strong> Citizen requested next pickup on <strong>{{ $wasteRequest->next_pickup_date->format('d M Y (l)') }}</strong>.
+                        @if($wasteRequest->not_available_reason)
+                            <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">Reason: {{ $wasteRequest->not_available_reason }}</div>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             <!-- Stepper Progress Flow -->
             <div class="status-flow">
@@ -322,12 +335,12 @@
                 
                 <span class="completed">Request<br>Submitted</span>
                 
-                <span class="{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? 'completed' : ($status == 'pending' ? 'active-stage' : 'pending-step') }}">
+                <span class="{{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? 'completed' : ($status == 'pending' ? 'active-stage' : 'pending-step') }}">
                     Verified
                 </span>
                 
-                <span class="{{ in_array($status, ['picked_up', 'dumped']) ? 'completed' : ($status == 'assigned' ? 'active-stage' : 'pending-step') }}">
-                    Assigned
+                <span class="{{ in_array($status, ['picked_up', 'dumped']) ? 'completed' : (in_array($status, ['assigned', 'not_available']) ? 'active-stage' : 'pending-step') }}">
+                    {{ $status == 'not_available' ? 'Rescheduled' : 'Assigned' }}
                 </span>
                 
                 <span class="{{ $status == 'dumped' ? 'completed' : ($status == 'picked_up' ? 'active-stage' : 'pending-step') }}">
@@ -343,7 +356,15 @@
             <div class="facts">
                 <div>
                     <small>Scheduled Pickup Date</small>
-                    <b>{{ $wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d M Y (l)') : 'Sunday Scheduled' }}</b>
+                    <b>
+                        @if($wasteRequest->next_pickup_date)
+                            {{ $wasteRequest->next_pickup_date->format('d M Y (l)') }} (Rescheduled)
+                        @elseif($wasteRequest->preferred_pickup_date)
+                            {{ $wasteRequest->preferred_pickup_date->format('d M Y (l)') }}
+                        @else
+                            Sunday Scheduled
+                        @endif
+                    </b>
                 </div>
                 <div>
                     <small>Assigned Vehicle</small>
