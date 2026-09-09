@@ -265,13 +265,13 @@ body {
         <div class="col-md-6 col-lg-6">
             <div class="mb-3">
                 <label class="col-form-label mb-0"><b>Corporation</b></label>
-                <select class="js-example-basic-single col-sm-12">
-
-                    <optgroup label="corporation">
-                        <option value="west">West</option>
-                        <option value="south">South</option>
-                        <option value="north">North</option>
-                    </optgroup>
+                <select class="js-example-basic-single col-sm-12" id="corporationSelect">
+                    <option value="all" {{ empty($selectedCorporationId) || $selectedCorporationId === 'all' ? 'selected' : '' }}>All Corporations</option>
+                    @foreach($corporations as $corp)
+                        <option value="{{ $corp->id }}" {{ $selectedCorporationId == $corp->id ? 'selected' : '' }}>
+                            {{ $corp->name }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
         </div>
@@ -283,7 +283,7 @@ body {
                 <div class="stat-box">
                     <div class="stat-title">Total Requests <i class="fa fa-info-circle text-primary"
                             style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-blue">12,568</div>
+                    <div class="stat-value val-blue" id="statTotalRequests">{{ number_format($totalRequests) }}</div>
 
                 </div>
             </div>
@@ -293,7 +293,7 @@ body {
                 <div class="stat-box">
                     <div class="stat-title">Completed Pickups <i class="fa fa-check-circle text-success"
                             style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-orange">1,256</div>
+                    <div class="stat-value val-orange" id="statCompletedPickups">{{ number_format($completedPickups) }}</div>
                 </div>
             </div>
         </div>
@@ -302,7 +302,7 @@ body {
                 <div class="stat-box">
                     <div class="stat-title">Scheduled Pickups <i class="fa fa-calendar text-primary"
                             style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-green">9,245</div>
+                    <div class="stat-value val-green" id="statScheduledPickups">{{ number_format($scheduledPickups) }}</div>
                 </div>
             </div>
         </div>
@@ -311,7 +311,7 @@ body {
                 <div class="stat-box">
                     <div class="stat-title">Total Users <i class="fa fa-users text-info" style="font-size: 15px;"></i>
                     </div>
-                    <div class="stat-value val-blue">256</div>
+                    <div class="stat-value val-blue" id="statTotalUsers">{{ number_format($totalUsers) }}</div>
                 </div>
             </div>
         </div>
@@ -320,7 +320,7 @@ body {
                 <div class="stat-box">
                     <div class="stat-title">Cancelled pickups <i class="fa fa-ban text-danger"
                             style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-red">256</div>
+                    <div class="stat-value val-red" id="statCancelledPickups">{{ number_format($cancelledPickups) }}</div>
                 </div>
             </div>
         </div>
@@ -334,9 +334,9 @@ body {
             <div class="dash-card h-100">
                 <div class="dash-card-header">
                     <h5 class="dash-card-title">Requests Trend</h5>
-                    <select class="form-select select-sm w-auto">
-                        <option>This Week</option>
-                        <option>This Month</option>
+                    <select class="form-select select-sm w-auto" id="trendTimeframe">
+                        <option value="week" {{ $timeframe === 'week' ? 'selected' : '' }}>This Week</option>
+                        <option value="month" {{ $timeframe === 'month' ? 'selected' : '' }}>This Month</option>
                     </select>
                 </div>
                 <div class="dash-card-body">
@@ -351,7 +351,7 @@ body {
             <div class="dash-card h-100">
                 <div class="dash-card-header">
                     <h5 class="dash-card-title">Requests by Category</h5>
-                    <a href="#" class="view-all">View All</a>
+                    <a href="{{ route('admin.masters.categories.index') }}" class="view-all">View All</a>
                 </div>
                 <div class="dash-card-body d-flex align-items-center justify-content-center">
                     <div id="categoryChart"></div>
@@ -383,7 +383,7 @@ body {
 
 
                     <div class="table-responsive">
-                        <table class=" table table-bordered table-striped  text-center align-middle" id="data-source-1">
+                        <table class=" table table-bordered table-striped text-center align-middle" id="data-source-1">
                             <thead>
                                 <tr>
                                     <th>Display ID</th>
@@ -395,19 +395,53 @@ body {
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                              
+                            <tbody id="recentRequestsBody">
+                                @forelse($recentRequests as $req)
                                 <tr>
-                                    <td style="color: #202935dc; font-size: 12px; font-weight:600;">#DCL-1255</td>
-                                    <td style="color: #202935dc;font-weight:600;">John Doe</td>
-                                    <td style="color: #202935dc;font-weight:600;">Furniture</td>
-                                    <td style="color: #202935dc;font-weight:600;">Sofas</td>
-                                    <td><span class="status-badge assigned">Assigned</span></td>
-                                    <td style="color: #202935dc; font-weight:600;">23 May, 10:15 AM</td>
-                                    <td class="text-center"><a href="#" class="action-link btn btn-primary">View</a>
+                                    <td style="color: #202935dc; font-size: 12px; font-weight:600;">{{ $req->request_number }}</td>
+                                    <td style="color: #202935dc;font-weight:600;">{{ $req->applicant_name ?: 'Citizen User' }}</td>
+                                    <td style="color: #202935dc;font-weight:600;">
+                                        @if(is_array($req->category_ids))
+                                            {{ implode(', ', $req->category_ids) }}
+                                        @else
+                                            {{ $req->category_ids ?: 'N/A' }}
+                                        @endif
+                                    </td>
+                                    <td style="color: #202935dc;font-weight:600;">
+                                        @if(is_array($req->subcategory_ids))
+                                            {{ implode(', ', $req->subcategory_ids) }}
+                                        @else
+                                            {{ $req->subcategory_ids ?: 'N/A' }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $st = strtolower($req->status ?? 'pending');
+                                            $badgeClass = match($st) {
+                                                'assigned', 'scheduled' => 'assigned',
+                                                'picked_up', 'dumped', 'completed' => 'completed',
+                                                'rejected', 'cancelled', 'not_available' => 'pending',
+                                                default => 'pending',
+                                            };
+                                            $statusLabel = match($st) {
+                                                'pending' => 'Requested',
+                                                'assigned', 'scheduled' => 'Scheduled',
+                                                'picked_up', 'dumped', 'completed' => 'Completed',
+                                                'rejected', 'cancelled', 'not_available' => 'Cancelled',
+                                                default => ucfirst(str_replace('_', ' ', $st)),
+                                            };
+                                        @endphp
+                                        <span class="status-badge {{ $badgeClass }}">{{ $statusLabel }}</span>
+                                    </td>
+                                    <td style="color: #202935dc; font-weight:600;">{{ $req->created_at ? $req->created_at->format('d M, h:i A') : 'N/A' }}</td>
+                                    <td class="text-center"><a href="{{ route('admin.requests.show', $req->id) }}" class="action-link btn btn-primary">View</a>
                                     </td>
                                 </tr>
-                               
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-muted py-4 text-center">No waste requests found.</td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -416,153 +450,292 @@ body {
         </div>
     </div>
 
-
-
-    <!-- Live Map -->
-    <!-- <div class="col-xl-12">
-            <div class="dash-card h-100">
-                <div class="dash-card-header">
-                    <h5 class="dash-card-title">Live Map</h5>
-                    <span class="badge bg-success rounded-pill" style="font-size: 10px;">24 Active</span>
-                </div>
-                <div class="dash-card-body p-0">
-                    <div id="liveMap"></div>
-                </div>
-            </div>
-        </div> -->
-</div>
 </div>
 @endsection
 
 @section('script')
-<!-- ApexCharts -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Line Chart: Requests Trend
-    var trendOptions = {
-        series: [{
-            name: 'Received',
-            data: [31, 40, 28, 51, 42, 109, 100]
-        }, {
-            name: 'Completed',
-            data: [11, 32, 45, 32, 34, 52, 41]
-        }],
-        chart: {
-            height: 250,
-            type: 'area',
-            toolbar: {
-                show: false
-            }
-        },
-        colors: ['#3b82f6', '#10b981'],
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 2
-        },
-        xaxis: {
-            categories: ["23 May", "24 May", "25 May", "26 May", "27 May", "28 May", "29 May"],
-            labels: {
-                style: {
-                    colors: '#64748b'
-                }
-            }
-        },
-        yaxis: {
-            labels: {
-                style: {
-                    colors: '#64748b'
-                }
-            }
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'left'
+(function() {
+    function initDashboard() {
+        if (typeof ApexCharts === 'undefined') {
+            setTimeout(initDashboard, 50);
+            return;
         }
-    };
-    var trendChart = new ApexCharts(document.querySelector("#trendChart"), trendOptions);
-    trendChart.render();
 
-    // 2. Donut Chart: Requests by Category
-    var catOptions = {
-        series: [25, 15, 12, 10, 15, 8, 5, 10],
-        labels: ['Furniture', 'Mattresses & Cushions', 'Clothes & Shoes', 'Appliances', 'Electronics',
-            'Books & Magazines', 'Toys & Games', 'Other Items'
-        ],
-        chart: {
-            type: 'donut',
-            height: 260
-        },
-        colors: ['#16a34a', '#2563eb', '#ea580c', '#9333ea', '#0d9488', '#d97706', '#dc2626', '#64748b'],
-        plotOptions: {
-            pie: {
-                donut: {
-                    size: '70%',
+        // 1. Initial Data from Backend
+        var trendDates = @json($trendDates);
+        var receivedCounts = @json($receivedCounts);
+        var completedCounts = @json($completedCounts);
+
+        var categoryLabels = @json($categoryLabels);
+        var categorySeries = @json($categorySeries);
+
+        var statusLabels = @json($statusLabels);
+        var statusSeries = @json($statusSeries);
+
+        // 2. Line Chart: Requests Trend
+        var trendEl = document.querySelector("#trendChart");
+        var trendChart = null;
+        if (trendEl) {
+            trendEl.innerHTML = '';
+            var trendOptions = {
+                series: [{
+                    name: 'Received',
+                    data: receivedCounts
+                }, {
+                    name: 'Completed',
+                    data: completedCounts
+                }],
+                chart: {
+                    height: 250,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                colors: ['#3b82f6', '#10b981'],
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 2
+                },
+                xaxis: {
+                    categories: trendDates,
                     labels: {
-                        show: true,
-                        name: {
-                            show: false
+                        style: {
+                            colors: '#64748b'
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: '#64748b'
                         },
-                        value: {
-                            show: true,
-                            fontSize: '24px',
-                            fontWeight: 700,
-                            color: '#0f172a',
-                            formatter: function(val) {
-                                return val + "%"
-                            }
-                        },
-                        total: {
-                            show: true,
-                            showAlways: true,
-                            label: 'Total',
-                            fontSize: '12px',
-                            color: '#64748b',
-                            formatter: function(w) {
-                                return "12,568"
+                        formatter: function(val) {
+                            return Math.round(val);
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left'
+                }
+            };
+            trendChart = new ApexCharts(trendEl, trendOptions);
+            trendChart.render();
+        }
+
+        // 3. Donut Chart: Requests by Category
+        var catEl = document.querySelector("#categoryChart");
+        var catChart = null;
+        if (catEl) {
+            catEl.innerHTML = '';
+            var catS = categorySeries.length > 0 && Math.max.apply(Math, categorySeries) > 0 ? categorySeries : [1];
+            var catL = categoryLabels.length > 0 ? categoryLabels : ['No Requests'];
+
+            var catOptions = {
+                series: catS,
+                labels: catL,
+                chart: {
+                    type: 'donut',
+                    height: 260
+                },
+                colors: ['#16a34a', '#2563eb', '#ea580c', '#9333ea', '#0d9488', '#d97706', '#dc2626', '#64748b'],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '70%',
+                            labels: {
+                                show: true,
+                                name: {
+                                    show: false
+                                },
+                                value: {
+                                    show: true,
+                                    fontSize: '24px',
+                                    fontWeight: 700,
+                                    color: '#0f172a',
+                                    formatter: function(val) {
+                                        return val;
+                                    }
+                                },
+                                total: {
+                                    show: true,
+                                    showAlways: true,
+                                    label: 'Total',
+                                    fontSize: '12px',
+                                    color: '#64748b',
+                                    formatter: function(w) {
+                                        return categorySeries.reduce(function(a, b) { return a + b; }, 0);
+                                    }
+                                }
                             }
                         }
                     }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                legend: {
+                    show: false
                 }
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        legend: {
-            show: false
+            };
+            catChart = new ApexCharts(catEl, catOptions);
+            catChart.render();
         }
-    };
-    var catChart = new ApexCharts(document.querySelector("#categoryChart"), catOptions);
-    catChart.render();
 
-    // 3. Leaflet Map
-    var map = L.map('liveMap').setView([12.9716, 77.5946], 12); // Bengaluru coordinates
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
-    }).addTo(map);
+        // 4. Donut Chart: Pickup status breakdown (Exact Original Template Settings)
+        var donutEl = document.querySelector("#donutchart");
+        var donutChart = null;
+        if (donutEl) {
+            donutEl.innerHTML = '';
+            var statS = statusSeries.length > 0 && Math.max.apply(Math, statusSeries) > 0 ? statusSeries : [1, 0, 0, 0];
+            var donutchartOptions = {
+                chart: {
+                    width: 380,
+                    type: 'donut',
+                },
+                series: statS,
+                labels: statusLabels,
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }],
+                colors: ['#3489eb', '#eb9b34', '#51bb25', '#f41b35']
+            };
+            donutChart = new ApexCharts(donutEl, donutchartOptions);
+            donutChart.render();
+        }
 
-    // Add some dummy markers
-    var markers = [
-        [12.9716, 77.5946, 'Vehicle #1 (On Route)'],
-        [12.9352, 77.6245, 'Vehicle #2 (Collecting)'],
-        [12.9121, 77.6446, 'Vehicle #3 (Idle)']
-    ];
+        // 5. AJAX Update Function
+        function updateDashboardAjax() {
+            var corpSelect = document.getElementById('corporationSelect');
+            var corpId = corpSelect ? corpSelect.value : 'all';
+            var timeframeSelect = document.getElementById('trendTimeframe');
+            var timeframe = timeframeSelect ? timeframeSelect.value : 'week';
 
-    markers.forEach(function(m) {
-        L.circleMarker([m[0], m[1]], {
-            color: '#10b981',
-            fillColor: '#10b981',
-            fillOpacity: 0.8,
-            radius: 6
-        }).addTo(map).bindPopup(m[2]);
-    });
-});
+            var url = new URL("{{ route('admin.dashboard') }}", window.location.origin);
+            if (corpId && corpId !== 'all') {
+                url.searchParams.set('corporation_id', corpId);
+            }
+            if (timeframe) {
+                url.searchParams.set('timeframe', timeframe);
+            }
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // Update Top Stats
+                    var elTotal = document.getElementById('statTotalRequests');
+                    if (elTotal) elTotal.innerText = data.stats.totalRequests;
+
+                    var elComp = document.getElementById('statCompletedPickups');
+                    if (elComp) elComp.innerText = data.stats.completedPickups;
+
+                    var elSched = document.getElementById('statScheduledPickups');
+                    if (elSched) elSched.innerText = data.stats.scheduledPickups;
+
+                    var elUsers = document.getElementById('statTotalUsers');
+                    if (elUsers) elUsers.innerText = data.stats.totalUsers;
+
+                    var elCanc = document.getElementById('statCancelledPickups');
+                    if (elCanc) elCanc.innerText = data.stats.cancelledPickups;
+
+                    // Update Trend Chart
+                    if (trendChart) {
+                        trendChart.updateOptions({
+                            xaxis: {
+                                categories: data.trend.categories
+                            }
+                        });
+                        trendChart.updateSeries([{
+                            name: 'Received',
+                            data: data.trend.received
+                        }, {
+                            name: 'Completed',
+                            data: data.trend.completed
+                        }]);
+                    }
+
+                    // Update Category Chart
+                    if (catChart) {
+                        var updatedCatS = data.categories.series.length > 0 && Math.max.apply(Math, data.categories.series) > 0 
+                            ? data.categories.series 
+                            : [1];
+                        var updatedCatL = data.categories.labels.length > 0 
+                            ? data.categories.labels 
+                            : ['No Requests'];
+
+                        catChart.updateOptions({
+                            labels: updatedCatL
+                        });
+                        catChart.updateSeries(updatedCatS);
+                    }
+
+                    // Update Status Breakdown Chart
+                    if (donutChart) {
+                        var updatedStatS = data.statusBreakdown.series.length > 0 && Math.max.apply(Math, data.statusBreakdown.series) > 0 
+                            ? data.statusBreakdown.series 
+                            : [1, 0, 0, 0];
+                        donutChart.updateSeries(updatedStatS);
+                    }
+
+                    // Update Recent Requests Table via AJAX
+                    var tbody = document.getElementById('recentRequestsBody');
+                    if (tbody && data.tableHtml) {
+                        tbody.innerHTML = data.tableHtml;
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.error('Dashboard AJAX error:', err);
+            });
+        }
+
+        // Attach AJAX change events (handles both plain select and jQuery Select2)
+        var corpSelectEl = document.getElementById('corporationSelect');
+        if (corpSelectEl) {
+            corpSelectEl.addEventListener('change', updateDashboardAjax);
+        }
+        if (window.jQuery) {
+            $(document).on('change select2:select', '#corporationSelect', function() {
+                updateDashboardAjax();
+            });
+            $(document).on('change', '#trendTimeframe', function() {
+                updateDashboardAjax();
+            });
+        } else {
+            var timeframeSelectEl = document.getElementById('trendTimeframe');
+            if (timeframeSelectEl) {
+                timeframeSelectEl.addEventListener('change', updateDashboardAjax);
+            }
+        }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initDashboard();
+    } else {
+        document.addEventListener("DOMContentLoaded", initDashboard);
+    }
+})();
 </script>
 @endsection

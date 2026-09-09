@@ -278,7 +278,6 @@
 
         <script src="{{asset('/theme/js/chart/apex-chart/apex-chart.js') }}"></script>
     <script src="{{asset('/theme/js/chart/apex-chart/stock-prices.js') }}"></script>
-    <script src="{{asset('/theme/js/chart/apex-chart/chart-custom.js') }}"></script>
     <!-- Plugins JS Ends-->
     <!-- Theme js-->
     <script src="{{asset('/theme/js/script.js') }}"></script>
