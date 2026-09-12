@@ -6,10 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <meta name="description"
-        content="D-Clutter">
-    <meta name="keywords"
-        content="D-Cultter">
+    <meta name="description" content="D-Clutter">
+    <meta name="keywords" content="D-Cultter">
     <meta name="author" content="pixelstrap">
     <link rel="icon" href="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}">
     <title>@yield('title') - Dclutter</title>
@@ -22,7 +20,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&amp;display=swap"
         rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{asset('/theme/css/vendors/font-awesome.css') }}">
     <!-- ico-font-->
     <link rel="stylesheet" type="text/css" href="{{asset('/theme/css/vendors/icofont.css') }}">
@@ -43,15 +41,15 @@
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="{{asset('/theme/css/responsive.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
-      rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <style>
-        body{
-            font-family: 'Inter', sans-serif;
-        }
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+
     .btn-close.white-close {
         filter: invert(1);
     }
@@ -102,14 +100,15 @@
         transform: translateX(4px) !important;
     }
 
-   .sidebar-link.active {
+    .sidebar-link.active {
         background: linear-gradient(135deg, #5f62e6 0%, #5f62e6 100%) !important;
         border-color: #5f62e6 !important;
         color: #ffffff !important;
         box-shadow: 0 5px 20px #5a63e559 !important;
     }
 
-    .sidebar-link i, .sidebar-link span {
+    .sidebar-link i,
+    .sidebar-link span {
         color: #000 !important;
     }
 
@@ -129,7 +128,8 @@
         text-decoration: none;
     }
 
-    .sidebar-submenu li a:hover, .sidebar-submenu li a.active {
+    .sidebar-submenu li a:hover,
+    .sidebar-submenu li a.active {
         color: #000 !important;
         background: rgba(255, 255, 255, 0.2) !important;
         font-weight: bold;
@@ -164,18 +164,20 @@
         stroke: #ffffff !important;
     }
 
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
         background: #705dbb !important;
         border-color: #715cba !important;
         border-radius: 5px !important;
         color: white !important;
     }
-    .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content > li .sidebar-link.active span{
-        color:#fff !important;
+
+    .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active span {
+        color: #fff !important;
     }
     </style>
     @yield('style')
-<style>
+    <style>
     /* DataTables Pagination Override */
     .dataTables_wrapper .dataTables_paginate .paginate_button {
         color: #0d6efd !important;
@@ -187,11 +189,13 @@
         font-weight: 600 !important;
         cursor: pointer !important;
     }
+
     .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
         background: #0d6efd !important;
         color: white !important;
         border-color: #0d6efd !important;
     }
+
     .dataTables_wrapper .dataTables_paginate .paginate_button.current,
     .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
         background: #198754 !important;
@@ -199,6 +203,7 @@
         border-radius: 5px !important;
         color: white !important;
     }
+
     .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
     .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
         color: #6c757d !important;
@@ -276,7 +281,7 @@
     <script src="{{asset('/theme/js/datepicker/date-picker/datepicker.en.js') }}"></script>
     <script src="{{asset('/theme/js/datepicker/date-picker/datepicker.custom.js') }}"></script>
 
-        <script src="{{asset('/theme/js/chart/apex-chart/apex-chart.js') }}"></script>
+    <script src="{{asset('/theme/js/chart/apex-chart/apex-chart.js') }}"></script>
     <script src="{{asset('/theme/js/chart/apex-chart/stock-prices.js') }}"></script>
     <script src="{{asset('/theme/js/chart/apex-chart/chart-custom.js') }}"></script>
     <!-- Plugins JS Ends-->
@@ -286,42 +291,42 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if(session('success'))
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: @json(session('success')),
-            confirmButtonColor: '#1f4e79'
-        });
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: @json(session('success')),
+        confirmButtonColor: '#1f4e79'
+    });
     </script>
     @endif
     @if(session('error'))
     <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: @json(session('error')),
-            confirmButtonColor: '#c0392b'
-        });
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: @json(session('error')),
+        confirmButtonColor: '#c0392b'
+    });
     </script>
     @endif
     <script>
-        window.adminConfirmDelete = function (form, title = 'Delete this record?') {
-            Swal.fire({
-                icon: 'warning',
-                title: title,
-                text: 'This action cannot be undone.',
-                showCancelButton: true,
-                confirmButtonColor: '#c0392b',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Delete',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+    window.adminConfirmDelete = function(form, title = 'Delete this record?') {
+        Swal.fire({
+            icon: 'warning',
+            title: title,
+            text: 'This action cannot be undone.',
+            showCancelButton: true,
+            confirmButtonColor: '#c0392b',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Delete',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
 
-            return false;
-        };
+        return false;
+    };
     </script>
     @yield('script')
 </body>
