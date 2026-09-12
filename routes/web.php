@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Citizen\CitizenRequestController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\GisController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminImportedRequestController;
@@ -31,6 +33,10 @@ Route::get('/lookup-ward', [CitizenRequestController::class, 'lookupWardByCoords
 Route::get('/track-request', [CitizenRequestController::class, 'trackRequest'])->name('citizen.track');
 Route::get('/request-details', [CitizenRequestController::class, 'requestDetails'])->name('citizen.details');
 
+Route::get('/gis', [GisController::class, 'index'])->name('gis');
+Route::get('/gis/api/wards', [GisController::class, 'getWardsGeoJson'])->name('gis.api.wards');
+Route::get('/gis/api/requests', [GisController::class, 'getRequestsGeoJson'])->name('gis.api.requests');
+
 /*
 |--------------------------------------------------------------------------
 | Admin Portal Routes Group
@@ -43,9 +49,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // GIS Map
+    Route::get('/gis', [GisController::class, 'index'])->name('gis');
+    Route::get('/gis/api/wards', [GisController::class, 'getWardsGeoJson'])->name('gis.api.wards');
+    Route::get('/gis/api/requests', [GisController::class, 'getRequestsGeoJson'])->name('gis.api.requests');
 
     // Requests Management
     Route::prefix('requests')->name('requests.')->group(function () {
@@ -176,8 +185,3 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/profile/update', [UserPwaProfileController::class, 'update']);
     });
 });
-
-
- Route::get('/gis', function () {
-        return view('admin.gis.index');
-    })->name('gis');

@@ -129,7 +129,7 @@
     @if($wasteRequest)
         @php
             $status = $wasteRequest->status;
-            $statusClass = $status == 'dumped' ? 'dumped' : ($status == 'assigned' ? 'assigned' : ($status == 'picked_up' ? 'picked_up' : 'pending'));
+            $statusClass = $status == 'dumped' ? 'dumped' : ($status == 'assigned' ? 'assigned' : ($status == 'picked_up' ? 'picked_up' : ($status == 'not_available' ? 'pending' : 'pending')));
         @endphp
         <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1e293b;">Tracking Result</h4>
         
@@ -137,19 +137,37 @@
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <div class="req-id">{{ $wasteRequest->request_number }}</div>
                 <span class="badge-status badge-{{ $statusClass }}">
-                    {{ ucfirst(str_replace('_', ' ', $status)) }}
+                    {{ $status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $status)) }}
                 </span>
             </div>
             <div class="req-date">Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}</div>
+
+            @if($status == 'not_available' && $wasteRequest->next_pickup_date)
+                <div class="alert alert-warning py-2 px-3 mb-3" style="font-size: 12px; border-radius: 8px;">
+                    <i class="fa-solid fa-calendar-days me-1"></i>
+                    <strong>Pickup Rescheduled for Sunday:</strong> {{ $wasteRequest->next_pickup_date->format('d M Y (l)') }}
+                    @if($wasteRequest->not_available_reason)
+                        <div class="text-muted mt-1">Reason: {{ $wasteRequest->not_available_reason }}</div>
+                    @endif
+                </div>
+            @endif
             
             <div class="timeline">
                 <div class="timeline-item active">
                     <p>Request Submitted</p>
                     <small>{{ $wasteRequest->created_at->format('d M Y, h:i A') }}</small>
                 </div>
-                <div class="timeline-item {{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? 'active' : '' }}">
-                    <p>Assigned to Vehicle</p>
-                    <small>{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? 'Vehicle has been assigned' : 'Pending Assignment' }}</small>
+                <div class="timeline-item {{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? 'active' : '' }}">
+                    <p>{{ $status == 'not_available' ? 'Rescheduled for Sunday' : 'Assigned to Vehicle' }}</p>
+                    <small>
+                        @if($status == 'not_available' && $wasteRequest->next_pickup_date)
+                            Scheduled on {{ $wasteRequest->next_pickup_date->format('d M Y') }}
+                        @elseif(in_array($status, ['assigned', 'picked_up', 'dumped']))
+                            Vehicle has been assigned
+                        @else
+                            Pending Assignment
+                        @endif
+                    </small>
                 </div>
                 <div class="timeline-item {{ in_array($status, ['picked_up', 'dumped']) ? 'active' : '' }}">
                     <p>Picked Up</p>
@@ -161,7 +179,7 @@
                 </div>
             </div>
 
-            @if(in_array($status, ['assigned', 'picked_up']) && $wasteRequest->vehicle)
+            @if(in_array($status, ['assigned', 'not_available', 'picked_up']) && $wasteRequest->vehicle)
             <div class="driver-box">
                 <div class="driver-icon"><i class="fa-solid fa-truck"></i></div>
                 <div class="driver-details">

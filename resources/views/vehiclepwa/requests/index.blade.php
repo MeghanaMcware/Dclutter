@@ -476,8 +476,18 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Pickup Date</label>
+                        <label class="small text-muted font-weight-bold text-uppercase d-block mb-1">Assigned / Requested Date</label>
                         <strong class="fs-6 text-dark"><i class="fa-regular fa-calendar text-primary me-1"></i> <span id="modalDate">09-Aug-2026</span></strong>
+                    </div>
+
+                    <div class="mb-3" id="modalRescheduledBox" style="display: none;">
+                        <div class="p-2 rounded-3" style="background: #fff8e1; border: 1px solid #ffe082; color: #856404; font-size: 13px;">
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="fa-solid fa-calendar-check text-warning"></i>
+                                <span><strong>Rescheduled Date:</strong> <span id="modalRescheduledDate" class="fw-bold text-dark"></span></span>
+                            </div>
+                            <div class="text-muted small mt-1" id="modalRescheduledReasonWrap">Reason: <span id="modalRescheduledReason"></span></div>
+                        </div>
                     </div>
 
                     <div class="row g-2 mb-3">
@@ -558,11 +568,12 @@
         </select>
 
         <div id="nextDateSection" class="modal-reason-section" style="display: none;">
-            <label class="modal-reason-label d-block" for="nextPickupDate">Next Pickup Date</label>
+            <label class="modal-reason-label d-block" for="nextPickupDate">Next Pickup Date (Sundays Only)</label>
             <input type="date"
                id="nextPickupDate"
                class="modal-reason-select"
                min="{{ now()->format('Y-m-d') }}">
+            <small class="text-muted d-block mt-1" style="font-size: 11px;">* Please select an upcoming Sunday for collection.</small>
         </div>
     <button type="button"
         id="notAvailableSubmitBtn"
@@ -617,6 +628,8 @@
                 applicant: '{{ addslashes($req->applicant_name) }}',
                 mobile: '{{ $req->mobile_number }}',
                 date: '{{ $req->created_at->format("d-M-Y") }}',
+                nextPickupDate: '{{ $req->next_pickup_date ? $req->next_pickup_date->format("d-M-Y (l)") : "" }}',
+                notAvailableReason: '{{ addslashes($req->not_available_reason ?? "") }}',
                 houseNo: '{{ addslashes($req->house_no) }}',
                 floor: '{{ addslashes($req->floor_no ?? $req->floor ?? "") }}',
                 ward: '{{ $req->ward?->name ?? "Ward" }}',
@@ -733,6 +746,17 @@
             document.getElementById('modalPincode').innerText = item.pincode;
             document.getElementById('modalDate').innerText = item.date;
           
+            const reschedBox = document.getElementById('modalRescheduledBox');
+            const reschedDate = document.getElementById('modalRescheduledDate');
+            const reschedReason = document.getElementById('modalRescheduledReason');
+            if (item.nextPickupDate) {
+                if (reschedBox) reschedBox.style.display = 'block';
+                if (reschedDate) reschedDate.innerText = item.nextPickupDate;
+                if (reschedReason) reschedReason.innerText = item.notAvailableReason || 'Asking for Next Date';
+            } else {
+                if (reschedBox) reschedBox.style.display = 'none';
+            }
+
             document.getElementById('modalCategory').innerText = item.category;
             document.getElementById('modalSubCategory').innerText = item.subCategory;
             
@@ -745,6 +769,9 @@
                 } else if (item.status === 'ASSIGNED') {
                     statusBadgeElem.className = 'badge bg-primary text-white py-1 px-2 font-12';
                     statusBadgeElem.innerHTML = '<i class="fa-solid fa-truck-fast me-1"></i> ASSIGNED';
+                } else if (item.status === 'NOT_AVAILABLE') {
+                    statusBadgeElem.className = 'badge bg-warning text-dark py-1 px-2 font-12';
+                    statusBadgeElem.innerHTML = '<i class="fa-solid fa-calendar-days me-1"></i> RESCHEDULED: ' + (item.nextPickupDate || 'SUNDAY');
                 } else {
                     statusBadgeElem.className = 'badge-status-pending font-12';
                     statusBadgeElem.innerHTML = '<i class="fa-regular fa-clock me-1"></i> ' + item.status;
@@ -847,8 +874,8 @@
     availablePickupSection.style.display = 'none';
     notAvailableSubmitBtn.disabled = true;
 
-    // Check status: Only show availability dropdown for ASSIGNED / pending requests
-    const isAlreadyPickedUp = (item.status === 'PICKED_UP' || item.status === 'COMPLETED' || item.status === 'DUMPED' || item.status === 'NOT_AVAILABLE' || item.pickedUpDone);
+    // Check status: Only show availability dropdown for ASSIGNED / NOT_AVAILABLE requests
+    const isAlreadyPickedUp = (item.status === 'PICKED_UP' || item.status === 'COMPLETED' || item.status === 'DUMPED' || item.pickedUpDone);
 
     if (isAlreadyPickedUp) {
         if (availabilityContainer) availabilityContainer.style.display = 'none';
@@ -896,11 +923,25 @@
         nextDateSection.style.display = asksForNextDate ? 'block' : 'none';
         nextPickupDate.required = asksForNextDate;
         notAvailableSubmitBtn.disabled = this.value === '' || (asksForNextDate && !nextPickupDate.value);
-
     };
 
     nextPickupDate.onchange = function () {
         const asksForNextDate = notAvailableReason.value === 'asking_next_date';
+        if (this.value) {
+            const parts = this.value.split('-');
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (selectedDate.getDay() !== 0) { // 0 is Sunday
+                Swal.fire({
+                    title: 'Sundays Only',
+                    text: 'Rescheduled pickup date must be a Sunday. Please select an upcoming Sunday.',
+                    icon: 'warning',
+                    confirmButtonColor: '#0e7a43'
+                });
+                this.value = '';
+                notAvailableSubmitBtn.disabled = true;
+                return;
+            }
+        }
         notAvailableSubmitBtn.disabled = notAvailableReason.value === '' || (asksForNextDate && !this.value);
     };
 
@@ -959,10 +1000,21 @@
         function renderRequestCards() {
             const cardsContainer = document.getElementById('cards-container');
             cardsContainer.innerHTML = allRequestData.map((item, index) => {
-                const statusBadge = item.status === 'PICKED_UP'
-                    ? '<span class="badge bg-success py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-circle-check"></i> PICKED UP</span>'
-                    : '<span class="badge bg-primary py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-truck-fast"></i> ASSIGNED</span>';
+                let statusBadge = '<span class="badge bg-primary py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-truck-fast"></i> ASSIGNED</span>';
+                if (item.status === 'PICKED_UP') {
+                    statusBadge = '<span class="badge bg-success py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-circle-check"></i> PICKED UP</span>';
+                } else if (item.status === 'NOT_AVAILABLE') {
+                    statusBadge = '<span class="badge bg-warning text-dark py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-calendar-days"></i> RESCHEDULED</span>';
+                }
                 const searchText = `${item.ref} ${item.applicant} ${item.location} ${item.category} ${item.status}`.toLowerCase();
+
+                const rescheduledInfo = (item.status === 'NOT_AVAILABLE' && item.nextPickupDate)
+                    ? `<div class="card-info-item" style="margin-top: 4px; color: #b45309;">
+                           <i class="fa-solid fa-calendar-check text-warning"></i>
+                           <span class="card-info-label" style="color: #b45309;">Pickup Due:</span>
+                           <span class="card-info-value fw-bold" style="color: #92400e;">${item.nextPickupDate}</span>
+                       </div>`
+                    : '';
 
                 return `
                     <div class="request-card request-item-row" data-search="${searchText}" data-status="${item.status.toLowerCase()}">
@@ -988,6 +1040,7 @@
                                     <span class="card-info-label">Sub Category:</span>
                                     <span class="card-info-value">${item.subCategory}</span>
                                 </div>
+                                ${rescheduledInfo}
                             </div>
                             <button type="button" class="btn-view-card" data-request-index="${index}">
                                 <i class="fa-regular fa-eye"></i> View

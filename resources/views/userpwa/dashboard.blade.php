@@ -228,25 +228,64 @@
     </div>
 
     <div class="stats-section">
-        <div class="stats-header">Quick Stats</div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="stats-header mb-0">Quick Stats</div>
+            @if(Auth::check())
+                <span class="badge bg-light text-muted border" style="font-size: 11px; font-weight: 600;">My Activity</span>
+            @else
+                <span class="badge bg-light text-muted border" style="font-size: 11px; font-weight: 600;">Platform Stats</span>
+            @endif
+        </div>
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-val text-blue">12,568</div>
+            <a href="{{ route('user.track') }}" class="stat-card text-decoration-none">
+                <div class="stat-val text-blue">{{ number_format($totalRequests) }}</div>
                 <div class="stat-lbl">Total Requests</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-val text-green">9,245</div>
+            </a>
+            <a href="{{ route('user.track') }}" class="stat-card text-decoration-none">
+                <div class="stat-val text-green">{{ number_format($completedRequests) }}</div>
                 <div class="stat-lbl">Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-val text-orange">1,256</div>
+            </a>
+            <a href="{{ route('user.track') }}" class="stat-card text-decoration-none">
+                <div class="stat-val text-orange">{{ number_format($inProgressRequests) }}</div>
                 <div class="stat-lbl">In Progress</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-val text-red">256</div>
+            </a>
+            <a href="{{ route('user.track') }}" class="stat-card text-decoration-none">
+                <div class="stat-val text-red">{{ number_format($pendingRequests) }}</div>
                 <div class="stat-lbl">Pending</div>
-            </div>
+            </a>
         </div>
     </div>
+
+    @if(isset($recentRequests) && $recentRequests->count() > 0)
+        <div class="recent-section mt-4" style="padding: 0 24px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size: 14px; font-weight: 700; color: #1e293b;">Recent Requests</span>
+                <a href="{{ route('user.track') }}" style="font-size: 12px; font-weight: 600; color: #0e7a43; text-decoration: none;">View All <i class="fa fa-arrow-right ms-1"></i></a>
+            </div>
+            @foreach($recentRequests as $req)
+                @php
+                    $badgeClass = 'bg-secondary';
+                    if (in_array($req->status, ['completed', 'dumped', 'picked_up'])) {
+                        $badgeClass = 'bg-success';
+                    } elseif ($req->status === 'assigned') {
+                        $badgeClass = 'bg-warning text-dark';
+                    } elseif ($req->status === 'pending') {
+                        $badgeClass = 'bg-danger';
+                    }
+                @endphp
+                <a href="{{ route('user.details', ['id' => $req->request_number]) }}" class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 border text-decoration-none bg-white shadow-sm" style="border-color: #e2e8f0 !important;">
+                    <div>
+                        <div class="fw-bold text-dark font-13">{{ $req->request_number }}</div>
+                        <div class="text-muted font-11 mt-1">
+                            <i class="fa fa-calendar-alt me-1"></i>{{ $req->created_at->format('d M Y') }} &bull; {{ is_array($req->category_ids) ? implode(', ', $req->category_ids) : $req->category_ids }}
+                        </div>
+                    </div>
+                    <span class="badge {{ $badgeClass }}" style="font-size: 11px; text-transform: capitalize; padding: 6px 10px;">
+                        {{ str_replace('_', ' ', $req->status) }}
+                    </span>
+                </a>
+            @endforeach
+        </div>
+    @endif
 </div>
 @endsection

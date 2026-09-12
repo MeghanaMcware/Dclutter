@@ -45,7 +45,14 @@
                                 <tr>
                                     <th>Latitude & Longitude</th>
                                     <td>
-                                        <strong>66.88, 12.34</strong>
+                                        @if($plant->latitude && $plant->longitude)
+                                            <strong>{{ $plant->latitude }}, {{ $plant->longitude }}</strong>
+                                            <a href="https://www.google.com/maps?q={{ $plant->latitude }},{{ $plant->longitude }}" target="_blank" class="btn btn-xs btn-outline-primary ms-2 py-0 px-2" style="font-size: 11px;">
+                                                <i class="fa fa-map-marker-alt me-1"></i> View on Google Maps
+                                            </a>
+                                        @else
+                                            <span class="text-muted">Not specified</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr>

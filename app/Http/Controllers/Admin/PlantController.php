@@ -51,6 +51,8 @@ class PlantController extends Controller
             'corporation_id' => 'required|exists:corporations,id',
             'constituency_id' => 'required|exists:constituencies,id',
             'address' => 'required|string',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
             'status' => 'nullable|boolean',
         ]);
 
@@ -76,7 +78,7 @@ class PlantController extends Controller
     {
         $plant = Plant::findOrFail($id);
         $corporations = Corporation::orderBy('name')->get();
-        $constituencies = Constituency::where('corporation_id', $plant->corporation_id)->orderBy('name')->get();
+        $constituencies = Constituency::with('corporation')->orderBy('name')->get();
 
         return view('admin.masters.plant.edit', compact('plant', 'corporations', 'constituencies'));
     }
@@ -90,6 +92,8 @@ class PlantController extends Controller
             'corporation_id' => 'required|exists:corporations,id',
             'constituency_id' => 'required|exists:constituencies,id',
             'address' => 'required|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'status' => 'nullable|boolean',
         ]);
 

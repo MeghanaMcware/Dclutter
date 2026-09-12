@@ -73,11 +73,21 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label class="form-label  mb-0" for="subcategoryIcon"><b>Icon</b></label>
+                                <label class="form-label fw-bold" for="subcategoryIcon">Icon / Image</label>
                                 @if($subcategory->icon)
-                                    <div class="mb-2">
-                                        <img src="{{ str_starts_with($subcategory->icon, 'http') || str_starts_with($subcategory->icon, '/') ? $subcategory->icon : asset('storage/' . $subcategory->icon) }}" alt="Current Icon" width="50" height="50" class="border rounded p-1 object-fit-cover" onerror="this.src='https://placehold.co/50x50'">
-                                        <span class="ms-2 text-muted small">Current Icon</span>
+                                    @php
+                                        $icon = $subcategory->icon;
+                                        $isImage = $icon && (str_contains($icon, '/') || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $icon) || str_starts_with($icon, 'http'));
+                                    @endphp
+                                    <div class="mb-2 d-flex align-items-center gap-2">
+                                        @if($isImage)
+                                            <img src="{{ str_starts_with($icon, 'http') || str_starts_with($icon, '/') ? $icon : asset('storage/' . $icon) }}" alt="Current Icon" width="50" height="50" class="border rounded p-1 object-fit-cover shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/50x50?text=Icon';">
+                                        @else
+                                            <span class="border rounded p-2 bg-light d-inline-flex align-items-center justify-content-center text-primary shadow-sm" style="width:50px; height:50px; font-size:22px;">
+                                                <i class="{{ str_starts_with($icon, 'fa-') ? 'fa-solid ' . $icon : (str_starts_with($icon, 'fa ') || str_starts_with($icon, 'fas ') || str_starts_with($icon, 'fa-solid ') || str_starts_with($icon, 'bi-') ? $icon : 'fa-solid fa-' . $icon) }}"></i>
+                                            </span>
+                                        @endif
+                                        <span class="text-muted small">Current Icon</span>
                                     </div>
                                 @endif
                                 <input type="file" class="form-control @error('icon') is-invalid @enderror" id="subcategoryIcon" name="icon" accept="image/*">

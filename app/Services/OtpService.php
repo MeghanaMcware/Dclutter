@@ -209,18 +209,6 @@ class OtpService
                 ];
             }
 
-            // Edge Case 3: Maximum failed attempts already exceeded
-            if ($otpRecord->hasExceededMaxAttempts()) {
-                $otpRecord->is_used = true;
-                $otpRecord->save();
-
-                return [
-                    'success' => false,
-                    'code' => 'MAX_ATTEMPTS_EXCEEDED',
-                    'message' => 'Maximum verification attempts exceeded. Please request a new OTP.',
-                ];
-            }
-
             // Edge Case 4: OTP was superseded / invalidated
             if ($otpRecord->is_used) {
                 return [
@@ -252,25 +240,11 @@ class OtpService
 
             if (!$isMatch) {
                 $otpRecord->increment('attempts');
-                $remaining = max(0, $otpRecord->max_attempts - $otpRecord->attempts);
-
-                if ($remaining <= 0) {
-                    $otpRecord->is_used = true;
-                    $otpRecord->save();
-
-                    return [
-                        'success' => false,
-                        'code' => 'MAX_ATTEMPTS_EXCEEDED',
-                        'message' => 'Incorrect OTP. Maximum verification attempts exceeded. Please request a new OTP.',
-                        'attempts_remaining' => 0,
-                    ];
-                }
 
                 return [
                     'success' => false,
                     'code' => 'INCORRECT_OTP',
-                    'message' => "Incorrect OTP. You have {$remaining} " . ($remaining === 1 ? 'attempt' : 'attempts') . " remaining.",
-                    'attempts_remaining' => $remaining,
+                    'message' => 'Incorrect OTP code. Please enter the valid code received on WhatsApp.',
                 ];
             }
 

@@ -50,54 +50,78 @@
                             <!-- Dynamic Corporation -->
                             <div class="mb-3 col-lg-6 col-md-6 col-12">
                                 <label for="corporation_id" class="dump-form-label mb-0">Corporation <span class="text-danger">*</span></label>
-                                <select id="corporation_id" name="corporation_id" class="dump-form-control" required>
+                                <select id="corporation_id" name="corporation_id" class="dump-form-control @error('corporation_id') is-invalid @enderror" required>
                                     <option value="" selected disabled>Select Corporation</option>
                                     @foreach($corporations as $corp)
-                                        <option value="{{ $corp->id }}">{{ $corp->name }}</option>
+                                        <option value="{{ $corp->id }}" {{ old('corporation_id') == $corp->id ? 'selected' : '' }}>{{ $corp->name }}</option>
                                     @endforeach
                                 </select>
-                                <div class="invalid-feedback">Please select a corporation.</div>
+                                @error('corporation_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @else
+                                    <div class="invalid-feedback">Please select a corporation.</div>
+                                @enderror
                             </div>
 
                             <!-- Dynamic Constituency -->
                             <div class="mb-3 col-lg-6 col-md-6 col-12">
                                 <label for="constituency_id" class="dump-form-label mb-0">Constituency <span class="text-danger">*</span></label>
-                                <select id="constituency_id" name="constituency_id" class="dump-form-control" required>
+                                <select id="constituency_id" name="constituency_id" class="dump-form-control @error('constituency_id') is-invalid @enderror" required>
                                     <option value="" selected disabled>Select Constituency</option>
                                     @foreach($constituencies as $const)
-                                        <option value="{{ $const->id }}" data-corp="{{ $const->corporation_id }}">{{ $const->name }}</option>
+                                        <option value="{{ $const->id }}" data-corp="{{ $const->corporation_id }}" {{ old('constituency_id') == $const->id ? 'selected' : '' }}>{{ $const->name }}</option>
                                     @endforeach
                                 </select>
-                                <div class="invalid-feedback">Please select a constituency.</div>
+                                @error('constituency_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @else
+                                    <div class="invalid-feedback">Please select a constituency.</div>
+                                @enderror
                             </div>
 
                             <!-- Plant Name -->
-                            <div class="mb-3 col-lg-6 col-md-6 col-12">
+                            <div class="mb-3 col-lg-12 col-md-12 col-12">
                                 <label for="name" class="dump-form-label mb-0">Plant Location Name <span class="text-danger">*</span></label>
-                                <input type="text" id="name" name="name" class="dump-form-control" placeholder="Enter plant location name (e.g., Kannahalli Plant)" required>
-                                <div class="invalid-feedback">Please enter the plant location name.</div>
+                                <input type="text" id="name" name="name" class="dump-form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Enter plant location name (e.g., Kannahalli Plant)" required>
+                                @error('name')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @else
+                                    <div class="invalid-feedback">Please enter the plant location name.</div>
+                                @enderror
                             </div>
 
-
-
-                             <!-- Plant Latitude -->
+                            <!-- Plant Latitude -->
                             <div class="mb-3 col-lg-6 col-md-6 col-12">
-                                <label for="latitude" class="dump-form-label mb-0">Latitude <span class="text-danger">*</span></label>
-                                <input type="text" id="latitude" name="latitude" class="dump-form-control" placeholder="Enter latitude" required>
-                                <div class="invalid-feedback">Please enter the latitude.</div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="latitude" class="dump-form-label mb-0">Latitude</label>
+                                    <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="getLocation()">
+                                        <i class="fa fa-crosshairs me-1"></i> Current Location
+                                    </button>
+                                </div>
+                                <input type="number" step="any" id="latitude" name="latitude" class="dump-form-control @error('latitude') is-invalid @enderror" value="{{ old('latitude') }}" placeholder="e.g. 12.971598">
+                                @error('latitude')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                             </div>
-                             <!-- Plant Longitude -->
+
+                            <!-- Plant Longitude -->
                             <div class="mb-3 col-lg-6 col-md-6 col-12">
-                                <label for="longitude" class="dump-form-label mb-0">Longitude <span class="text-danger">*</span></label>
-                                <input type="text" id="longitude" name="longitude" class="dump-form-control" placeholder="Enter longitude" required>
-                                <div class="invalid-feedback">Please enter the longitude.</div>
+                                <label for="longitude" class="dump-form-label mb-1">Longitude</label>
+                                <input type="number" step="any" id="longitude" name="longitude" class="dump-form-control @error('longitude') is-invalid @enderror" value="{{ old('longitude') }}" placeholder="e.g. 77.594566">
+                                @error('longitude')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Plant Address -->
-                            <div class="mb-4 col-lg-6 col-md-6 col-12">
+                            <div class="mb-4 col-12">
                                 <label for="address" class="dump-form-label mb-0">Plant Place Address <span class="text-danger">*</span></label>
-                                <textarea id="address" name="address" class="dump-form-control" placeholder="Enter full plant location address" required></textarea>
-                                <div class="invalid-feedback">Please enter the plant place address.</div>
+                                <textarea id="address" name="address" class="dump-form-control @error('address') is-invalid @enderror" placeholder="Enter full plant location address" required>{{ old('address') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @else
+                                    <div class="invalid-feedback">Please enter the plant place address.</div>
+                                @enderror
                             </div>
 </div>
                             <div class="text-center">
@@ -118,21 +142,45 @@
 
 @section('script')
 <script>
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('latitude').value = position.coords.latitude.toFixed(8);
+            document.getElementById('longitude').value = position.coords.longitude.toFixed(8);
+        }, function(error) {
+            alert('Unable to retrieve your location. Error: ' + error.message);
+        });
+    } else {
+        alert('Geolocation is not supported by your browser.');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const corpSelect = document.getElementById('corporation_id');
     const constSelect = document.getElementById('constituency_id');
     const constOptions = Array.from(constSelect.options);
 
-    corpSelect.addEventListener('change', function() {
-        const corpId = this.value;
+    function filterConstituencies() {
+        const corpId = corpSelect.value;
+        const currentVal = constSelect.value;
         constSelect.innerHTML = '<option value="" selected disabled>Select Constituency</option>';
 
         constOptions.forEach(opt => {
             if (opt.value && opt.dataset.corp == corpId) {
-                constSelect.appendChild(opt.cloneNode(true));
+                const clone = opt.cloneNode(true);
+                if (clone.value === currentVal) {
+                    clone.selected = true;
+                }
+                constSelect.appendChild(clone);
             }
         });
-    });
+    }
+
+    corpSelect.addEventListener('change', filterConstituencies);
+
+    if (corpSelect.value) {
+        filterConstituencies();
+    }
 
     const form = document.getElementById('plantForm');
     form.addEventListener('submit', function (event) {

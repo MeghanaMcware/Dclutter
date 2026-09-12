@@ -319,14 +319,20 @@
                                                 $statusClasses = [
                                                     'pending' => 'status-pending',
                                                     'assigned' => 'status-assigned',
+                                                    'not_available' => 'status-pending',
                                                     'picked_up' => 'status-in-progress',
                                                     'dumped' => 'status-completed',
                                                     'rejected' => 'status-rejected',
                                                 ];
                                             @endphp
                                             <span class="status-badge {{ $statusClasses[$req->status] ?? 'status-pending' }}">
-                                                {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                                                {{ $req->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $req->status)) }}
                                             </span>
+                                            @if($req->status == 'not_available' && $req->next_pickup_date)
+                                                <div class="text-muted mt-1" style="font-size: 11px; white-space: nowrap;">
+                                                    <i class="fa fa-calendar-alt text-warning me-1"></i>{{ $req->next_pickup_date->format('d M Y') }}
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="text-start">{{ $req->created_at->format('d M Y') }}</td>
                                         <td class="text-center">
