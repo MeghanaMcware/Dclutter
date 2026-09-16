@@ -24,6 +24,13 @@ Route::get('/', function () {
     return view('frontend.home');
 });
 
+Route::get('/report/index', function () {
+    return view('admin.reports.index');
+});
+Route::get('/report/show', function () {
+    return view('admin.reports.show');
+});
+
 Route::get('/report-request', [CitizenRequestController::class, 'create'])->name('citizen.report');
 Route::post('/report-request', [CitizenRequestController::class, 'store'])->name('citizen.report.store');
 Route::post('/citizen/send-otp', [CitizenRequestController::class, 'sendOtp'])->name('citizen.send_otp');
@@ -68,6 +75,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminImportedRequestController::class, 'index'])->name('index');
         Route::get('/{id}', [AdminImportedRequestController::class, 'show'])->name('show');
     });
+
+
+Route::get('/reports/index', function () {
+    return view('admin.reports.index');
+});
+
 
     // Masters Management (Categories, Subcategories, Users, Dump Locations)
     Route::prefix('masters')->name('masters.')->group(function () {

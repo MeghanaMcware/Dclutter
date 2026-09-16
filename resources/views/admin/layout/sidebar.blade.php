@@ -47,6 +47,12 @@
               <span>GIS Overview Map</span>
             </a>
           </li>
+          <li class="sidebar-list">
+            <a class="sidebar-link sidebar-title link-nav" href="{{ url('/report/index') }}">
+              <i data-feather="map-pin"></i>
+              <span>Reports</span>
+            </a>
+          </li>
 
           <li class="sidebar-list">
             <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('admin.vehicles.*') ? 'active' : '' }}" href="{{ route('admin.vehicles.index') }}">
