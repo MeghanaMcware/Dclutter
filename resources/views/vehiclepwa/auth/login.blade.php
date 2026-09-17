@@ -453,8 +453,15 @@
 
               
 
-                <form method="POST" action="{{ route('vehicle.login.submit') }}" id="loginForm" onsubmit="event.preventDefault(); window.location.href='{{ route('vehicle.dashboard') }}';">
-                
+                <form method="POST" action="{{ route('vehicle.login.submit') }}" id="loginForm">
+                    @csrf
+
+                    @if($errors->any())
+                        <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 13px; border-radius: 10px; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>
+                            <span>{{ $errors->first() }}</span>
+                        </div>
+                    @endif
 
                     <!-- Mobile Login Mode -->
                     <div id="mobileModePanel" class="mode-panel">
@@ -467,6 +474,7 @@
                             <input type="tel" 
                                    id="mobileInput" 
                                    name="mobile" 
+                                   value="{{ old('mobile') }}"
                                    placeholder="+91 98765 43210" 
                                    maxlength="10" 
                                    pattern="[0-9]{10}"
@@ -632,6 +640,17 @@
             icon: 'success',
             title: 'Success',
             text: @json(session('success')),
+            confirmButtonColor: '#0e7a43'
+        });
+    </script>
+    @endif
+
+    @if($errors->any())
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Authentication Failed',
+            text: @json($errors->first()),
             confirmButtonColor: '#0e7a43'
         });
     </script>

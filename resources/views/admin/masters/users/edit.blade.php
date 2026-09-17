@@ -72,9 +72,7 @@
 <div class="content-body">
     <div class="container-fluid pt-3">
         <div class="row">
-            <div class="col-sm-12 col-lg-12">
-               
-
+            <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
                         @if ($errors->any())
@@ -88,12 +86,12 @@
                         @endif
 
                         @php
-                            $userRole = old('role', $user->roles->first()?->name ?? 'admin');
+                            $userRole = old('role', $user->roles->first()?->name ?? '');
                             $userCorpIds = (array) old('corporation', $user->corporation_ids ?? []);
                             $userConstIds = (array) old('constituency', $user->constituency_ids ?? []);
                         @endphp
 
-                        <form id="userEditForm" action="{{ route('admin.masters.users.update', $user->id) }}" method="POST" class="needs-validation" novalidate>
+                        <form id="userForm" action="{{ route('admin.masters.users.update', $user->id) }}" method="POST" class="needs-validation" novalidate>
                             @csrf
                             @method('PUT')
 
@@ -105,8 +103,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label mb-0" for="phone"><b>Phone Number</b> <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $user->mobile_number) }}" placeholder="Enter Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
-                                    <div class="invalid-feedback">Please enter the phone number.</div>
+                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $user->mobile_number) }}" placeholder="Enter 10-digit Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
+                                    <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
                             </div>
 
@@ -119,11 +117,12 @@
                                 <div class="col-md-4">
                                     <label class="form-label mb-0" for="password"><b>Password</b></label>
                                     <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Leave blank to keep unchanged">
+                                    <div class="form-text text-muted" style="font-size: 11px;">Leave blank to keep current password.</div>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label mb-0" for="role"><b>Role</b> <span class="text-danger">*</span></label>
                                     <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
-                                        <option value="" disabled>Select Role</option>
+                                        <option value="" disabled {{ $userRole ? '' : 'selected' }}>Select Role</option>
                                         <option value="agm" {{ $userRole == 'agm' ? 'selected' : '' }}>AGM (Additional General Manager)</option>
                                         <option value="dgm" {{ $userRole == 'dgm' ? 'selected' : '' }}>DGM (Deputy General Manager)</option>
                                     </select>
@@ -154,18 +153,6 @@
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback">Please select at least one constituency for AGM.</div>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label mb-0" for="role"><b>Role</b> <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="role" name="role" required>
-                                        <option value="" disabled selected>Select Role</option>
-                                        <option value="DGM">DGM</option>
-                                        <option value="AGM">AGM</option>
-                                    </select>
-                                    <div class="invalid-feedback">Please select a role.</div>
                                 </div>
                             </div>
 

@@ -118,29 +118,31 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     Route::post('/logout', [VehicleAuthController::class, 'logout'])->name('logout');
     Route::get('/register', [VehicleAuthController::class, 'showRegistrationForm'])->name('register');
 
-    // PWA Navigation & Dashboards
-    Route::get('/dashboard', [VehiclePwaController::class, 'dashboard'])->name('dashboard');
-    Route::get('/requests', [VehiclePwaController::class, 'requests'])->name('requests');
-    Route::get('/route', [VehiclePwaController::class, 'route'])->name('route');
-    Route::get('/stop-details/{id?}', [VehiclePwaController::class, 'stopDetails'])->name('stop_details');
-    Route::get('/trip-progress', [VehiclePwaController::class, 'tripProgress'])->name('trip_progress');
-    Route::get('/trip-summary', [VehiclePwaController::class, 'tripSummary'])->name('trip_summary');
-    Route::get('/profile', [VehiclePwaController::class, 'profile'])->name('profile_settings');
-    Route::get('/notifications', [VehiclePwaController::class, 'notifications'])->name('notifications');
+    // Authenticated Driver Routes
+    Route::middleware('auth')->group(function () {
+        Route::get('/dashboard', [VehiclePwaController::class, 'dashboard'])->name('dashboard');
+        Route::get('/requests', [VehiclePwaController::class, 'requests'])->name('requests');
+        Route::get('/route', [VehiclePwaController::class, 'route'])->name('route');
+        Route::get('/stop-details/{id?}', [VehiclePwaController::class, 'stopDetails'])->name('stop_details');
+        Route::get('/trip-progress', [VehiclePwaController::class, 'tripProgress'])->name('trip_progress');
+        Route::get('/trip-summary', [VehiclePwaController::class, 'tripSummary'])->name('trip_summary');
+        Route::get('/profile', [VehiclePwaController::class, 'profile'])->name('profile_settings');
+        Route::get('/notifications', [VehiclePwaController::class, 'notifications'])->name('notifications');
 
-    // Dump Flow
-    Route::get('/dump', [VehiclePwaController::class, 'dumpList'])->name('dump');
-    Route::get('/dumpform', [VehiclePwaController::class, 'dumpForm'])->name('dumpform');
-    Route::post('/dumpform', [VehiclePwaController::class, 'storeDump'])->name('store_dump');
+        // Dump Flow
+        Route::get('/dump', [VehiclePwaController::class, 'dumpList'])->name('dump');
+        Route::get('/dumpform', [VehiclePwaController::class, 'dumpForm'])->name('dumpform');
+        Route::post('/dumpform', [VehiclePwaController::class, 'storeDump'])->name('store_dump');
 
-    // Step 1: Before Pickup
-    Route::get('/before-pickup/{id?}', [VehiclePwaController::class, 'beforePickup'])->name('before_pickup');
-    Route::post('/before-pickup/{id}', [VehiclePwaController::class, 'storeBeforePickup'])->name('store_before_pickup');
-    Route::post('/not-available/{id}', [VehiclePwaController::class, 'storeNotAvailable'])->name('store_not_available');
+        // Step 1: Before Pickup
+        Route::get('/before-pickup/{id?}', [VehiclePwaController::class, 'beforePickup'])->name('before_pickup');
+        Route::post('/before-pickup/{id}', [VehiclePwaController::class, 'storeBeforePickup'])->name('store_before_pickup');
+        Route::post('/not-available/{id}', [VehiclePwaController::class, 'storeNotAvailable'])->name('store_not_available');
 
-    // Step 2: After Pickup
-    Route::get('/after-pickup/{id?}', [VehiclePwaController::class, 'afterPickup'])->name('after_pickup');
-    Route::post('/after-pickup/{id}', [VehiclePwaController::class, 'storeAfterPickup'])->name('store_after_pickup');
+        // Step 2: After Pickup
+        Route::get('/after-pickup/{id?}', [VehiclePwaController::class, 'afterPickup'])->name('after_pickup');
+        Route::post('/after-pickup/{id}', [VehiclePwaController::class, 'storeAfterPickup'])->name('store_after_pickup');
+    });
 });
 
 /*
@@ -158,30 +160,28 @@ Route::prefix('user')->name('user.')->group(function () {
         return auth()->check() ? redirect()->route('user.dashboard') : redirect()->route('user.login');
     });
     
-    // Guest / Public Authentication Routes
+    // Guest / Public Authentication Routes (Login & OTP)
     Route::get('/login', [UserPwaAuthController::class, 'showLogin'])->name('login');
     Route::post('/send-otp', [UserPwaAuthController::class, 'sendOtp'])->name('send-otp');
     Route::post('/verify-otp', [UserPwaAuthController::class, 'verifyOtp'])->name('verify-otp');
     Route::post('/otp/send', [UserPwaAuthController::class, 'sendOtp'])->name('otp.send');
     Route::post('/otp/verify', [UserPwaAuthController::class, 'verifyOtp'])->name('otp.verify');
-
-    // Ward lookup & OTP aliases (accessible publicly and within PWA)
-    Route::get('/ward-lookup', [UserPwaRequestController::class, 'lookupWard'])->name('ward_lookup');
     Route::post('/send_otp', [UserPwaAuthController::class, 'sendOtp'])->name('send_otp');
     Route::post('/verify_otp', [UserPwaAuthController::class, 'verifyOtp'])->name('verify_otp');
 
-    // Public PWA Request Submission & Tracking (OTP-verified)
-    Route::get('/report-request', [UserPwaRequestController::class, 'report'])->name('report');
-    Route::post('/report-request', [UserPwaRequestController::class, 'store'])->name('report.store');
-    Route::get('/track-request', [UserPwaRequestController::class, 'track'])->name('track');
-    Route::get('/request-details/{id?}', [UserPwaRequestController::class, 'show'])->name('details');
-
-    // Authenticated User Routes (Protected by auth middleware)
+    // Authenticated User Routes (All Protected by auth middleware)
     Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/logout', [UserPwaAuthController::class, 'logout'])->name('logout');
 
         // Dashboard
         Route::get('/dashboard', [UserPwaDashboardController::class, 'index'])->name('dashboard');
+
+        // Request Submission & Tracking
+        Route::get('/report-request', [UserPwaRequestController::class, 'report'])->name('report');
+        Route::post('/report-request', [UserPwaRequestController::class, 'store'])->name('report.store');
+        Route::get('/track-request', [UserPwaRequestController::class, 'track'])->name('track');
+        Route::get('/request-details/{id?}', [UserPwaRequestController::class, 'show'])->name('details');
+        Route::get('/ward-lookup', [UserPwaRequestController::class, 'lookupWard'])->name('ward_lookup');
 
         // Standard Laravel Resource Routes for Requests
         Route::get('/requests', [UserPwaRequestController::class, 'track'])->name('requests.index');

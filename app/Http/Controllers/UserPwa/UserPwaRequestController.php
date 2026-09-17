@@ -224,7 +224,7 @@ class UserPwaRequestController extends Controller
                 'ward_id' => $wardId,
                 'preferred_pickup_date' => $request->input('preferred_pickup_date'),
                 'terms_accepted' => 1,
-                'status' => 'pending',
+                'status' => 'pending',  
             ];
 
             $wasteRequest = WasteRequest::create($wasteRequestData);
@@ -268,21 +268,23 @@ class UserPwaRequestController extends Controller
     public function track(Request $request)
     {
         $user = Auth::user();
-        $mobile = $user ? $user->mobile_number : null;
-        $userId = $user ? $user->id : null;
+        if (!$user) {
+            return redirect()->route('user.login');
+        }
+
+        $mobile = $user->mobile_number;
+        $userId = $user->id;
 
         $query = WasteRequest::with(['ward.constituency.corporation', 'vehicle']);
 
-        if ($mobile || $userId) {
-            $query->where(function($q) use ($mobile, $userId) {
-                if ($mobile) {
-                    $q->where('mobile_number', $mobile);
-                }
-                if ($userId) {
-                    $q->orWhere('user_id', $userId);
-                }
-            });
-        }
+        $query->where(function($q) use ($mobile, $userId) {
+            if ($mobile) {
+                $q->where('mobile_number', $mobile);
+            }
+            if ($userId) {
+                $q->orWhere('user_id', $userId);
+            }
+        });
 
         if ($request->filled('query') || $request->filled('id') || $request->filled('search')) {
             $term = trim($request->input('query') ?: ($request->input('id') ?: $request->input('search')));
@@ -309,10 +311,27 @@ class UserPwaRequestController extends Controller
             return redirect()->route('user.track');
         }
 
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('user.login');
+        }
+
+        $mobile = $user->mobile_number;
+        $userId = $user->id;
+
         $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle', 'dump'])
             ->where(function($q) use ($id) {
                 $q->where('id', $id)->orWhere('request_number', $id);
-            })->firstOrFail();
+            })
+            ->where(function($q) use ($mobile, $userId) {
+                if ($mobile) {
+                    $q->where('mobile_number', $mobile);
+                }
+                if ($userId) {
+                    $q->orWhere('user_id', $userId);
+                }
+            })
+            ->firstOrFail();
 
         return view('userpwa.track.show', compact('wasteRequest'));
     }
@@ -323,9 +342,26 @@ class UserPwaRequestController extends Controller
     public function edit($id = null)
     {
         $id = $id ?: request('id');
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('user.login');
+        }
+
+        $mobile = $user->mobile_number;
+        $userId = $user->id;
+
         $wasteRequest = WasteRequest::where(function($q) use ($id) {
             $q->where('id', $id)->orWhere('request_number', $id);
-        })->firstOrFail();
+        })
+        ->where(function($q) use ($mobile, $userId) {
+            if ($mobile) {
+                $q->where('mobile_number', $mobile);
+            }
+            if ($userId) {
+                $q->orWhere('user_id', $userId);
+            }
+        })
+        ->firstOrFail();
 
         return view('userpwa.track.edit', compact('wasteRequest'));
     }
