@@ -68,6 +68,22 @@ class AdminVehicleController extends Controller
             if (!$ownerUser->hasRole('vehicle')) {
                 $ownerUser->assignRole($vehicleRole);
             }
+
+            // Assign Spatie 'vehicle' role to driver user if different from owner
+            if ($request->driver_phone && $request->driver_phone !== $request->owner_phone) {
+                $driverUser = User::where('mobile_number', $request->driver_phone)->first();
+                if (!$driverUser) {
+                    $driverUser = User::create([
+                        'name' => $request->driver_name,
+                        'mobile_number' => $request->driver_phone,
+                        'email' => 'driver_' . $request->driver_phone . '@dclutter.com',
+                        'password' => bcrypt('1234'),
+                    ]);
+                }
+                if (!$driverUser->hasRole('vehicle')) {
+                    $driverUser->assignRole($vehicleRole);
+                }
+            }
         }
 
         // 2. Handle File Uploads

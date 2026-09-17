@@ -44,8 +44,18 @@
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
                 <div class="profile-text">
-                    <h3>{{ Auth::user()->name ?? 'Driver Account' }}</h3>
-                    <p>Mobile: {{ Auth::user()->mobile_number ?? 'N/A' }}</p>
+                    <h3 style="font-size: 16px; font-weight: 800; margin: 0; color: #0f172a;">
+                        {{ $driverName ?? ($user?->name ?? 'N/A') }}
+                    </h3>
+                    <p style="font-size: 13px; color: #475569; margin: 3px 0 0; font-weight: 600;">
+                        <i class="fa-solid fa-phone text-success me-1"></i>
+                        {{ $driverMobile ?? ($user?->mobile_number ?? 'N/A') }}
+                    </p>
+                    @if(!empty($vehicle?->vehicle_number))
+                        <div style="font-size: 11px; color: #0e7a43; font-weight: 700; margin-top: 3px;">
+                            <i class="fa-solid fa-truck me-1"></i> {{ $vehicle->vehicle_number }}
+                        </div>
+                    @endif
                 </div>
             </div>
             <div class="status-badge">

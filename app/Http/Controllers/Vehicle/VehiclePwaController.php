@@ -62,7 +62,34 @@ class VehiclePwaController extends Controller
         $pickedUpCount = $pickedUpQuery->count();
         $recentRequests = $recentQuery->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->take(5)->get();
 
-        return view('vehiclepwa.dashboard', compact('assignedCount', 'pickedUpCount', 'recentRequests'));
+        $user = Auth::user();
+        if (!$user || !$user->hasRole('vehicle')) {
+            return redirect()->route('vehicle.login')->withErrors([
+                'mobile' => 'Access denied. Vehicle role is required.',
+            ]);
+        }
+
+        $vehicle = Vehicle::with('owner')
+            ->where('user_id', $user->id)
+            ->orWhere('driver_phone', $user->mobile_number)
+            ->first();
+
+        if (!$vehicle && $vehicleId) {
+            $vehicle = Vehicle::with('owner')->find($vehicleId);
+        }
+
+        $driverName = !empty(trim($user?->name ?? '')) ? $user->name : ($vehicle?->driver_name ?: 'N/A');
+        $driverMobile = !empty($user?->mobile_number) ? $user->mobile_number : ($vehicle?->driver_phone ?: 'N/A');
+
+        return view('vehiclepwa.dashboard', compact(
+            'assignedCount',
+            'pickedUpCount',
+            'recentRequests',
+            'user',
+            'vehicle',
+            'driverName',
+            'driverMobile'
+        ));
     }
 
     /**
@@ -398,17 +425,18 @@ class VehiclePwaController extends Controller
     {
         $user = Auth::user();
 
-        if ($user) {
-            $vehicle = Vehicle::with('owner')
-                ->where('user_id', $user->id)
-                ->orWhere('driver_phone', $user->mobile_number)
-                ->first();
-            if ($vehicle && $vehicle->owner) {
-                $user = $vehicle->owner;
-            }
-        } else {
-            $vehicle = Vehicle::with('owner')->first();
-            $user = $vehicle?->owner ?? \App\Models\User::first();
+        if (!$user || !$user->hasRole('vehicle')) {
+            return redirect()->route('vehicle.login')->withErrors([
+                'mobile' => 'Access denied. Vehicle role is required.',
+            ]);
+        }
+
+        $vehicle = Vehicle::with('owner')
+            ->where('user_id', $user->id)
+            ->orWhere('driver_phone', $user->mobile_number)
+            ->first();
+        if ($vehicle && $vehicle->owner) {
+            $user = $vehicle->owner;
         }
 
         return view('vehiclepwa.profile_settings', compact('user', 'vehicle'));

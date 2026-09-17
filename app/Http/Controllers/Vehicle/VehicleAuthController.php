@@ -16,9 +16,6 @@ class VehicleAuthController extends Controller
      */
     public function showLoginForm()
     {
-        if (Auth::check()) {
-            return redirect()->route('vehicle.dashboard');
-        }
         return view('vehiclepwa.auth.login');
     }
 
@@ -27,46 +24,74 @@ class VehicleAuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'mobile_number' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        $mobile = trim($request->input('mobile_number') ?: $request->input('mobile', ''));
+        $password = $request->input('password') ?: $request->input('password_emp', '');
 
-        $mobile = trim($request->mobile_number);
-        $password = $request->password;
-
-        // 1. Attempt login via Auth::attempt with mobile_number or email
-        if (Auth::attempt(['mobile_number' => $mobile, 'password' => $password])) {
-            $request->session()->regenerate();
-            return redirect()->route('vehicle.dashboard');
+        if (empty($mobile) || empty($password)) {
+            return back()->withInput()->withErrors([
+                'mobile' => 'Please enter both mobile number and password.',
+            ]);
         }
 
-        // 2. Check if driver exists via Vehicle owner / driver_phone
+        // If currently authenticated as another user, log out old session to allow switching
+        if (Auth::check()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        $matchedUser = null;
+
+        // 1. Check if user exists with this mobile number or email and verify password
         $user = User::where('mobile_number', $mobile)->orWhere('email', $mobile)->first();
         if ($user && Hash::check($password, $user->password)) {
-            Auth::login($user);
-            $request->session()->regenerate();
-            return redirect()->route('vehicle.dashboard');
+            $matchedUser = $user;
         }
 
-        // For convenience / demo PWA bypass if driver mobile matches registered vehicle
-        $vehicle = Vehicle::where('driver_phone', $mobile)->orWhere('vehicle_number', $mobile)->first();
-        if ($vehicle) {
-            $driverUser = User::where('mobile_number', $mobile)->first();
-            if (!$driverUser) {
-                $driverUser = User::create([
-                    'name' => $vehicle->driver_name ?? 'Driver ' . $vehicle->vehicle_number,
-                    'email' => 'driver_' . strtolower(str_replace([' ', '-'], '', $vehicle->vehicle_number)) . '@dclutter.gov.in',
-                    'mobile_number' => $mobile,
-                    'password' => Hash::make($password),
-                ]);
+        // 2. If not matched directly, check if input matches vehicle number or driver_phone
+        if (!$matchedUser) {
+            $vehicle = Vehicle::where('driver_phone', $mobile)
+                ->orWhere('vehicle_number', $mobile)
+                ->first();
+
+            if ($vehicle) {
+                // Check if driver has a user account
+                $driverUser = User::where('mobile_number', $vehicle->driver_phone)->first();
+                if ($driverUser && Hash::check($password, $driverUser->password)) {
+                    $matchedUser = $driverUser;
+                } elseif ($vehicle->user_id) {
+                    // Check if owner user exists and password matches
+                    $owner = User::find($vehicle->user_id);
+                    if ($owner && Hash::check($password, $owner->password)) {
+                        $matchedUser = $owner;
+                    }
+                }
+
+                if (!$matchedUser) {
+                    return back()->withInput()->withErrors([
+                        'mobile' => 'Invalid password for this vehicle or driver.',
+                    ]);
+                }
             }
-            Auth::login($driverUser);
-            $request->session()->regenerate();
-            return redirect()->route('vehicle.dashboard');
         }
 
-        // Default redirect for convenience
+        // If credentials did not match any user
+        if (!$matchedUser) {
+            return back()->withInput()->withErrors([
+                'mobile' => 'Invalid mobile number or password. Please check your credentials.',
+            ]);
+        }
+
+        // 3. Strict Check: User MUST have the 'vehicle' role
+        if (!$matchedUser->hasRole('vehicle')) {
+            return back()->withInput()->withErrors([
+                'mobile' => 'Access denied. Your account does not have the vehicle role.',
+            ]);
+        }
+
+        // 4. Log in and redirect to dashboard
+        Auth::login($matchedUser);
+        $request->session()->regenerate();
         return redirect()->route('vehicle.dashboard');
     }
 
@@ -95,6 +120,11 @@ class VehicleAuthController extends Controller
             'mobile_number' => $request->mobile_number,
             'password' => Hash::make($request->password),
         ]);
+
+        if (class_exists(\Spatie\Permission\Models\Role::class)) {
+            $vehicleRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'vehicle', 'guard_name' => 'web']);
+            $user->assignRole($vehicleRole);
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

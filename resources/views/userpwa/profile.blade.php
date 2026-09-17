@@ -97,11 +97,15 @@
 @endsection
 
 @section('content')
+@php
+    $userName = !empty(trim($user->name ?? '')) ? $user->name : 'N/A';
+    $avatarName = $userName !== 'N/A' ? $userName : 'NA';
+@endphp
 <div class="profile-container">
     <div class="profile-card">
         <div class="profile-avatar-wrapper" style="position: relative; display: inline-block; margin-bottom: 10px;">
             <div class="profile-avatar" style="padding: 0; overflow: hidden; border: 3px solid #e8f5ed; margin-bottom: 0;">
-                <img src="https://ui-avatars.com/api/?name=Demo+User&background=e8f5ed&color=0e7a43&size=100&bold=true" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <img src="https://ui-avatars.com/api/?name={{ urlencode($avatarName) }}&background=e8f5ed&color=0e7a43&size=100&bold=true" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
             </div>
             <label for="profileImageUpload" class="edit-avatar-btn" style="position: absolute; bottom: 0; right: 0; background: #0e7a43; color: white; border: 2px solid #ffffff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); margin: 0;">
                 <i class="fa-solid fa-camera" style="font-size: 14px;"></i>
@@ -113,17 +117,23 @@
         <div class="profile-info">
             <div class="info-group">
                 <span class="info-label">Name</span>
-                <div class="info-value">Demo User</div>
+                <div class="info-value">{{ $userName }}</div>
             </div>
             
             <div class="info-group">
                 <span class="info-label">Mobile Number</span>
-                <div class="info-value">+91 9876543210</div>
+                <div class="info-value">
+                    @if(!empty($user->mobile_number))
+                        {{ str_starts_with($user->mobile_number, '+') ? $user->mobile_number : '+91 ' . $user->mobile_number }}
+                    @else
+                        N/A
+                    @endif
+                </div>
             </div>
             
             <div class="info-group">
                 <span class="info-label">Member Since</span>
-                <div class="info-value">Aug 2026</div>
+                <div class="info-value">{{ $user?->created_at ? $user->created_at->format('M Y') : 'N/A' }}</div>
             </div>
         </div>
     </div>
