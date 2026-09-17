@@ -4,46 +4,59 @@
 
 @section('style')
 <style>
-    /* Select2 Alignment & Validation Fixes */
-    .select2-container {
-        width: 100% !important;
-    }
-    .select2-container .select2-selection--multiple {
-        min-height: 38px !important;
-        border: 1px solid #dee2e6 !important;
-        border-radius: 0.375rem !important;
-        padding: 2px 6px !important;
-    }
-    .select2-container .select2-search--inline .select2-search__field {
-        margin-top: 0 !important;
-        height: 24px !important;
-    }
-    
-    /* Validation styles */
-    .was-validated .form-select:invalid + .select2-container .select2-selection {
-        border-color: #dc3545 !important;
-        padding-right: 2.25rem !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right calc(.375em + .1875rem) center;
-        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
-    }
-    .was-validated .form-select:valid + .select2-container .select2-selection {
-        border-color: #198754 !important;
-        padding-right: 2.25rem !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right calc(.375em + .1875rem) center;
-        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
-    }
-    .was-validated .form-select:invalid ~ .invalid-feedback {
-        display: block;
-    }
+/* Select2 Alignment & Validation Fixes */
+.select2-container {
+    width: 100% !important;
+}
 
-    .form-label {
+.select2-container .select2-selection--multiple {
+    min-height: 38px !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.375rem !important;
+    padding: 2px 6px !important;
+}
+
+.select2-container .select2-search--inline .select2-search__field {
+    margin-top: 0 !important;
+    height: 24px !important;
+}
+
+/* Validation styles */
+.was-validated .form-select:invalid+.select2-container .select2-selection {
+    border-color: #dc3545 !important;
+    padding-right: 2.25rem !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+.was-validated .form-select:valid+.select2-container .select2-selection {
+    border-color: #198754 !important;
+    padding-right: 2.25rem !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+.was-validated .form-select:invalid~.invalid-feedback {
+    display: block;
+}
+
+.form-label {
     color: #2c3e50 !important;
     opacity: inherit !important;
 
+}
+
+.select2-container .select2-selection--single {
+    border-color: #6d737833 !important;
+}
+
+.form-select {
+    font-size: 14px;
+    color: #212529d4;
 }
 </style>
 @endsection
@@ -77,73 +90,111 @@
                 <div class="card">
                     <div class="card-body">
                         @if ($errors->any())
-                            <div class="alert alert-danger mb-4">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
+                        <div class="alert alert-danger mb-4">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                         @endif
 
-                        <form id="userForm" action="{{ route('admin.masters.users.store') }}" method="POST" class="needs-validation" novalidate>
+                        <form id="userForm" action="{{ route('admin.masters.users.store') }}" method="POST"
+                            class="needs-validation" novalidate>
                             @csrf
 
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label mb-0" for="name"><b>Name</b> <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Enter Name" required>
+                            <div class="row mb-3 align-items-center justify-content-center">
+                                <div class="col-md-6 mb-3">
+                                    <div class="">
+                                        <label class="col-form-label mb-0 mt-0 pt-0 pb-0 text-dark"
+                                            style="color:black !important"><b>Constituency</b></label>
+                                        <select class="js-example-basic-single col-sm-12">
+                                            <optgroup label="Constituency">
+                                                <option value="Constituency" disabled selected>Select Constituency
+                                                </option>
+                                                <option value="Padmanabanagar">Padmanabanagar</option>
+                                                <option value="Shivajinagar">Shivajinagar</option>
+                                                <option value="Padmanabanagar">Padmanabanagar</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label mb-0" for="name"><b>Name</b> <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" value="{{ old('name') }}" placeholder="Enter Name"
+                                        required>
                                     <div class="invalid-feedback">Please enter the name.</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label mb-0" for="phone"><b>Phone Number</b> <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" placeholder="Enter 10-digit Phone Number" pattern="[0-9]{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
+                                <div class="col-md-6" mb-3>
+                                    <label class="form-label mb-0" for="phone"><b>Phone Number</b> <span
+                                            class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror"
+                                        id="phone" name="phone" value="{{ old('phone') }}"
+                                        placeholder="Enter 10-digit Phone Number" pattern="[0-9]{10}" maxlength="10"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
                                     <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
                                 </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label class="form-label mb-0" for="email"><b>Email</b> <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="Enter Email" required>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label mb-0" for="email"><b>Email</b> <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                        id="email" name="email" value="{{ old('email') }}" placeholder="Enter Email"
+                                        required>
                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label mb-0" for="password"><b>Password</b> <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Enter Password" required>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label mb-0" for="password"><b>Password</b> <span
+                                            class="text-danger">*</span></label>
+                                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                        id="password" name="password" placeholder="Enter Password" required>
                                     <div class="invalid-feedback">Please enter a password.</div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label mb-0" for="role"><b>Role</b> <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
-                                        <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select Role</option>
-                                        <option value="agm" {{ old('role') == 'agm' ? 'selected' : '' }}>AGM (Additional General Manager)</option>
-                                        <option value="dgm" {{ old('role') == 'dgm' ? 'selected' : '' }}>DGM (Deputy General Manager)</option>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label mb-0" for="role"><b>Role</b> <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select @error('role') is-invalid @enderror" id="role"
+                                        name="role" required>
+                                        <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select Role
+                                        </option>
+                                        <option value="agm" {{ old('role') == 'agm' ? 'selected' : '' }}>AGM (Additional
+                                            General Manager)</option>
+                                        <option value="dgm" {{ old('role') == 'dgm' ? 'selected' : '' }}>DGM (Deputy
+                                            General Manager)</option>
                                     </select>
                                     <div class="invalid-feedback">Please select a user role.</div>
                                 </div>
                             </div>
-                            
+
+
+
                             <!-- Dynamic Jurisdiction Scoping Row -->
                             <div class="row mb-3">
                                 <div class="col-md-6" id="corporationCol" style="display: none;">
-                                    <label class="form-label mb-0" for="corporation"><b>Corporation (DGM Jurisdiction)</b> <span class="text-danger">*</span></label>
-                                    <select class="form-select select2" id="corporation" name="corporation[]" multiple="multiple">
+                                    <label class="form-label mb-0" for="corporation"><b>Corporation (DGM
+                                            Jurisdiction)</b> <span class="text-danger">*</span></label>
+                                    <select class="form-select select2" id="corporation" name="corporation[]"
+                                        multiple="multiple">
                                         @foreach($corporations as $corp)
-                                            <option value="{{ $corp->id }}" {{ is_array(old('corporation')) && in_array($corp->id, old('corporation')) ? 'selected' : '' }}>
-                                                {{ $corp->name }}
-                                            </option>
+                                        <option value="{{ $corp->id }}"
+                                            {{ is_array(old('corporation')) && in_array($corp->id, old('corporation')) ? 'selected' : '' }}>
+                                            {{ $corp->name }}
+                                        </option>
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback">Please select at least one corporation for DGM.</div>
                                 </div>
                                 <div class="col-md-6" id="constituencyCol" style="display: none;">
-                                    <label class="form-label mb-0" for="constituency"><b>Constituency (AGM Jurisdiction)</b> <span class="text-danger">*</span></label>
-                                    <select class="form-select select2-search" id="constituency" name="constituency[]" multiple="multiple">
+                                    <label class="form-label mb-0" for="constituency"><b>Constituency (AGM
+                                            Jurisdiction)</b> <span class="text-danger">*</span></label>
+                                    <select class="form-select select2-search" id="constituency" name="constituency[]"
+                                        multiple="multiple">
                                         @foreach($constituencies as $const)
-                                            <option value="{{ $const->id }}" {{ is_array(old('constituency')) && in_array($const->id, old('constituency')) ? 'selected' : '' }}>
-                                                {{ $const->name }}
-                                            </option>
+                                        <option value="{{ $const->id }}"
+                                            {{ is_array(old('constituency')) && in_array($const->id, old('constituency')) ? 'selected' : '' }}>
+                                            {{ $const->name }}
+                                        </option>
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback">Please select at least one constituency for AGM.</div>
@@ -151,8 +202,10 @@
                             </div>
 
                             <div class="text-center mt-4">
-                                <a href="{{ route('admin.masters.users.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                                <button type="submit" class="btn btn-primary px-4"><i class="fa fa-save me-1"></i> Submit</button>
+                                <a href="{{ route('admin.masters.users.index') }}"
+                                    class="btn btn-secondary me-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4"><i class="fa fa-save me-1"></i>
+                                    Submit</button>
                             </div>
                         </form>
                     </div>
@@ -165,71 +218,63 @@
 
 @section('script')
 <script>
-    $(document).ready(function() {
-        $('.select2').select2({
-            placeholder: "Select Corporation",
-            closeOnSelect: true
-        });
-        $('.select2-search').select2({
-            placeholder: "Search Constituency",
-            allowClear: true,
-            closeOnSelect: true
-        });
+$(document).ready(function() {
 
-        // Prevent opening if all options are already selected
-        $('.select2, .select2-search').on('select2:opening', function (e) {
-            var $select = $(this);
-            // check if it is a multiple select
-            if ($select.prop('multiple')) {
-                var availableOptions = $select.find('option').not(':selected').not('[value=""]').length;
-                if (availableOptions === 0) {
-                    e.preventDefault();
-                }
-            }
-        });
 
-        function updateJurisdictionFields() {
-            const selectedRole = $('#role').val();
-            const corpCol = $('#corporationCol');
-            const constCol = $('#constituencyCol');
-            const corpSelect = $('#corporation');
-            const constSelect = $('#constituency');
-
-            if (selectedRole === 'dgm') {
-                corpCol.show();
-                corpSelect.prop('required', true);
-                constCol.hide();
-                constSelect.prop('required', false);
-            } else if (selectedRole === 'agm') {
-                constCol.show();
-                constSelect.prop('required', true);
-                corpCol.hide();
-                corpSelect.prop('required', false);
-            } else {
-                corpCol.hide();
-                corpSelect.prop('required', false);
-                constCol.hide();
-                constSelect.prop('required', false);
+    // Prevent opening if all options are already selected
+    $('.select2, .select2-search').on('select2:opening', function(e) {
+        var $select = $(this);
+        // check if it is a multiple select
+        if ($select.prop('multiple')) {
+            var availableOptions = $select.find('option').not(':selected').not('[value=""]').length;
+            if (availableOptions === 0) {
+                e.preventDefault();
             }
         }
-
-        $('#role').on('change', updateJurisdictionFields);
-        updateJurisdictionFields(); // Initial call
     });
 
-    (function () {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-    })()
+    function updateJurisdictionFields() {
+        const selectedRole = $('#role').val();
+        const corpCol = $('#corporationCol');
+        const constCol = $('#constituencyCol');
+        const corpSelect = $('#corporation');
+        const constSelect = $('#constituency');
+
+        if (selectedRole === 'dgm') {
+            corpCol.show();
+            corpSelect.prop('required', true);
+            constCol.hide();
+            constSelect.prop('required', false);
+        } else if (selectedRole === 'agm') {
+            constCol.show();
+            constSelect.prop('required', true);
+            corpCol.hide();
+            corpSelect.prop('required', false);
+        } else {
+            corpCol.hide();
+            corpSelect.prop('required', false);
+            constCol.hide();
+            constSelect.prop('required', false);
+        }
+    }
+
+    $('#role').on('change', updateJurisdictionFields);
+    updateJurisdictionFields(); // Initial call
+});
+
+(function() {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
 </script>
 @endsection

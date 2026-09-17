@@ -28,9 +28,11 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">System Users</h4>
+                    <div class="card-header p-2 d-flex justify-content-end align-items-end">
+                        <!-- <h4 class="mb-0 font-weight-bold" style="color: #1e293b; font-weight: 700;">System Users</h4> -->
+                         <div class="d-flex flex-column align-items-end justify-content-end">
                         <a href="{{ route('admin.masters.users.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus me-1"></i> Add User</a>
+                        </div>
                     </div>
                     <div class="card-body">
                         @if(session('success'))
