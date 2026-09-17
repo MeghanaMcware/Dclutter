@@ -1035,7 +1035,7 @@ textarea.is-invalid~.invalid-feedback,
 
                         <!-- Floor No -->
                         <div>
-                            <label>Floor No <span class="req">*</span></label>
+                            <label>Floor No </label>
                             <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. 1st" required
                                 oninput="validateSingleField(this)">
                             <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.
