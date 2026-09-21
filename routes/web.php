@@ -30,6 +30,9 @@ Route::get('/report/index', function () {
 Route::get('/report/show', function () {
     return view('admin.reports.show');
 });
+Route::get('/vehiclegis', function () {
+    return view('admin.vehiclegis');
+});
 
 Route::get('/report-request', [CitizenRequestController::class, 'create'])->name('citizen.report');
 Route::post('/report-request', [CitizenRequestController::class, 'store'])->name('citizen.report.store');
