@@ -48,8 +48,8 @@
             </a>
           </li>
           <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav" href="{{ url('/report/index') }}">
-              <i data-feather="map-pin"></i>
+            <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
+              <i data-feather="file-text"></i>
               <span>Reports</span>
             </a>
           </li>

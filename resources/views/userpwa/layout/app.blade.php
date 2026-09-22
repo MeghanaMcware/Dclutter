@@ -62,6 +62,43 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('success'))
+    <script>
+        @php
+            $reqNum = session('request_number');
+        @endphp
+        Swal.fire({
+            icon: 'success',
+            title: '{{ $reqNum ? "Request Submitted Successfully!" : "Success" }}',
+            html: `
+                <div style="font-size: 14px; color: #334155; margin-bottom: 12px;">
+                    {{ session('success') }}
+                </div>
+                @if($reqNum)
+                <div style="background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: 10px; padding: 14px 16px; margin: 14px 0; text-align: center;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #166534; font-weight: 700; margin-bottom: 4px;">Request ID</div>
+                    <div style="font-size: 22px; font-weight: 800; color: #15803d; letter-spacing: 0.5px; font-family: monospace;">{{ $reqNum }}</div>
+                </div>
+                <div style="font-size: 12px; color: #64748b;">
+                    Please save this Request ID to track your request status.
+                </div>
+                @endif
+            `,
+            confirmButtonColor: '#0e7a43',
+            confirmButtonText: 'OK'
+        });
+    </script>
+    @endif
+    @if(session('error'))
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: @json(session('error')),
+            confirmButtonColor: '#dc3545'
+        });
+    </script>
+    @endif
     @yield('script')
 </body>
 </html>

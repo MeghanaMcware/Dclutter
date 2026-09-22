@@ -243,13 +243,15 @@ class UserPwaRequestController extends Controller
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Your D-Clutter pickup request has been received successfully. You can now track its status.',
+                    'message' => 'Your D-Clutter pickup request has been received successfully.',
                     'request_number' => $wasteRequest->request_number,
                     'redirect_url' => route('user.track'),
                 ]);
             }
 
-            return redirect()->route('user.track')->with('success', 'Pickup request #' . $wasteRequest->request_number . ' submitted successfully!');
+            return redirect()->route('user.track')
+                ->with('success', 'Pickup request #' . $wasteRequest->request_number . ' submitted successfully!')
+                ->with('request_number', $wasteRequest->request_number);
         } catch (\Throwable $e) {
             Log::error('UserPwaRequest store error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             if ($request->expectsJson() || $request->ajax()) {

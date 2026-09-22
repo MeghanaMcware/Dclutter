@@ -380,15 +380,25 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    @if($wasteRequest->constituency)
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Request Constituency</label>
+                            <input type="text" class="form-control" value="{{ $wasteRequest->constituency->name }}" readonly style="background-color: #f8f9fa;">
+                        </div>
+                    @endif
                     <div class="mb-3">
                         <label class="form-label fw-bold" for="vehicle_id">Select Vehicle <span class="text-danger">*</span></label>
                         <select class="form-select" id="vehicle_id" name="vehicle_id" required>
-                            <option value="" disabled selected>-- Choose Available Vehicle --</option>
-                            @foreach($vehicles as $vehicle)
-                                <option value="{{ $vehicle->id }}" {{ $wasteRequest->vehicle_id == $vehicle->id ? 'selected' : '' }}>
-                                    {{ $vehicle->vehicle_number }} - {{ $vehicle->vehicle_type ?? 'Truck' }} (Driver: {{ $vehicle->driver_name ?? $vehicle->owner?->name ?? 'N/A' }})
-                                </option>
-                            @endforeach
+                            @if($vehicles->isEmpty())
+                                <option value="" disabled selected>No active vehicles registered for {{ $wasteRequest->constituency?->name ?? 'this constituency' }}</option>
+                            @else
+                                <option value="" disabled {{ !$wasteRequest->vehicle_id ? 'selected' : '' }}>-- Choose Available Vehicle ({{ $wasteRequest->constituency?->name ?? 'Constituency' }}) --</option>
+                                @foreach($vehicles as $vehicle)
+                                    <option value="{{ $vehicle->id }}" {{ $wasteRequest->vehicle_id == $vehicle->id ? 'selected' : '' }}>
+                                        {{ $vehicle->vehicle_number }} - {{ $vehicle->vehicle_type ?? 'Truck' }} (Driver: {{ $vehicle->driver_name ?? $vehicle->owner?->name ?? 'N/A' }})
+                                    </option>
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                     <div class="mb-3">

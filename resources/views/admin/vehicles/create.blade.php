@@ -80,16 +80,39 @@
                         <h5 class="form-section-title mt-2 d-flex flex-row gap-1"><span>  <i class="bi bi-truck me-2"></i></span><span>Vehicle Information</span></h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="">
-                                    <label class="form-label mb-0"><b>Constituency</b></label>
-                                    <select class="js-example-basic-single col-sm-12">
-
-                                        <optgroup label="constituency">
-                                            <option value="test">test</option>
-                                            <option value="WY">test2</option>
+                                <label class="form-label mb-0" for="constituency_id"><b>Constituency</b> <span class="text-danger">*</span></label>
+                                <select class="js-example-basic-single form-select col-sm-12 @error('constituency_id') is-invalid @enderror" id="constituency_id" name="constituency_id" required>
+                                    <option value="" disabled {{ old('constituency_id') ? '' : 'selected' }}>Select Constituency</option>
+                                    @foreach($corporations as $corp)
+                                        @if($corp->constituencies && $corp->constituencies->isNotEmpty())
+                                            <optgroup label="{{ $corp->name }}">
+                                                @foreach($corp->constituencies as $constituency)
+                                                    <option value="{{ $constituency->id }}" {{ old('constituency_id') == $constituency->id ? 'selected' : '' }}>
+                                                        {{ $constituency->name }}
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endif
+                                    @endforeach
+                                    @php
+                                        $assignedIds = $corporations->pluck('constituencies')->flatten()->pluck('id')->all();
+                                        $otherConstituencies = $constituencies->whereNotIn('id', $assignedIds);
+                                    @endphp
+                                    @if($otherConstituencies->isNotEmpty())
+                                        <optgroup label="Other Constituencies">
+                                            @foreach($otherConstituencies as $constituency)
+                                                <option value="{{ $constituency->id }}" {{ old('constituency_id') == $constituency->id ? 'selected' : '' }}>
+                                                    {{ $constituency->name }}
+                                                </option>
+                                            @endforeach
                                         </optgroup>
-                                    </select>
-                                </div>
+                                    @endif
+                                </select>
+                                @error('constituency_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @else
+                                    <div class="invalid-feedback">Please select a constituency.</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">

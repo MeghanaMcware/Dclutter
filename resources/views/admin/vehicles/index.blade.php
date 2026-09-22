@@ -105,6 +105,7 @@
                             <thead style="background: #f8f9fa;">
                                 <tr>
                                     <th class="text-start text-start1">Vehicle No.</th>
+                                    <th class="text-start text-start1">Constituency</th>
                                     <th class="text-start text-start1">Type</th>
                                     <th class="text-start text-start1">Capacity</th>
                                     <th class="text-start text-start1">Owner</th>
@@ -118,6 +119,9 @@
                                     <tr style="border-bottom: 1px solid #eaebf0;">
                                         <td style="padding: 15px 20px; vertical-align: middle;">
                                             <span style="font-weight: 600; color: #2c3e50;">{{ $vehicle->vehicle_number }}</span>
+                                        </td>
+                                        <td style="font-weight: 600; color: #2c3e50;">
+                                            {{ $vehicle->constituency?->name ?? 'N/A' }}
                                         </td>
                                         <td style="font-weight: 600; color: #2c3e50;">
                                             {{ $vehicle->vehicle_type ?? 'N/A' }}

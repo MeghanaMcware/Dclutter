@@ -15,6 +15,7 @@ class Vehicle extends Model
     protected $fillable = [
         'vehicle_number',
         'user_id',
+        'constituency_id',
         'vehicle_type',
         'capacity_tons',
         'vehicle_photo',
@@ -32,6 +33,14 @@ class Vehicle extends Model
         'status' => 'boolean',
         'capacity_tons' => 'decimal:2',
     ];
+
+    /**
+     * Constituency where this vehicle operates.
+     */
+    public function constituency(): BelongsTo
+    {
+        return $this->belongsTo(Constituency::class, 'constituency_id');
+    }
 
     /**
      * Owner/Driver user account linked to this vehicle for login.

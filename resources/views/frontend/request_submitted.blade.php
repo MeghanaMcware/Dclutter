@@ -136,7 +136,7 @@
         <div class="id-box">
             <span>Your Request ID</span>
             <b id="successReqId">
-                <span id="reqIdText">DCL-2025-000123</span>
+                <span id="reqIdText">{{ $reqId ?? ($requestRecord?->request_number ?? (session('request_number') ?? '')) }}</span>
                 <button class="copy-btn" onclick="copyReqId()" title="Copy Request ID"><i class="bi bi-copy"></i></button>
             </b>
             <span style="font-size: 11px;">You will receive real-time SMS updates<br>on your registered mobile number.</span>
@@ -151,20 +151,56 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof hideLoader === 'function') hideLoader();
 
-    const searchId = new URLSearchParams(window.location.search).get('id');
+    const searchId = new URLSearchParams(window.location.search).get('id') || 
+                     @json($reqId ?? ($requestRecord?->request_number ?? (session('request_number') ?? '')));
+    
     if (searchId) {
-        document.getElementById('reqIdText').innerText = searchId;
+        const textEl = document.getElementById('reqIdText');
+        if (textEl) textEl.innerText = searchId;
+
+        // Show SweetAlert popup with Request ID
+        Swal.fire({
+            icon: 'success',
+            title: 'Request Submitted Successfully!',
+            html: `
+                <div style="font-size: 14px; color: #475569; margin-bottom: 12px;">
+                    Thank you! Your D-Clutter pickup request has been received.
+                </div>
+                <div style="background: #e8f5ed; border: 1.5px dashed #087d45; border-radius: 10px; padding: 14px 16px; margin: 14px 0; text-align: center;">
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #055a31; font-weight: 700; margin-bottom: 4px;">Your Request ID</div>
+                    <div style="font-size: 24px; font-weight: 800; color: #087d45; letter-spacing: 0.5px; font-family: monospace;">${searchId}</div>
+                </div>
+                <div style="font-size: 12px; color: #64748b;">
+                    Please save this Request ID for future reference and tracking.
+                </div>
+            `,
+            confirmButtonColor: '#087d45',
+            confirmButtonText: 'OK',
+            allowOutsideClick: false
+        });
     }
 });
 
 function copyReqId() {
-    const reqId = document.getElementById('reqIdText').innerText;
+    const reqId = document.getElementById('reqIdText').innerText.trim();
+    if (!reqId) return;
     navigator.clipboard.writeText(reqId).then(() => {
-        alert(`Request ID ${reqId} copied to clipboard!`);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Copied!',
+                text: `Request ID ${reqId} copied to clipboard!`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            alert(`Request ID ${reqId} copied to clipboard!`);
+        }
     });
 }
 </script>

@@ -309,13 +309,29 @@
   <script src="{{asset('frontendwebsite/js/main.js')}}"></script>
   @include('layouts.image-compression-script')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  @if(session('success'))
+  @if(session('success') && !request()->routeIs('citizen.success'))
   <script>
+    @php
+        $reqNum = session('request_number');
+    @endphp
     Swal.fire({
       icon: 'success',
-      title: 'Success',
-      text: @json(session('success')),
-      confirmButtonColor: '#1f4e79'
+      title: '{{ $reqNum ? "Request Submitted Successfully!" : "Success" }}',
+      html: `
+        <div style="font-size: 14px; color: #475569; margin-bottom: 12px;">
+          {{ session('success') }}
+        </div>
+        @if($reqNum)
+        <div style="background: #e8f5ed; border: 1.5px dashed #087d45; border-radius: 10px; padding: 14px 16px; margin: 14px 0; text-align: center;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #055a31; font-weight: 700; margin-bottom: 4px;">Your Request ID</div>
+          <div style="font-size: 22px; font-weight: 800; color: #087d45; letter-spacing: 0.5px; font-family: monospace;">{{ $reqNum }}</div>
+        </div>
+        <div style="font-size: 12px; color: #64748b;">
+          Please save this Request ID for tracking your pickup status.
+        </div>
+        @endif
+      `,
+      confirmButtonColor: '#087d45'
     });
   </script>
   @endif

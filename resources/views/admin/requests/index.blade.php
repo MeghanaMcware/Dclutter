@@ -287,6 +287,8 @@
                                     <th class="text-start text-start1">Constituency</th>
                                     <th class="text-start text-start1">Requested By</th>
                                     <th class="text-start text-start1">Mobile</th>
+                                    <th class="text-start text-start1">Vehicle No.</th>
+                                    <th class="text-start text-start1">Driver Number</th>
                                     <th class="text-start text-start1">Status</th>
                                     <th class="text-start text-start1">Created At</th>
                                     <th class="text-center text-start1">Actions</th>
@@ -314,6 +316,20 @@
                                         <td class="text-start">{{ $req->constituency?->name ?? 'N/A' }}</td>
                                         <td class="text-start">{{ $req->applicant_name }}</td>
                                         <td class="text-start">{{ $req->mobile_number }}</td>
+                                        <td class="text-start">
+                                            @if($req->vehicle)
+                                                <span class="fw-semibold text-dark">{{ $req->vehicle->vehicle_number }}</span>
+                                            @else
+                                                <span class="text-muted">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-start">
+                                            @if($req->vehicle && ($req->vehicle->driver_phone || $req->vehicle->owner?->mobile_number))
+                                                <span>{{ $req->vehicle->driver_phone ?? $req->vehicle->owner?->mobile_number }}</span>
+                                            @else
+                                                <span class="text-muted">N/A</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             @php
                                                 $statusClasses = [
@@ -340,7 +356,7 @@
                                                 <a href="{{ route('admin.requests.show', $req->id) }}" class="btn btn-primary" title="View">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="{{ $req->id }}" data-request-number="{{ $req->request_number }}" title="Assign Vehicle">
+                                                <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="{{ $req->id }}" data-request-number="{{ $req->request_number }}" data-constituency-id="{{ $req->constituency_id }}" data-constituency-name="{{ $req->constituency?->name ?? 'N/A' }}" title="Assign Vehicle">
                                                     <i class="fa fa-edit"></i>
                                                 </button>
                                             </div>
@@ -348,7 +364,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-muted py-4">No waste requests found.</td>
+                                        <td colspan="12" class="text-muted py-4">No waste requests found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -418,6 +434,17 @@
 
                 </div>
 
+                <!-- CONSTITUENCY -->
+                <div class="mb-3">
+                    <label class="assign-label">
+                        Constituency
+                    </label>
+                    <input type="text"
+                           id="assignConstituency"
+                           class="form-control filter-input"
+                           readonly
+                           style="background-color: #f8f9fa;">
+                </div>
 
                 <!-- VEHICLE -->
 
@@ -629,19 +656,22 @@
                                 <a href="${req.show_url}" class="btn btn-primary" title="View">
                                     <i class="fa fa-eye"></i>
                                 </a>
-                                <a href="#" class="btn btn-success" title="Edit">
+                                <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="${req.id}" data-request-number="${req.request_number}" data-constituency-id="${req.constituency_id || ''}" data-constituency-name="${req.constituency || ''}" title="Assign Vehicle">
                                     <i class="fa fa-edit"></i>
-                                </a>
+                                </button>
                             </div>
                         `;
 
                         table.row.add([
                             `<span class="text-start text-dark fw-bold">${req.request_number}</span>`,
                             `<span class="text-start">${req.category}</span>`,
+                            `<span class="text-start">${req.subcategory ?? 'N/A'}</span>`,
                             `<span class="text-start">${req.pickup_location}</span>`,
                             `<span class="text-start">${req.constituency}</span>`,
                             `<span class="text-start">${req.applicant_name}</span>`,
                             `<span class="text-start">${req.mobile_number}</span>`,
+                            `<span class="text-start fw-semibold text-dark">${req.vehicle_number ?? 'N/A'}</span>`,
+                            `<span class="text-start">${req.driver_number ?? 'N/A'}</span>`,
                             statusHtml,
                             `<span class="text-start">${req.created_at}</span>`,
                             actionsHtml
@@ -693,7 +723,10 @@ const vehicles = [
         id: {{ $vehicle->id }},
         number: '{{ addslashes($vehicle->vehicle_number) }}',
         type: '{{ addslashes($vehicle->vehicle_type ?? "Garbage Truck") }}',
-        driver: '{{ addslashes($vehicle->driver_name ?? $vehicle->owner?->name ?? "N/A") }}'
+        driver: '{{ addslashes($vehicle->driver_name ?? $vehicle->owner?->name ?? "N/A") }}',
+        driver_phone: '{{ addslashes($vehicle->driver_phone ?? $vehicle->owner?->mobile_number ?? "N/A") }}',
+        constituency_id: {{ $vehicle->constituency_id ? $vehicle->constituency_id : 'null' }},
+        constituency_name: '{{ addslashes($vehicle->constituency?->name ?? "") }}'
     },
     @endforeach
 ];
@@ -707,14 +740,10 @@ let currentRequestRow = null;
 
 
 /* =========================================================
-   LOAD VEHICLES INTO SEARCHABLE DROPDOWN
+   LOAD VEHICLES INTO SEARCHABLE DROPDOWN (FILTERED BY CONSTITUENCY)
 ========================================================= */
 
-/* =========================================================
-   LOAD VEHICLES INTO SEARCHABLE DROPDOWN
-========================================================= */
-
-function loadVehicleDropdown() {
+function loadVehicleDropdown(constituencyId, constituencyName) {
     const $select = $('#assignVehicleSelect');
 
     if ($select.hasClass('select2-hidden-accessible')) {
@@ -723,29 +752,41 @@ function loadVehicleDropdown() {
 
     $select.empty();
 
-    $select.append(
-        new Option(
-            'Search and select vehicle',
-            '',
-            false,
-            false
-        )
-    );
+    // Only vehicles from that constituency should be displayed in assigning vehicle to requests
+    const filteredVehicles = constituencyId 
+        ? vehicles.filter(v => v.constituency_id == constituencyId)
+        : vehicles;
 
-    vehicles.forEach(function(vehicle) {
-        const option = new Option(
-            vehicle.number + ' - ' + vehicle.type,
-            vehicle.id,
-            false,
-            false
+    if (filteredVehicles.length === 0) {
+        const label = constituencyName 
+            ? 'No active vehicles registered for ' + constituencyName 
+            : 'No vehicles available for this constituency';
+        $select.append(new Option(label, '', true, true));
+    } else {
+        $select.append(
+            new Option(
+                'Search and select vehicle' + (constituencyName ? ' (' + constituencyName + ')' : ''),
+                '',
+                false,
+                false
+            )
         );
 
-        $(option).attr('data-number', vehicle.number);
-        $(option).attr('data-driver', vehicle.driver);
-        $(option).attr('data-type', vehicle.type);
+        filteredVehicles.forEach(function(vehicle) {
+            const option = new Option(
+                vehicle.number + ' - ' + vehicle.type + ' (Driver: ' + vehicle.driver + ')',
+                vehicle.id,
+                false,
+                false
+            );
 
-        $select.append(option);
-    });
+            $(option).attr('data-number', vehicle.number);
+            $(option).attr('data-driver', vehicle.driver);
+            $(option).attr('data-type', vehicle.type);
+
+            $select.append(option);
+        });
+    }
 
     $select.select2({
         dropdownParent: $('#assignVehicleModal'),
@@ -766,16 +807,21 @@ $(document).on('click', '.edit-request', function(e) {
 
     let requestId = $(this).attr('data-request-number') || currentRequestRow.find('td:first').text().trim();
     let dbId = $(this).attr('data-db-id') || currentRequestRow.find('a[href*="/admin/requests/"]').attr('href').split('/').pop();
+    let constituencyId = $(this).attr('data-constituency-id') || currentRequestRow.attr('data-constituency-id');
+    let constituencyName = $(this).attr('data-constituency-name') || currentRequestRow.attr('data-constituency-name') || currentRequestRow.find('td').eq(4).text().trim();
 
     $('#assignRequestId').val(requestId);
+    $('#assignConstituency').val(constituencyName || 'N/A');
     currentRequestRow.attr('data-db-id', dbId);
+    currentRequestRow.attr('data-constituency-id', constituencyId || '');
+    currentRequestRow.attr('data-constituency-name', constituencyName || '');
 
     $('#vehicleError').hide();
     $('#vehicleInfoBox').hide();
     $('#selectedVehicleNumber').text('');
     $('#selectedVehicleDetails').text('');
 
-    loadVehicleDropdown();
+    loadVehicleDropdown(constituencyId, constituencyName);
     $('#assignVehicleModal').modal('show');
 });
 
@@ -835,13 +881,22 @@ $('#assignVehicleSubmit').on('click', function() {
         },
         success: function(response) {
             const statusHtml = '<span class="status-badge status-assigned">Assigned</span>';
-            currentRequestRow.find('td').eq(6).html(statusHtml);
+            const vehicleNum = (response && response.vehicle_number) ? response.vehicle_number : vehicle.number;
+            const driverNum = (response && response.driver_number) ? response.driver_number : (vehicle.driver_phone || 'N/A');
+            const vehicleHtml = '<span class="fw-semibold text-dark">' + vehicleNum + '</span>';
+            const driverHtml = '<span>' + driverNum + '</span>';
+
+            currentRequestRow.find('td').eq(7).html(vehicleHtml);
+            currentRequestRow.find('td').eq(8).html(driverHtml);
+            currentRequestRow.find('td').eq(9).html(statusHtml);
 
             if ($.fn.DataTable.isDataTable('#admin-waste-requests-table')) {
                 const dataTable = $('#admin-waste-requests-table').DataTable();
                 const data = dataTable.row(currentRequestRow).data();
                 if (data) {
-                    data[6] = statusHtml;
+                    data[7] = vehicleHtml;
+                    data[8] = driverHtml;
+                    data[9] = statusHtml;
                     dataTable.row(currentRequestRow).data(data).draw(false);
                 }
             }
@@ -905,21 +960,59 @@ $('#assignVehicleModal').on(
 
     });
 
-    // Simple Table CSV Export helper
+    // Enhanced Excel / CSV Export helper with DataTables support and UTF-8 BOM
     function exportTableToCSV(filename) {
+        if (!filename) filename = 'waste_requests.csv';
         var csv = [];
-        var rows = document.querySelectorAll("#admin-waste-requests-table tr");
-        
-        for (var i = 0; i < rows.length; i++) {
-            var row = [], cols = rows[i].querySelectorAll("td, th");
-            for (var j = 0; j < cols.length - 1; j++) {
-                var text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
-                row.push('"' + text.replace(/"/g, '""') + '"');
+        var table = $.fn.DataTable.isDataTable('#admin-waste-requests-table') 
+            ? $('#admin-waste-requests-table').DataTable() 
+            : null;
+
+        // 1. Headers: all columns except Actions (the last column)
+        var headers = [];
+        var $thList = $('#admin-waste-requests-table thead th');
+        $thList.each(function(index, th) {
+            if (index < $thList.length - 1) {
+                var headerText = $(th).text().trim().replace(/(\r\n|\n|\r)/gm, " ");
+                headers.push('"' + headerText.replace(/"/g, '""') + '"');
             }
-            csv.push(row.join(","));
+        });
+        csv.push(headers.join(","));
+
+        // 2. Data rows: All filtered rows across all pages from DataTables
+        if (table && table.rows().count() > 0) {
+            table.rows({ search: 'applied' }).every(function() {
+                var rowData = this.data();
+                if (!rowData || !Array.isArray(rowData)) return;
+
+                var row = [];
+                for (var j = 0; j < rowData.length - 1; j++) {
+                    var cellHtml = rowData[j] !== undefined && rowData[j] !== null ? String(rowData[j]) : '';
+                    var tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = cellHtml;
+                    var text = tempDiv.innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    row.push('"' + text.replace(/"/g, '""') + '"');
+                }
+                csv.push(row.join(","));
+            });
+        } else {
+            // Fallback for non-datatable DOM rows
+            var rows = document.querySelectorAll("#admin-waste-requests-table tbody tr");
+            for (var i = 0; i < rows.length; i++) {
+                var cols = rows[i].querySelectorAll("td");
+                if (cols.length <= 1) continue; // Skip empty row
+                var row = [];
+                for (var j = 0; j < cols.length - 1; j++) {
+                    var text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    row.push('"' + text.replace(/"/g, '""') + '"');
+                }
+                csv.push(row.join(","));
+            }
         }
 
-        var csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+        // Add UTF-8 BOM (\uFEFF) so Microsoft Excel opens it correctly with proper encoding
+        var csvContent = "\uFEFF" + csv.join("\r\n");
+        var csvFile = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         var downloadLink = document.createElement("a");
         downloadLink.download = filename;
         downloadLink.href = window.URL.createObjectURL(csvFile);

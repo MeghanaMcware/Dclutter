@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\GisController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminImportedRequestController;
+use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminVehicleController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubcategoryController;
@@ -24,12 +25,11 @@ Route::get('/', function () {
     return view('frontend.home');
 });
 
-Route::get('/report/index', function () {
-    return view('admin.reports.index');
+Route::get('/report/index', fn () => redirect()->route('admin.reports.index'));
+Route::get('/report/show/{id?}', function ($id = null) {
+    return $id ? redirect()->route('admin.reports.show', $id) : redirect()->route('admin.reports.index');
 });
-Route::get('/report/show', function () {
-    return view('admin.reports.show');
-});
+Route::get('/report/show', fn () => redirect()->route('admin.reports.index'));
 
 Route::get('/report-request', [CitizenRequestController::class, 'create'])->name('citizen.report');
 Route::post('/report-request', [CitizenRequestController::class, 'store'])->name('citizen.report.store');
@@ -65,6 +65,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Requests Management
     Route::prefix('requests')->name('requests.')->group(function () {
+        Route::get('/export', [AdminRequestController::class, 'export'])->name('export');
         Route::get('/', [AdminRequestController::class, 'index'])->name('index');
         Route::get('/{id}', [AdminRequestController::class, 'show'])->name('show');
         Route::post('/{id}/assign-vehicle', [AdminRequestController::class, 'assignVehicle'])->name('assign-vehicle');
@@ -77,9 +78,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
 
-Route::get('/reports/index', function () {
-    return view('admin.reports.index');
-});
+    // Reports Management
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/export', [AdminReportController::class, 'export'])->name('export');
+        Route::get('/', [AdminReportController::class, 'index'])->name('index');
+        Route::get('/{id}', [AdminReportController::class, 'show'])->name('show');
+    });
+    Route::get('/reports/index', fn () => redirect()->route('admin.reports.index'));
 
 
     // Masters Management (Categories, Subcategories, Users, Dump Locations)

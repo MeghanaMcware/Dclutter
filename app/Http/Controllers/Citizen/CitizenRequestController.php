@@ -201,7 +201,18 @@ class CitizenRequestController extends Controller
             \Illuminate\Support\Facades\Log::error('WhatsApp Registration Notification Exception: ' . $e->getMessage());
         }
 
-        return redirect()->route('citizen.success', ['id' => $wasteRequest->request_number]);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Request submitted successfully!',
+                'request_number' => $wasteRequest->request_number,
+                'redirect_url' => route('citizen.success', ['id' => $wasteRequest->request_number]),
+            ]);
+        }
+
+        return redirect()->route('citizen.success', ['id' => $wasteRequest->request_number])
+            ->with('success', 'Your D-Clutter request has been submitted successfully.')
+            ->with('request_number', $wasteRequest->request_number);
     }
 
     /**

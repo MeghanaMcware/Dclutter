@@ -91,6 +91,10 @@ font-size: 13px;
                             </div>
                         </div>
                         <div class="col-sm-6">
+                            <div class="detail-label">Constituency</div>
+                            <div class="detail-value fw-bold text-primary">{{ $vehicle->constituency?->name ?? 'N/A' }}</div>
+                        </div>
+                        <div class="col-sm-6">
                             <div class="detail-label">Status</div>
                             <div class="detail-value {{ $vehicle->status ? 'text-success' : 'text-danger' }}">
                                 {{ $vehicle->status ? 'Active' : 'Inactive' }}
