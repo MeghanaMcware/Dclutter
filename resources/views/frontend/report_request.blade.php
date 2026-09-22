@@ -970,11 +970,10 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter house number.</div>
                     </div>
 
-                    <!-- Floor No -->
+                    <!-- Floor No (now optional) -->
                     <div>
-                        <label>Floor No / Level <span class="text-danger" >*</span></label>
-                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. Ground Floor, 2nd Floor" required oninput="validateSingleField(this)">
-                          <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
+                        <label>Floor No / Level</label>
+                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. Ground Floor, 2nd Floor" oninput="validateSingleField(this)">
                     </div>
 
                     <!-- Ward (Readonly - Auto-Mapped from GPS) -->
@@ -1184,6 +1183,20 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof hideLoader === 'function') hideLoader();
     initSundayDatePicker();
 });
+
+/* =========================================================
+   FOCUS / SCROLL HELPER FOR MANDATORY FIELDS
+========================================================= */
+function focusInvalidField(el) {
+    if (!el) return;
+    // Give layout a tick to settle (e.g. after step switch) before scrolling
+    setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof el.focus === 'function') {
+            try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+        }
+    }, 80);
+}
 
 function handleImageSelection(event) {
     if (isProgrammaticSync) return;
@@ -1551,6 +1564,7 @@ function validateStep(step) {
             if (errorDiv) errorDiv.style.display = 'block';
             if (subcatErrorDiv) subcatErrorDiv.style.display = 'none';
             valid = false;
+            focusInvalidField(document.querySelector('.category-card-container'));
         } else {
             if (errorDiv) errorDiv.style.display = 'none';
             
@@ -1558,6 +1572,7 @@ function validateStep(step) {
             if (checkedSubItems.length === 0) {
                 if (subcatErrorDiv) subcatErrorDiv.style.display = 'block';
                 valid = false;
+                focusInvalidField(document.getElementById('subcategory-section'));
             } else {
                 if (subcatErrorDiv) subcatErrorDiv.style.display = 'none';
             }
@@ -1570,15 +1585,16 @@ function validateStep(step) {
         const applicantName = document.getElementById('applicantNameInput');
         const address = document.getElementById('addressInput');
         const houseNo = document.getElementById('houseNoInput');
-        const floorNo = document.getElementById('floorNoInput');
         const landmark = document.getElementById('landmarkInput');
         const wardDisplay = document.getElementById('wardDisplayInput');
         const wardId = document.getElementById('wardIdInput');
         const pincode = document.getElementById('pincodeInput');
         const mobile = document.getElementById('mobileInput');
+        const floorNo = document.getElementById('floorNoInput'); // optional, not required
 
         let valid = true;
-        
+        let firstInvalidEl = null;
+
         // Sync selectedWasteFiles if input element has files
         const wasteInput = document.getElementById('wasteImagesInput');
         if (selectedWasteFiles.length === 0 && wasteInput && wasteInput.files && wasteInput.files.length > 0) {
@@ -1591,15 +1607,18 @@ function validateStep(step) {
             if (imageError) imageError.style.display = 'block';
             if (imageBox) imageBox.style.borderColor = '#dc3545';
             valid = false;
+            if (!firstInvalidEl) firstInvalidEl = imageBox;
         } else {
             if (imageError) imageError.style.display = 'none';
         }
 
-        [applicantName, address, houseNo, floorNo, landmark, wardDisplay, pincode, mobile].forEach(el => {
+        // Required fields only — floorNo intentionally excluded
+        [applicantName, mobile, address, houseNo, landmark, wardDisplay, pincode].forEach(el => {
             if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                 if (el) {
                     el.classList.remove('is-valid');
                     el.classList.add('is-invalid');
+                    if (!firstInvalidEl) firstInvalidEl = el;
                 }
                 valid = false;
             } else {
@@ -1610,15 +1629,21 @@ function validateStep(step) {
             }
         });
 
-        if (floorNo && floorNo.value && floorNo.value.trim() !== '') {
+        // Floor No is optional — just reflect valid state if filled, never block submission
+        if (floorNo) {
             floorNo.classList.remove('is-invalid');
-            floorNo.classList.add('is-valid');
+            if (floorNo.value && floorNo.value.trim() !== '') {
+                floorNo.classList.add('is-valid');
+            } else {
+                floorNo.classList.remove('is-valid');
+            }
         }
 
         if (!wardId || !wardId.value) {
             if (wardDisplay) {
                 wardDisplay.classList.remove('is-valid');
                 wardDisplay.classList.add('is-invalid');
+                if (!firstInvalidEl) firstInvalidEl = wardDisplay;
             }
             valid = false;
         }
@@ -1633,11 +1658,12 @@ function validateStep(step) {
                 otpMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your mobile number with WhatsApp OTP before proceeding.';
             }
             const mobileEl = document.getElementById('mobileInput');
-            if (mobileEl) {
-                mobileEl.focus();
-                mobileEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            focusInvalidField(mobileEl);
             return false;
+        }
+
+        if (!valid && firstInvalidEl) {
+            focusInvalidField(firstInvalidEl);
         }
 
         return valid;
@@ -1645,7 +1671,11 @@ function validateStep(step) {
 
     if (step === 3) {
         const dateInput = document.getElementById('preferredDateInput');
-        return validateSundayDate(dateInput);
+        const ok = validateSundayDate(dateInput);
+        if (!ok) {
+            focusInvalidField(dateInput);
+        }
+        return ok;
     }
 
     if (step === 4) {
@@ -1653,6 +1683,7 @@ function validateStep(step) {
         const agreementError = document.getElementById('agreement-error');
         if (!agreementCb || !agreementCb.checked) {
             if (agreementError) agreementError.style.display = 'block';
+            focusInvalidField(agreementCb);
             return false;
         } else {
             if (agreementError) agreementError.style.display = 'none';

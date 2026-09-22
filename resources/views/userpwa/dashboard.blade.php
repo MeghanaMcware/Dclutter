@@ -182,6 +182,12 @@
     .text-blue { color: #3b82f6; }
     .text-orange { color: #f59e0b; }
     .text-red { color: #ef4444; }
+    .font-13{
+        font-size:13px;
+    }
+    .font-11{
+        font-size:12px;
+    }
 </style>
 @endsection
 
@@ -277,7 +283,7 @@
                     <div>
                         <div class="fw-bold text-dark font-13">{{ $req->request_number }}</div>
                         <div class="text-muted font-11 mt-1">
-                            <i class="fa fa-calendar-alt me-1"></i>{{ $req->created_at->format('d M Y') }} &bull; {{ is_array($req->category_ids) ? implode(', ', $req->category_ids) : $req->category_ids }}
+                            <i class="fa fa-calendar-alt me-1"></i><b>{{ $req->created_at->format('d M Y') }}</b> &bull; {{ is_array($req->category_ids) ? implode(', ', $req->category_ids) : $req->category_ids }}
                         </div>
                     </div>
                     <span class="badge {{ $badgeClass }}" style="font-size: 11px; text-transform: capitalize; padding: 6px 10px;">
