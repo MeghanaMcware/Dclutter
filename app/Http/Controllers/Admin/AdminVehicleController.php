@@ -18,7 +18,7 @@ class AdminVehicleController extends Controller
      */
     public function index()
     {
-        $vehicles = Vehicle::with(['owner', 'constituency'])->latest()->get();
+        $vehicles = Vehicle::forUserJurisdiction()->with(['owner', 'constituency'])->latest()->get();
         return view('admin.vehicles.index', compact('vehicles'));
     }
 
@@ -27,8 +27,8 @@ class AdminVehicleController extends Controller
      */
     public function create()
     {
-        $corporations = Corporation::with('constituencies')->orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->with(['constituencies' => fn($q) => $q->forUserJurisdiction()])->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
         return view('admin.vehicles.create', compact('corporations', 'constituencies'));
     }
 
@@ -142,8 +142,8 @@ class AdminVehicleController extends Controller
     public function edit($id)
     {
         $vehicle = Vehicle::with(['owner', 'constituency'])->findOrFail($id);
-        $corporations = Corporation::with('constituencies')->orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->with(['constituencies' => fn($q) => $q->forUserJurisdiction()])->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
         return view('admin.vehicles.edit', compact('vehicle', 'corporations', 'constituencies'));
     }
 

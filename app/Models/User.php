@@ -111,26 +111,77 @@ class User extends Authenticatable
     */
 
     /**
-     * Check if user is assigned to a specific ward ID.
+     * Check if user has global unrestricted jurisdiction.
+     */
+    public function hasFullJurisdiction(): bool
+    {
+        return $this->hasAnyRole(['admin', 'superadmin', 'super-admin']);
+    }
+
+    /**
+     * Get user's primary jurisdiction type.
+     */
+    public function getJurisdictionLevel(): string
+    {
+        if ($this->hasFullJurisdiction()) {
+            return 'admin';
+        }
+        if ($this->hasRole('dgm') || !empty($this->corporation_ids)) {
+            return 'dgm';
+        }
+        if ($this->hasRole('agm') || !empty($this->constituency_ids)) {
+            return 'agm';
+        }
+        if (!empty($this->ward_ids)) {
+            return 'ward';
+        }
+        if ($this->hasRole('vehicle')) {
+            return 'vehicle';
+        }
+        return 'citizen';
+    }
+
+    /**
+     * Human-readable jurisdiction title and scope label.
+     */
+    public function getJurisdictionTitle(): string
+    {
+        $level = $this->getJurisdictionLevel();
+
+        return match ($level) {
+            'admin' => 'Administrator (All Bengaluru)',
+            'dgm' => 'DGM (' . ($this->assigned_corporations->pluck('name')->implode(', ') ?: 'Corporations') . ')',
+            'agm' => 'AGM (' . ($this->assigned_constituencies->pluck('name')->implode(', ') ?: 'Constituencies') . ')',
+            'ward' => 'Ward Officer (' . ($this->assigned_wards->pluck('name')->implode(', ') ?: 'Wards') . ')',
+            'vehicle' => 'Vehicle Driver / Operator',
+            default => 'Citizen User',
+        };
+    }
+
+    /**
+     * Check if user is assigned to or can access a specific ward ID.
      */
     public function isInWard($wardId): bool
     {
-        return !empty($this->ward_ids) && in_array((int)$wardId, array_map('intval', (array)$this->ward_ids));
+        if ($this->hasFullJurisdiction()) return true;
+        return !empty($this->ward_ids) && in_array((int)$wardId, array_map('intval', (array)$this->ward_ids), true);
     }
 
     /**
-     * Check if user is assigned to a specific constituency ID.
+     * Check if user is assigned to or can access a specific constituency ID.
      */
     public function isInConstituency($constituencyId): bool
     {
-        return !empty($this->constituency_ids) && in_array((int)$constituencyId, array_map('intval', (array)$this->constituency_ids));
+        if ($this->hasFullJurisdiction()) return true;
+        return !empty($this->constituency_ids) && in_array((int)$constituencyId, array_map('intval', (array)$this->constituency_ids), true);
     }
 
     /**
-     * Check if user is assigned to a specific corporation ID.
+     * Check if user is assigned to or can access a specific corporation ID.
      */
     public function isInCorporation($corporationId): bool
     {
-        return !empty($this->corporation_ids) && in_array((int)$corporationId, array_map('intval', (array)$this->corporation_ids));
+        if ($this->hasFullJurisdiction()) return true;
+        return !empty($this->corporation_ids) && in_array((int)$corporationId, array_map('intval', (array)$this->corporation_ids), true);
     }
 }

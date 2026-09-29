@@ -304,11 +304,21 @@
                         Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
                     </div>
                     <div class="sub" id="trackCategory">
-                        Category: 
+                        <strong>Category:</strong> 
                         @if(is_array($wasteRequest->category_ids))
                             {{ implode(', ', $wasteRequest->category_ids) }}
                         @else
                             {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
+                        @endif
+                        @if(!empty($wasteRequest->subcategory_ids))
+                            | <strong>Sub Category:</strong>
+                            @if(is_array($wasteRequest->subcategory_ids))
+                                {{ implode(', ', array_map(function($s) {
+                                    return \Illuminate\Support\Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
+                                }, $wasteRequest->subcategory_ids)) }}
+                            @else
+                                {{ $wasteRequest->subcategory_ids }}
+                            @endif
                         @endif
                     </div>
                 </div>

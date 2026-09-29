@@ -626,38 +626,22 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
     const allRequestData = [
-        @foreach($assignedRequests as $req) {
-            id: {
-                {
-                    $req - > id
-                }
-            },
+        @foreach($assignedRequests as $req)
+        {
+            id: {{ $req->id }},
             ref: '{{ $req->request_number }}',
             status: '{{ strtoupper($req->status) }}',
-            beforePickupDone: {
-                {
-                    (!empty($req - > before_pickup_images) || !empty($req - > approx_weight_kg)) ? 'true' : 'false'
-                }
-            },
-            beforePhotos: {
-                !!json_encode(array_map(function($img) {
-                    return Str::startsWith($img, 'http') ? $img : asset('storage/'.$img);
-                }, $req - > before_pickup_images ?? [])) !!
-            },
-            afterPhotos: {
-                !!json_encode(array_map(function($img) {
-                    return Str::startsWith($img, 'http') ? $img : asset('storage/'.$img);
-                }, $req - > picked_up_images ?? [])) !!
-            },
-            category: {
-                !!json_encode(is_array($req - > category_ids) ? implode(", ", $req - > category_ids) : ($req - >
-                    category_ids ?? "N/A")) !!
-            },
-            subCategory: {
-                !!json_encode(is_array($req - > subcategory_ids) ? implode(", ", array_map(function($s) {
-                    return Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
-                }, $req - > subcategory_ids)) : ($req - > subcategory_ids ?? "N/A")) !!
-            },
+            beforePickupDone: {{ (!empty($req->before_pickup_images) || !empty($req->approx_weight_kg)) ? 'true' : 'false' }},
+            beforePhotos: {!! json_encode(array_map(function($img) {
+                return Str::startsWith($img, 'http') ? $img : asset('storage/'.$img);
+            }, $req->before_pickup_images ?? [])) !!},
+            afterPhotos: {!! json_encode(array_map(function($img) {
+                return Str::startsWith($img, 'http') ? $img : asset('storage/'.$img);
+            }, $req->picked_up_images ?? [])) !!},
+            category: {!! json_encode(is_array($req->category_ids) ? implode(", ", $req->category_ids) : ($req->category_ids ?? "N/A")) !!},
+            subCategory: {!! json_encode(is_array($req->subcategory_ids) ? implode(", ", array_map(function($s) {
+                return Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
+            }, $req->subcategory_ids)) : ($req->subcategory_ids ?? "N/A")) !!},
             applicant: '{{ addslashes($req->applicant_name) }}',
             mobile: '{{ $req->mobile_number }}',
             date: '{{ $req->created_at->format("d-M-Y") }}',
@@ -669,16 +653,8 @@
             constituency: '{{ $req->constituency?->name ?? "Constituency" }}',
             pincode: '{{ $req->pincode }}',
             location: '{{ addslashes($req->address) }}',
-            lat: {
-                {
-                    $req - > latitude ?? 12.9716
-                }
-            },
-            lng: {
-                {
-                    $req - > longitude ?? 77.5946
-                }
-            }
+            lat: {{ $req->latitude ?? 12.9716 }},
+            lng: {{ $req->longitude ?? 77.5946 }}
         },
         @endforeach
     ];

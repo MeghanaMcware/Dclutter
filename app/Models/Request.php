@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasGeoScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Request extends Model
 {
-    use HasFactory;
+    use HasFactory, HasGeoScope;
 
     protected $table = 'requests';
 
@@ -148,44 +149,6 @@ class Request extends Model
     public function scopeRejected($query)
     {
         return $query->where('status', 'rejected');
-    }
-
-    /**
-     * Scope to filter requests within a user's assigned jurisdiction (DGM Corporation / AGM Constituency / Ward).
-     */
-    public function scopeForUserJurisdiction($query, ?User $user = null)
-    {
-        $user = $user ?? auth()->user();
-
-        if (!$user) {
-            return $query;
-        }
-
-        // DGM Scoping: Filter by assigned Corporations
-        if ($user->hasRole('dgm') || (!empty($user->corporation_ids) && is_array($user->corporation_ids))) {
-            $corpIds = array_filter(array_map('intval', (array)$user->corporation_ids));
-            if (!empty($corpIds)) {
-                return $query->whereIn('corporation_id', $corpIds);
-            }
-        }
-
-        // AGM Scoping: Filter by assigned Constituencies
-        if ($user->hasRole('agm') || (!empty($user->constituency_ids) && is_array($user->constituency_ids))) {
-            $constIds = array_filter(array_map('intval', (array)$user->constituency_ids));
-            if (!empty($constIds)) {
-                return $query->whereIn('constituency_id', $constIds);
-            }
-        }
-
-        // Ward Scoping
-        if (!empty($user->ward_ids) && is_array($user->ward_ids)) {
-            $wardIds = array_filter(array_map('intval', (array)$user->ward_ids));
-            if (!empty($wardIds)) {
-                return $query->whereIn('ward_id', $wardIds);
-            }
-        }
-
-        return $query;
     }
 
     public function dumpRecord(): \Illuminate\Database\Eloquent\Relations\HasOne

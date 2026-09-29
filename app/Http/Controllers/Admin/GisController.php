@@ -16,8 +16,8 @@ class GisController extends Controller
      */
     public function index()
     {
-        $corporations = Corporation::with('constituencies')->orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->with(['constituencies' => fn($q) => $q->forUserJurisdiction()])->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
         return view('admin.gis.index', compact('corporations', 'constituencies'));
     }
 
