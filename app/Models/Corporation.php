@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasGeoScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Corporation extends Model
 {
-    use HasFactory;
+    use HasFactory, HasGeoScope;
 
     protected $table = 'corporations';
     protected $fillable = ['name', 'name_kn', 'bone_merchant_id', 'meat_merchant_id'];

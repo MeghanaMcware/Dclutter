@@ -114,8 +114,8 @@ class AdminReportController extends Controller
             ]);
         }
 
-        $corporations = Corporation::orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
         $categories = Category::where('status', 1)->orderBy('name')->get();
         $requestNumbers = WasteRequest::forUserJurisdiction()->orderBy('id', 'desc')->pluck('request_number')->unique();
         $statuses = self::STATUS_OPTIONS;

@@ -270,6 +270,22 @@
                         </b>
                     </div>
                     <div>
+                        <small>Waste Sub-Categories</small>
+                        <b>
+                            @if(!empty($wasteRequest->subcategory_ids))
+                                @if(is_array($wasteRequest->subcategory_ids))
+                                    {{ implode(', ', array_map(function($s) {
+                                        return \Illuminate\Support\Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
+                                    }, $wasteRequest->subcategory_ids)) }}
+                                @else
+                                    {{ $wasteRequest->subcategory_ids }}
+                                @endif
+                            @else
+                                N/A
+                            @endif
+                        </b>
+                    </div>
+                    <div>
                         <small>Ward &amp; Zone</small>
                         <b>
                             {{ $wasteRequest->ward ? ($wasteRequest->ward->name . ' (Ward ' . $wasteRequest->ward->ward_number . ')') : 'N/A' }} 

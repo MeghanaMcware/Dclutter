@@ -81,9 +81,11 @@ class AdminRequestController extends Controller
             ]);
         }
 
-        $corporations = Corporation::with('constituencies')->orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
-        $vehicles = Vehicle::with(['owner', 'constituency'])->where('status', 1)->get();
+        $corporations = Corporation::forUserJurisdiction()->with(['constituencies' => function ($q) {
+            $q->forUserJurisdiction();
+        }])->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
+        $vehicles = Vehicle::forUserJurisdiction()->with(['owner', 'constituency'])->where('status', 1)->get();
 
         return view('admin.requests.index', compact('requests', 'corporations', 'constituencies', 'vehicles'));
     }
@@ -100,7 +102,10 @@ class AdminRequestController extends Controller
 
         $vehicleQuery = Vehicle::with(['owner', 'constituency'])->where('status', 1);
         if ($wasteRequest->constituency_id) {
-            $vehicleQuery->where('constituency_id', $wasteRequest->constituency_id);
+            $vehicleQuery->where(function($q) use ($wasteRequest) {
+                $q->where('constituency_id', $wasteRequest->constituency_id)
+                  ->orWhereNull('constituency_id');
+            });
         }
         $vehicles = $vehicleQuery->get();
 

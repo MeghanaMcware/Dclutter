@@ -127,7 +127,7 @@ class AdminDashboardController extends Controller
             ->get();
 
         // 6. Corporations list for filter dropdown
-        $corporations = Corporation::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->orderBy('name')->get();
 
         // If AJAX request, return formatted JSON response
         if ($request->ajax()) {

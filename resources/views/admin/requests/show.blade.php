@@ -64,15 +64,18 @@
         <div class="page-title mb-3">
             <div class="row align-items-center">
                 <div class="col-12 col-sm-6">
-                    <h3 class="fw-bold">
+                    <h3 class="fw-bold d-flex align-items-center gap-2 flex-wrap">
                         Request Details: <span class="text-primary">{{ $wasteRequest->request_number }}</span>
                     </h3>
                 </div>
-                <div class="col-12 col-sm-6 text-sm-end">
+                <div class="col-12 col-sm-6 d-flex align-items-center justify-content-sm-end gap-2 mt-2 mt-sm-0">
+                    <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVehicleModal">
+                        <i class="fa fa-truck me-1"></i> {{ $wasteRequest->vehicle ? 'Change Vehicle' : 'Assign Vehicle' }}
+                    </button>
                     <ol class="breadcrumb d-inline-flex mb-0 bg-transparent p-0">
                         <li class="breadcrumb-item">
                             <a href="{{ url('admin/dashboard') }}">
-                                <i class="bi bi-house"></i> Dashboard
+                                <i class="bi bi-house"></i>
                             </a>
                         </li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.requests.index') }}">All Requests</a></li>
@@ -142,19 +145,19 @@
                             @endif
                             <div class="col-sm-6">
                                 <div class="detail-label">Assigned Vehicle</div>
-                                <div class="detail-value d-flex align-items-center gap-2">
+                                <div class="detail-value d-flex align-items-center gap-2 flex-wrap">
                                     @if($wasteRequest->vehicle)
                                         <span class="fw-bold text-primary">
                                             <i class="fa fa-truck me-1"></i>
                                             {{ $wasteRequest->vehicle->vehicle_number }}
-                                            ({{ $wasteRequest->vehicle->driver_name ?? 'Driver' }})
+                                            ({{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Driver' }})
                                         </span>
-                                        <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" style="font-size: 11px;">
-                                            Change
+                                        <button type="button" class="btn btn-sm btn-outline-warning py-1 px-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" style="font-size: 11px;">
+                                            <i class="fa fa-edit me-1"></i> Change
                                         </button>
                                     @else
                                         <span class="text-muted fw-normal me-2">Not Assigned Yet</span>
-                                        <button type="button" class="btn btn-sm btn-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" style="font-size: 12px;">
+                                        <button type="button" class="btn btn-sm btn-success py-1 px-3 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" style="font-size: 12px;">
                                             <i class="fa fa-plus me-1"></i> Assign Vehicle
                                         </button>
                                     @endif
@@ -355,8 +358,11 @@
                             <p class="text-muted small">No after-pickup photos uploaded yet.</p>
                         @endif
 
-                        <div class="mt-4 pt-3 border-top">
-                            <a href="{{ route('admin.requests.index') }}" class="btn btn-secondary w-100">
+                        <div class="mt-4 pt-3 border-top d-flex flex-column gap-2">
+                            <button type="button" class="btn btn-success w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVehicleModal">
+                                <i class="fa fa-truck"></i> {{ $wasteRequest->vehicle ? 'Change Assigned Vehicle' : 'Assign Vehicle' }}
+                            </button>
+                            <a href="{{ route('admin.requests.index') }}" class="btn btn-outline-secondary w-100">
                                 <i class="bi bi-arrow-left me-1"></i> Back to All Requests
                             </a>
                         </div>
