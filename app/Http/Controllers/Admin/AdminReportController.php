@@ -74,10 +74,20 @@ class AdminReportController extends Controller
             });
         }
 
-        // Filter by Status (Strict matching on valid DB statuses)
-        if ($request->filled('status') && $request->status !== 'all' && $request->status !== 'Status') {
-            $status = strtolower(str_replace(' ', '_', $request->status));
-            $query->where('status', $status);
+        // Filter by Status (Strict matching on valid DB statuses, default to dumped/completed)
+        $statusParam = $request->input('status');
+        if ($request->has('status')) {
+            if ($statusParam !== 'all' && $statusParam !== 'Status' && !empty($statusParam)) {
+                $status = strtolower(str_replace(' ', '_', $statusParam));
+                if ($status === 'dumped' || $status === 'completed') {
+                    $query->whereIn('status', ['dumped', 'completed']);
+                } else {
+                    $query->where('status', $status);
+                }
+            }
+        } else {
+            // Default when visiting /admin/reports: show dumped/completed
+            $query->whereIn('status', ['dumped', 'completed']);
         }
 
         // Filter by Date Range
@@ -205,10 +215,20 @@ class AdminReportController extends Controller
             });
         }
 
-        // Filter by Status
-        if ($request->filled('status') && $request->status !== 'all' && $request->status !== 'Status') {
-            $status = strtolower(str_replace(' ', '_', $request->status));
-            $query->where('status', $status);
+        // Filter by Status (default to dumped/completed)
+        $statusParam = $request->input('status');
+        if ($request->has('status')) {
+            if ($statusParam !== 'all' && $statusParam !== 'Status' && !empty($statusParam)) {
+                $status = strtolower(str_replace(' ', '_', $statusParam));
+                if ($status === 'dumped' || $status === 'completed') {
+                    $query->whereIn('status', ['dumped', 'completed']);
+                } else {
+                    $query->where('status', $status);
+                }
+            }
+        } else {
+            // Default: show dumped/completed
+            $query->whereIn('status', ['dumped', 'completed']);
         }
 
         // Filter by Date Range

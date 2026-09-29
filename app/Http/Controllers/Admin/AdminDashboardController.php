@@ -37,13 +37,16 @@ class AdminDashboardController extends Controller
 
         // 1. Top KPI Metrics based on filtered query
         $totalRequests = (clone $baseQuery)->count();
-        $completedPickups = (clone $baseQuery)->whereIn('status', ['picked_up', 'dumped', 'completed'])->count();
+        $pendingRequests = (clone $baseQuery)->where('status', 'pending')->count();
         $scheduledPickups = (clone $baseQuery)->whereIn('status', ['assigned', 'scheduled'])->count();
+        $rescheduledRequests = (clone $baseQuery)->whereIn('status', ['not_available', 'rescheduled'])->count();
+        $dumpedRequests = (clone $baseQuery)->where('status', 'dumped')->count();
+        $completedPickups = (clone $baseQuery)->whereIn('status', ['picked_up', 'completed'])->count();
+        $cancelledPickups = (clone $baseQuery)->whereIn('status', ['rejected', 'cancelled'])->count();
         $totalUsers = User::role('citizen')->count();
         if ($totalUsers === 0) {
             $totalUsers = User::count();
         }
-        $cancelledPickups = (clone $baseQuery)->whereIn('status', ['rejected', 'cancelled', 'not_available'])->count();
 
         // 2. Trend Data Calculation (This Week = 7 days, This Month = 30 days)
         $daysCount = ($timeframe === 'month') ? 30 : 7;
@@ -114,7 +117,7 @@ class AdminDashboardController extends Controller
         $statusRequested = (clone $baseQuery)->where('status', 'pending')->count();
         $statusScheduled = (clone $baseQuery)->whereIn('status', ['assigned', 'scheduled'])->count();
         $statusCompleted = (clone $baseQuery)->whereIn('status', ['picked_up', 'dumped', 'completed'])->count();
-        $statusCancelled = (clone $baseQuery)->whereIn('status', ['rejected', 'cancelled', 'not_available'])->count();
+        $statusCancelled = (clone $baseQuery)->whereIn('status', ['rejected', 'cancelled', 'not_available', 'rescheduled'])->count();
 
         $statusLabels = ['Requested', 'Scheduled', 'Completed', 'Cancelled'];
         $statusSeries = [$statusRequested, $statusScheduled, $statusCompleted, $statusCancelled];
@@ -131,47 +134,17 @@ class AdminDashboardController extends Controller
 
         // If AJAX request, return formatted JSON response
         if ($request->ajax()) {
-            $tableRows = [];
-            foreach ($recentRequests as $req) {
-                $category = is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?: 'N/A');
-                $subcategory = is_array($req->subcategory_ids) ? implode(', ', $req->subcategory_ids) : ($req->subcategory_ids ?: 'N/A');
-                $status = strtolower($req->status ?? 'pending');
-                $statusClass = match($status) {
-                    'assigned', 'scheduled' => 'assigned',
-                    'picked_up', 'dumped', 'completed' => 'completed',
-                    'rejected', 'cancelled', 'not_available' => 'pending',
-                    default => 'pending',
-                };
-                $statusLabel = match($status) {
-                    'pending' => 'Requested',
-                    'assigned', 'scheduled' => 'Scheduled',
-                    'picked_up', 'dumped', 'completed' => 'Completed',
-                    'rejected', 'cancelled', 'not_available' => 'Cancelled',
-                    default => ucfirst(str_replace('_', ' ', $status)),
-                };
-                $submittedOn = $req->created_at ? $req->created_at->format('d M, h:i A') : 'N/A';
-                $viewUrl = route('admin.requests.show', $req->id);
-
-                $tableRows[] = '<tr>'
-                    . '<td style="color: #202935dc; font-size: 12px; font-weight:600;">' . e($req->request_number) . '</td>'
-                    . '<td style="color: #202935dc;font-weight:600;">' . e($req->applicant_name ?: 'Citizen User') . '</td>'
-                    . '<td style="color: #202935dc;font-weight:600;">' . e($category) . '</td>'
-                    . '<td style="color: #202935dc;font-weight:600;">' . e($subcategory) . '</td>'
-                    . '<td><span class="status-badge ' . $statusClass . '">' . e($statusLabel) . '</span></td>'
-                    . '<td style="color: #202935dc; font-weight:600;">' . e($submittedOn) . '</td>'
-                    . '<td class="text-center"><a href="' . e($viewUrl) . '" class="action-link btn btn-primary">View</a></td>'
-                    . '</tr>';
-            }
-            $tableHtml = !empty($tableRows) 
-                ? implode('', $tableRows) 
-                : '<tr><td colspan="7" class="text-center text-muted py-4">No waste requests found.</td></tr>';
+            $tableHtml = view('admin.partials.dashboard_table_rows', compact('recentRequests'))->render();
 
             return response()->json([
                 'success' => true,
                 'stats' => [
                     'totalRequests' => number_format($totalRequests),
-                    'completedPickups' => number_format($completedPickups),
+                    'pendingRequests' => number_format($pendingRequests),
                     'scheduledPickups' => number_format($scheduledPickups),
+                    'rescheduledRequests' => number_format($rescheduledRequests),
+                    'dumpedRequests' => number_format($dumpedRequests),
+                    'completedPickups' => number_format($completedPickups),
                     'totalUsers' => number_format($totalUsers),
                     'cancelledPickups' => number_format($cancelledPickups),
                 ],
@@ -195,8 +168,11 @@ class AdminDashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'totalRequests',
-            'completedPickups',
+            'pendingRequests',
             'scheduledPickups',
+            'rescheduledRequests',
+            'dumpedRequests',
+            'completedPickups',
             'totalUsers',
             'cancelledPickups',
             'trendDates',

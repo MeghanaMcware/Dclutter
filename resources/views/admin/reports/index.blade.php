@@ -187,18 +187,18 @@ table.dataTable tbody td {
                                 </select>
                             </div>
 
-                            <!-- Status Filter (Valid Backend Statuses) -->
-                            <div class="col-md-3 ">
-                                <label class="form-label mb-1"><b>Status</b></label>
-                                <select name="status" id="statusFilter" class="form-select filter-input">
-                                    <option value="">All Statuses</option>
-                                    @foreach($statuses as $val => $label)
-                                        <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                <!-- Status Filter (Valid Backend Statuses, Default: Dumped/Completed) -->
+                                <div class="col-md-3 ">
+                                    <label class="form-label mb-1"><b>Status</b></label>
+                                    <select name="status" id="statusFilter" class="form-select filter-input">
+                                        <option value="all" {{ request()->has('status') && request('status') === 'all' ? 'selected' : '' }}>All Statuses</option>
+                                        @foreach($statuses as $val => $label)
+                                            <option value="{{ $val }}" {{ request('status', 'dumped') === $val ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             <div class="col-md-9 d-flex align-items-end justify-content-end gap-2">
                                 <button type="submit" class="btn btn-filter-primary d-flex align-items-center gap-1">
                                     <i class="fa fa-filter"></i> Filter
