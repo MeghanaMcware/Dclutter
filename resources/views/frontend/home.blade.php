@@ -40,7 +40,7 @@
 }
 
 .heronew-desc {
-    color: var(--ink-muted);
+    color: #000;
     max-width: 520px;
     font-size: 0.95rem;
     margin-top: 0.8rem;
