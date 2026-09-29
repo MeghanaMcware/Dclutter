@@ -148,33 +148,23 @@ body {
     background-color: #f8fafc;
 }
 
-/* Badges exactly from image */
+/* Theme Badges */
 .status-badge {
-    font-size: 11px;
-    padding: 6px 10px;
+    padding: 5px 12px;
     border-radius: 4px;
+    font-size: 11px;
     font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
 }
 
-.status-badge.in-progress {
-    color: #ea580c;
-    background: #ffedd5;
-}
-
-.status-badge.assigned {
-    color: #2563eb;
-    background: #dbeafe;
-}
-
-.status-badge.completed {
-    color: #16a34a;
-    background: #dcfce7;
-}
-
-.status-badge.pending {
-    color: #dc2626;
-    background: #fee2e2;
-}
+.status-in-progress { background-color: #fff4e5; color: #ff9800; border: 1px solid #ffcc80; }
+.status-assigned { background-color: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
+.status-pending { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
+.status-completed { background-color: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
+.status-rejected { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
 
 /* Quick Actions */
 .quick-action-grid {
@@ -278,53 +268,70 @@ body {
     </div>
     <!-- Top Stats Row -->
     <div class="row g-4 mb-4">
-        <div class="col-md-6 col-lg-3 ">
+        <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Total Requests <i class="fa fa-info-circle text-primary"
-                            style="font-size: 15px;"></i></div>
+                    <div class="stat-title">Total Requests <i class="fa fa-info-circle text-primary" style="font-size: 15px;"></i></div>
                     <div class="stat-value val-blue" id="statTotalRequests">{{ number_format($totalRequests) }}</div>
-
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3 ">
+        <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Completed Pickups <i class="fa fa-check-circle text-success"
-                            style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-orange" id="statCompletedPickups">{{ number_format($completedPickups) }}</div>
+                    <div class="stat-title">Pending Requests <i class="fa fa-clock-o text-warning" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-orange" id="statPendingRequests">{{ number_format($pendingRequests) }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
+        <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Scheduled Pickups <i class="fa fa-calendar text-primary"
-                            style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-green" id="statScheduledPickups">{{ number_format($scheduledPickups) }}</div>
+                    <div class="stat-title">Scheduled Pickups <i class="fa fa-calendar text-primary" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-blue" id="statScheduledPickups">{{ number_format($scheduledPickups) }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3 ">
+        <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Total Users <i class="fa fa-users text-info" style="font-size: 15px;"></i>
-                    </div>
-                    <div class="stat-value val-blue" id="statTotalUsers">{{ number_format($totalUsers) }}</div>
+                    <div class="stat-title">Rescheduled Requests <i class="fa fa-history text-warning" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-purple" id="statRescheduledRequests">{{ number_format($rescheduledRequests) }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3 ">
+        <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Cancelled pickups <i class="fa fa-ban text-danger"
-                            style="font-size: 15px;"></i></div>
+                    <div class="stat-title">Dumped Requests <i class="fa fa-recycle text-success" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-green" id="statDumpedRequests">{{ number_format($dumpedRequests) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">Completed Pickups <i class="fa fa-check-circle text-success" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-green" id="statCompletedPickups">{{ number_format($completedPickups) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">Cancelled Pickups <i class="fa fa-ban text-danger" style="font-size: 15px;"></i></div>
                     <div class="stat-value val-red" id="statCancelledPickups">{{ number_format($cancelledPickups) }}</div>
                 </div>
             </div>
         </div>
-
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">Total Users <i class="fa fa-users text-info" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-blue" id="statTotalUsers">{{ number_format($totalUsers) }}</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Middle Row: Charts and Top Wards -->
@@ -358,10 +365,7 @@ body {
                 </div>
             </div>
         </div>
-
-
     </div>
-
 
     <div class="col-sm-12 col-xl-12 box-col-6">
         <div class="card">
@@ -374,74 +378,30 @@ body {
         </div>
     </div>
 
-    <!-- Bottom Row: Recent Requests, Quick Actions, Live Map -->
+    <!-- Bottom Row: Recent Requests -->
     <div class="row">
-        <!-- Recent Requests -->
-        <div class="container-fluid ">
+        <div class="col-sm-12">
             <div class="card">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h5>Recent Requests</h5>
+                    <a href="{{ route('admin.requests.index') }}" class="view-all">View All</a>
+                </div>
                 <div class="card-body">
-
-
-                    <div class="table-responsive">
-                        <table class=" table table-bordered table-striped text-center align-middle" id="data-source-1">
+                    <div class="table-responsive theme-scrollbar">
+                        <table class="display table table-striped table-bordered align-middle" id="recentRequestsTable">
                             <thead>
                                 <tr>
                                     <th>Display ID</th>
                                     <th>User Name</th>
                                     <th>Category</th>
-                                    <th>sub-Category </th>
+                                    <th>Sub-Category</th>
                                     <th>Status</th>
                                     <th>Submitted On</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="recentRequestsBody">
-                                @forelse($recentRequests as $req)
-                                <tr>
-                                    <td style="color: #202935dc; font-size: 12px; font-weight:600;">{{ $req->request_number }}</td>
-                                    <td style="color: #202935dc;font-weight:600;">{{ $req->applicant_name ?: 'Citizen User' }}</td>
-                                    <td style="color: #202935dc;font-weight:600;">
-                                        @if(is_array($req->category_ids))
-                                            {{ implode(', ', $req->category_ids) }}
-                                        @else
-                                            {{ $req->category_ids ?: 'N/A' }}
-                                        @endif
-                                    </td>
-                                    <td style="color: #202935dc;font-weight:600;">
-                                        @if(is_array($req->subcategory_ids))
-                                            {{ implode(', ', $req->subcategory_ids) }}
-                                        @else
-                                            {{ $req->subcategory_ids ?: 'N/A' }}
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $st = strtolower($req->status ?? 'pending');
-                                            $badgeClass = match($st) {
-                                                'assigned', 'scheduled' => 'assigned',
-                                                'picked_up', 'dumped', 'completed' => 'completed',
-                                                'rejected', 'cancelled', 'not_available' => 'pending',
-                                                default => 'pending',
-                                            };
-                                            $statusLabel = match($st) {
-                                                'pending' => 'Requested',
-                                                'assigned', 'scheduled' => 'Scheduled',
-                                                'picked_up', 'dumped', 'completed' => 'Completed',
-                                                'rejected', 'cancelled', 'not_available' => 'Cancelled',
-                                                default => ucfirst(str_replace('_', ' ', $st)),
-                                            };
-                                        @endphp
-                                        <span class="status-badge {{ $badgeClass }}">{{ $statusLabel }}</span>
-                                    </td>
-                                    <td style="color: #202935dc; font-weight:600;">{{ $req->created_at ? $req->created_at->format('d M, h:i A') : 'N/A' }}</td>
-                                    <td class="text-center"><a href="{{ route('admin.requests.show', $req->id) }}" class="action-link btn btn-primary">View</a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-muted py-4 text-center">No waste requests found.</td>
-                                </tr>
-                                @endforelse
+                                @include('admin.partials.dashboard_table_rows', ['recentRequests' => $recentRequests])
                             </tbody>
                         </table>
                     </div>
@@ -648,17 +608,26 @@ body {
                     var elTotal = document.getElementById('statTotalRequests');
                     if (elTotal) elTotal.innerText = data.stats.totalRequests;
 
-                    var elComp = document.getElementById('statCompletedPickups');
-                    if (elComp) elComp.innerText = data.stats.completedPickups;
+                    var elPending = document.getElementById('statPendingRequests');
+                    if (elPending) elPending.innerText = data.stats.pendingRequests;
 
                     var elSched = document.getElementById('statScheduledPickups');
                     if (elSched) elSched.innerText = data.stats.scheduledPickups;
 
-                    var elUsers = document.getElementById('statTotalUsers');
-                    if (elUsers) elUsers.innerText = data.stats.totalUsers;
+                    var elResched = document.getElementById('statRescheduledRequests');
+                    if (elResched) elResched.innerText = data.stats.rescheduledRequests;
+
+                    var elDumped = document.getElementById('statDumpedRequests');
+                    if (elDumped) elDumped.innerText = data.stats.dumpedRequests;
+
+                    var elComp = document.getElementById('statCompletedPickups');
+                    if (elComp) elComp.innerText = data.stats.completedPickups;
 
                     var elCanc = document.getElementById('statCancelledPickups');
                     if (elCanc) elCanc.innerText = data.stats.cancelledPickups;
+
+                    var elUsers = document.getElementById('statTotalUsers');
+                    if (elUsers) elUsers.innerText = data.stats.totalUsers;
 
                     // Update Trend Chart
                     if (trendChart) {
