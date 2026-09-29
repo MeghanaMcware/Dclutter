@@ -8,7 +8,7 @@
             <strong>DCLUTTER</strong>
         </div>
 
-        <div class="user-footer__tagline">BENGALURU'S CLEAN STREETS</div>
+        <div class="user-footer__tagline">Building a Cleaner Bengaluru, Together </div>
 
         <ul class="user-footer__social">
             <li>

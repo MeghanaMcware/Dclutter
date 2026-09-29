@@ -217,7 +217,7 @@ body {
 
 .action-link {
     color: #fff;
-    font-size: 16px;
+    font-size: 14px;
     text-decoration: none;
     transition: color 0.2s;
 }

@@ -176,7 +176,7 @@
                 <small>Items Requested</small>
                 <b>{{ $categoriesText }}</b>
                 @if($subcategoriesText)
-                    <span style="font-size: 12px; color: #64748b;">{{ $subcategoriesText }}</span>
+                    <span style="font-size: 13px; color: #0e7a43;font-weight: 600;">{{ $subcategoriesText }}</span>
                 @endif
             </div>
 

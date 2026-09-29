@@ -304,6 +304,80 @@ class UserPwaRequestController extends Controller
     }
 
     /**
+     * Show History List for User PWA
+     */
+    public function history(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('user.login');
+        }
+
+        $mobile = $user->mobile_number;
+        $userId = $user->id;
+
+        $query = WasteRequest::with(['ward.constituency.corporation', 'vehicle']);
+
+        $query->where(function($q) use ($mobile, $userId) {
+            if ($mobile) {
+                $q->where('mobile_number', $mobile);
+            }
+            if ($userId) {
+                $q->orWhere('user_id', $userId);
+            }
+        });
+
+        if ($request->filled('search')) {
+            $term = trim($request->search);
+            $query->where(function($q) use ($term) {
+                $q->where('request_number', 'like', "%{$term}%")
+                  ->orWhere('applicant_name', 'like', "%{$term}%")
+                  ->orWhere('mobile_number', 'like', "%{$term}%")
+                  ->orWhere('address', 'like', "%{$term}%");
+            });
+        }
+
+        $requests = $query->latest()->paginate(10);
+
+        return view('userpwa.history.index', compact('requests'));
+    }
+
+    /**
+     * Show History Details for User PWA
+     */
+    public function historyShow($id = null)
+    {
+        $id = $id ?: request('id');
+        if (!$id) {
+            return redirect()->route('user.history');
+        }
+
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('user.login');
+        }
+
+        $mobile = $user->mobile_number;
+        $userId = $user->id;
+
+        $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle', 'dump'])
+            ->where(function($q) use ($id) {
+                $q->where('id', $id)->orWhere('request_number', $id);
+            })
+            ->where(function($q) use ($mobile, $userId) {
+                if ($mobile) {
+                    $q->where('mobile_number', $mobile);
+                }
+                if ($userId) {
+                    $q->orWhere('user_id', $userId);
+                }
+            })
+            ->firstOrFail();
+
+        return view('userpwa.history.show', compact('wasteRequest'));
+    }
+
+    /**
      * Show Request Details for User PWA
      */
     public function show($id = null)

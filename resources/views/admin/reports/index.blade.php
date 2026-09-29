@@ -136,7 +136,7 @@ table.dataTable tbody td {
                     <form id="reportFilterForm" method="GET" action="{{ route('admin.reports.index') }}">
                         <div class="row g-3 mb-4">
                             <!-- Request ID Filter -->
-                            <div class="col-md-4 col-lg-2">
+                            <div class="col-md-3 ">
                                 <label class="form-label mb-1"><b>Request Id</b></label>
                                 <select name="request_id" id="requestIdFilter" class="form-select filter-input">
                                     <option value="">All Request IDs</option>
@@ -149,7 +149,7 @@ table.dataTable tbody td {
                             </div>
 
                             <!-- Corporation Filter -->
-                            <div class="col-md-4 col-lg-2">
+                            <div class="col-md-3 ">
                                 <label class="form-label mb-1"><b>Corporation</b></label>
                                 <select name="corporation" id="corporationFilter" class="form-select filter-input">
                                     <option value="">All Corporations</option>
@@ -162,7 +162,7 @@ table.dataTable tbody td {
                             </div>
 
                             <!-- Constituency Filter -->
-                            <div class="col-md-4 col-lg-2">
+                            <div class="col-md-3 ">
                                 <label class="form-label mb-1"><b>Constituency</b></label>
                                 <select name="constituency" id="constituencyFilter" class="form-select filter-input">
                                     <option value="">All Constituencies</option>
@@ -175,7 +175,7 @@ table.dataTable tbody td {
                             </div>
 
                             <!-- Category Filter -->
-                            <div class="col-md-4 col-lg-2">
+                            <div class="col-md-3 ">
                                 <label class="form-label mb-1"><b>Category</b></label>
                                 <select name="category" id="categoryFilter" class="form-select filter-input">
                                     <option value="">All Categories</option>
@@ -188,7 +188,7 @@ table.dataTable tbody td {
                             </div>
 
                             <!-- Status Filter (Valid Backend Statuses) -->
-                            <div class="col-md-4 col-lg-2">
+                            <div class="col-md-3 ">
                                 <label class="form-label mb-1"><b>Status</b></label>
                                 <select name="status" id="statusFilter" class="form-select filter-input">
                                     <option value="">All Statuses</option>
@@ -199,9 +199,7 @@ table.dataTable tbody td {
                                     @endforeach
                                 </select>
                             </div>
-
-                            <!-- Action Buttons -->
-                            <div class="col-md-4 col-lg-2 d-flex align-items-end justify-content-end gap-2">
+                            <div class="col-md-9 d-flex align-items-end justify-content-end gap-2">
                                 <button type="submit" class="btn btn-filter-primary d-flex align-items-center gap-1">
                                     <i class="fa fa-filter"></i> Filter
                                 </button>
@@ -212,7 +210,10 @@ table.dataTable tbody td {
                                     <i class="fa fa-download"></i> Export
                                 </button>
                             </div>
+                            
                         </div>
+                        <!-- Action Buttons -->
+                            
                     </form>
 
                     <div class="table-responsive">

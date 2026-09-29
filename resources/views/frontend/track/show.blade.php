@@ -268,6 +268,7 @@
                                 {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
                             @endif
                         </b>
+                        <small>Sub Categories</small>
                     </div>
                     <div>
                         <small>Waste Sub-Categories</small>

@@ -181,7 +181,7 @@
             align-items: center;
             justify-content: flex-start;
             gap: 12px;
-            padding: 10px 14px;
+            padding: 10px 36px 10px 14px;
             background: #ffffff;
             border: 1px solid #e1e9e4;
             border-radius: 12px;
@@ -238,10 +238,11 @@
         .item-option::before {
             content: '';
             position: absolute;
-            top: 2px;
-            right: 2px;
+            top: 50%;
+            right: 12px;
             width: 19px;
             height: 19px;
+            margin-top: -9.5px;
             border: 2px solid #b8c9bf;
             border-radius: 50%;
             background: #ffffff;
@@ -261,10 +262,11 @@
         .item-option::after {
             content: '';
             position: absolute;
-            top: 2px;
-            right: 2px;
+            top: 50%;
+            right: 11px;
             width: 21px;
             height: 21px;
+            margin-top: -10.5px;
             border-radius: 50%;
             background: radial-gradient(circle, var(--tile-color, var(--green)) 0 5px, #ffffff 6px);
             box-shadow: 0 0 0 2px color-mix(in srgb, var(--tile-color, var(--green)) 12%, transparent);
@@ -308,8 +310,8 @@
             }
 
             .category-card-container .item-option {
-                min-height: 48px;
-                padding: 8px 10px;
+                min-height: 73px;
+                padding: 8px 32px 8px 10px;
                 border-radius: 10px;
                 gap: 8px;
             }
@@ -1550,14 +1552,126 @@
             section.style.display = hasAnySubcategories ? 'block' : 'none';
         }
 
-        function handleImageSelection(event) {
+        async function handleImageSelection(event) {
             if (isProgrammaticSync) return;
 
             const newFiles = event.target.files;
             if (!newFiles || newFiles.length === 0) return;
 
-            selectedWasteFiles = Array.from(newFiles);
-            updateImagePreview();
+            if (typeof fetchCurrentLocation === 'function') {
+                fetchCurrentLocation({ silent: true });
+            }
+
+            if (typeof showLoader === 'function') showLoader('Processing images...');
+
+            const processedFiles = [];
+            const getGps = () => new Promise(resolve => {
+                if (!navigator.geolocation) return resolve(null);
+                navigator.geolocation.getCurrentPosition(
+                    pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                    err => resolve(null),
+                    { enableHighAccuracy: true, timeout: 3000 }
+                );
+            });
+            const gps = await getGps();
+
+            for (let i = 0; i < newFiles.length; i++) {
+                const file = newFiles[i];
+                
+                const isDuplicate = selectedWasteFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size)) ||
+                                    processedFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size));
+                if (isDuplicate) continue;
+
+                try {
+                    const watermarked = await watermarkImage(file, gps);
+                    processedFiles.push(watermarked);
+                } catch(e) {
+                    processedFiles.push(file);
+                }
+            }
+
+            if (processedFiles.length > 0) {
+                selectedWasteFiles = [...selectedWasteFiles, ...processedFiles];
+                
+                isProgrammaticSync = true;
+                const dt = new DataTransfer();
+                selectedWasteFiles.forEach(f => dt.items.add(f));
+                const input = document.getElementById('wasteImagesInput');
+                if (input) input.files = dt.files;
+                isProgrammaticSync = false;
+                
+                updateImagePreview();
+            }
+
+            if (typeof hideLoader === 'function') hideLoader();
+        }
+
+        function watermarkImage(file, gps) {
+            return new Promise((resolve) => {
+                if (!file.type.startsWith('image/')) return resolve(file);
+                
+                let lat = gps ? gps.lat : (document.getElementById('latitudeInput')?.value || '');
+                let lng = gps ? gps.lng : (document.getElementById('longitudeInput')?.value || '');
+                let locText = "GPS: Not Available";
+                
+                if (lat && lng && (lat != '12.9716' || lng != '77.5946')) {
+                    locText = `Lat: ${Number(lat).toFixed(6)}, Lng: ${Number(lng).toFixed(6)}`;
+                }
+
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width, height = img.height;
+                    const MAX = 1600;
+                    if (width > MAX || height > MAX) {
+                        if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+                        else { width = Math.round(width * MAX / height); height = MAX; }
+                    }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const time = new Date().toLocaleString();
+                    const address = document.getElementById('addressInput')?.value || 'Location not provided';
+                    
+                    // Draw a full-width dark semi-transparent banner at the bottom
+                    const titleFontSize = Math.max(18, Math.floor(width / 35));
+                    const subFontSize = Math.max(12, Math.floor(width / 55));
+                    const bannerHeight = titleFontSize + (subFontSize * 2) + 40;
+                    
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                    ctx.fillRect(0, height - bannerHeight, width, bannerHeight);
+                    
+                    ctx.textAlign = 'left';
+                    
+                    // Filename
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = `bold ${titleFontSize}px sans-serif`;
+                    ctx.fillText(file.name, 15, height - bannerHeight + titleFontSize + 10);
+                    
+                    // Address
+                    ctx.font = `normal ${subFontSize}px sans-serif`;
+                    const maxChars = Math.floor(width / (subFontSize * 0.6));
+                    const truncAddress = address.length > maxChars ? address.substring(0, maxChars - 3) + '...' : address;
+                    ctx.fillText(truncAddress, 15, height - bannerHeight + titleFontSize + subFontSize + 20);
+                    
+                    // GPS & Time
+                    ctx.fillStyle = '#facc15'; // yellow-400
+                    ctx.fillText(`${locText}  |  ${time}`, 15, height - 15);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+                            newFile.originalSize = file.size; // Save original size to prevent duplicate uploads
+                            resolve(newFile);
+                        } else {
+                            resolve(file);
+                        }
+                    }, 'image/jpeg', 0.85);
+                };
+                img.onerror = () => resolve(file);
+                img.src = URL.createObjectURL(file);
+            });
         }
 
         function removeImage(index) {
