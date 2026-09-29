@@ -1,6 +1,6 @@
 @extends('userpwa.layout.app')
 
-@section('title', 'Request Details - #DCL-2026-000023')
+@section('title', 'Request Details - #' . $wasteRequest->request_number)
 @section('heading', 'Request Details')
 
 @section('style')
@@ -71,53 +71,91 @@
 @endsection
 
 @section('content')
+@php
+    $status = strtolower($wasteRequest->status ?? 'pending');
+    $isSubmitted = true;
+    $isAssigned = in_array($status, ['assigned', 'scheduled', 'picked_up', 'dumped', 'completed']) || !empty($wasteRequest->vehicle_id);
+    $isPickedUp = in_array($status, ['picked_up', 'dumped', 'completed']) || !empty($wasteRequest->picked_up_at);
+    $isCompleted = in_array($status, ['dumped', 'completed']);
+
+    $badgeClass = match($status) {
+        'picked_up', 'dumped', 'completed' => 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;',
+        'assigned', 'scheduled' => 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;',
+        'rejected', 'cancelled' => 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;',
+        default => 'background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5;'
+    };
+    $badgeIcon = match($status) {
+        'picked_up', 'dumped', 'completed' => 'fa-solid fa-check-circle',
+        'assigned', 'scheduled' => 'fa-solid fa-truck',
+        'rejected', 'cancelled' => 'fa-solid fa-times-circle',
+        default => 'fa-solid fa-clock'
+    };
+    $badgeLabel = match($status) {
+        'pending' => 'Pending',
+        'assigned', 'scheduled' => 'Assigned',
+        'picked_up' => 'In Progress',
+        'dumped', 'completed' => 'Completed',
+        'not_available', 'rescheduled' => 'Rescheduled',
+        'rejected' => 'Rejected',
+        'cancelled' => 'Cancelled',
+        default => ucfirst(str_replace('_', ' ', $status))
+    };
+    $categories = is_array($wasteRequest->category_ids) ? implode(', ', $wasteRequest->category_ids) : ($wasteRequest->category_ids ?: 'N/A');
+    $subcategories = is_array($wasteRequest->subcategory_ids) ? implode(', ', $wasteRequest->subcategory_ids) : ($wasteRequest->subcategory_ids ?: '');
+    $images = is_array($wasteRequest->waste_images) ? $wasteRequest->waste_images : [];
+@endphp
+
 <div class="details-container">
-    <!-- Header Card (Completed State) -->
+    <!-- Header Card -->
     <div class="card-ui">
         <div class="ref-header">
             <div>
-                <div class="ref-id">#DCL-2026-000023</div>
-                <div class="ref-date">Submitted: 30 Sep 2026, 09:15 AM</div>
+                <div class="ref-id">#{{ $wasteRequest->request_number }}</div>
+                <div class="ref-date">Submitted: {{ $wasteRequest->created_at ? $wasteRequest->created_at->format('d M Y, h:i A') : 'N/A' }}</div>
             </div>
-            <span class="badge-status" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;">
-                <i class="fa-solid fa-check-circle"></i> Completed
+            <span class="badge-status" style="{{ $badgeClass }}">
+                <i class="{{ $badgeIcon }}"></i> {{ $badgeLabel }}
             </span>
         </div>
 
         <div class="timeline">
-            <div class="timeline-item active">
+            <div class="timeline-item {{ $isSubmitted ? 'active' : '' }}">
                 <p>Request Submitted</p>
-                <small>30 Sep 2026, 09:15 AM</small>
+                <small>{{ $wasteRequest->created_at ? $wasteRequest->created_at->format('d M Y, h:i A') : 'Recorded' }}</small>
             </div>
-            <div class="timeline-item active">
+            <div class="timeline-item {{ $isAssigned ? 'active' : '' }}">
                 <p>Vehicle Assigned</p>
-                <small>30 Sep 2026, 11:30 AM</small>
+                <small>{{ $wasteRequest->assigned_at ? $wasteRequest->assigned_at->format('d M Y, h:i A') : ($isAssigned ? 'Vehicle allocated' : 'Awaiting assignment') }}</small>
             </div>
-            <div class="timeline-item active">
+            <div class="timeline-item {{ $isPickedUp ? 'active' : '' }}">
                 <p>Waste Picked Up</p>
-                <small>01 Oct 2026, 02:45 PM</small>
+                <small>{{ $wasteRequest->picked_up_at ? $wasteRequest->picked_up_at->format('d M Y, h:i A') : ($isPickedUp ? 'Picked up' : 'Pending collection') }}</small>
             </div>
-            <div class="timeline-item active">
+            <div class="timeline-item {{ $isCompleted ? 'active' : '' }}">
                 <p>Disposed &amp; Completed</p>
-                <small>Waste safely recycled/disposed at the facility</small>
+                <small>{{ $isCompleted ? 'Waste safely recycled/disposed at the facility' : 'Pending disposal' }}</small>
             </div>
         </div>
     </div>
 
+    @if($wasteRequest->vehicle)
     <!-- Assigned Vehicle Details -->
     <div class="card-ui">
         <h6 class="fw-bold" style="font-size: 14px; color: #1e293b; margin-bottom: 2px;">Assigned Collection Vehicle</h6>
         <div class="driver-card">
             <div class="driver-avatar"><i class="fa-solid fa-truck"></i></div>
             <div style="flex: 1;">
-                <b style="color: #1e293b; font-size: 14px;">Ramesh Kumar (BBMP Driver)</b>
+                <b style="color: #1e293b; font-size: 14px;">{{ $wasteRequest->vehicle->driver_name ?? ($wasteRequest->vehicle->owner?->name ?? 'BBMP Driver') }}</b>
                 <div style="font-size: 12px; color: #475569; margin-top: 2px;">
-                    Vehicle: <strong>KA-02-AB-1234</strong>
-                    | Tel: <a href="tel:9876543210" style="color: #0e7a43; font-weight: 700;">+91 9876543210</a>
+                    Vehicle: <strong>{{ $wasteRequest->vehicle->vehicle_number }}</strong>
+                    @if(!empty($wasteRequest->vehicle->driver_phone) || !empty($wasteRequest->vehicle->owner?->mobile_number))
+                        | Tel: <a href="tel:{{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number }}" style="color: #0e7a43; font-weight: 700;">+91 {{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number }}</a>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
+    @endif
     
     <!-- Pickup Details Card -->
     <div class="card-ui">
@@ -128,53 +166,65 @@
         <div class="facts-list">
             <div class="fact-item">
                 <small>Items Requested</small>
-                <b>Electronic Waste</b>
-                <span style="font-size: 13px; color: #0e7a43;font-weight: 600;">TV, Computers, Wiring</span>
+                <b>{{ $categories }}</b>
+                @if($subcategories)
+                    <span style="font-size: 13px; color: #0e7a43; font-weight: 600;">{{ $subcategories }}</span>
+                @endif
             </div>
 
             <div class="fact-item">
                 <small>Pickup Address</small>
                 <b>
-                    House No: 14B, Floor: Ground,
-                    #13, Millers Tank Bund Road, Kaverappa Layout
-                    <br><span style="color: #64748b; font-size: 12px;">Landmark: Near Mount Carmel College</span>
-                    (PIN: 560052)
+                    @if($wasteRequest->house_no) House No: {{ $wasteRequest->house_no }}, @endif
+                    @if($wasteRequest->floor_no || $wasteRequest->floor) Floor: {{ $wasteRequest->floor_no ?: $wasteRequest->floor }}, @endif
+                    {{ $wasteRequest->address }}
+                    @if($wasteRequest->landmark)
+                        <br><span style="color: #64748b; font-size: 12px;">Landmark: {{ $wasteRequest->landmark }}</span>
+                    @endif
+                    @if($wasteRequest->pincode)
+                        (PIN: {{ $wasteRequest->pincode }})
+                    @endif
                 </b>
             </div>
 
             <div class="fact-item">
                 <small>Ward / Administrative Zone</small>
                 <b>
-                    Ward 93 - Vasanth Nagar | Shivajinagar (BBMP East)
+                    {{ $wasteRequest->ward?->name ?? 'Ward N/A' }} 
+                    @if($wasteRequest->constituency) | {{ $wasteRequest->constituency->name }} @endif
+                    @if($wasteRequest->corporation) ({{ $wasteRequest->corporation->name }}) @endif
                 </b>
             </div>
 
             <div class="fact-item">
                 <small>Scheduled Pickup Date</small>
                 <b style="color: #0e7a43;">
-                    Thursday, 01 October 2026
+                    {{ $wasteRequest->preferred_pickup_date ? \Carbon\Carbon::parse($wasteRequest->preferred_pickup_date)->format('l, d F Y') : ($wasteRequest->created_at ? $wasteRequest->created_at->format('l, d F Y') : 'N/A') }}
                 </b>
             </div>
 
             <div class="fact-item">
                 <small>Applicant Contact</small>
-                <b>John Doe (+91 9876543210)</b>
+                <b>{{ $wasteRequest->applicant_name ?: 'Citizen' }} (+91 {{ $wasteRequest->mobile_number }})</b>
             </div>
         </div>
     </div>
     
-    <!-- Uploaded Photos Placeholder -->
+    <!-- Uploaded Photos -->
     <div class="card-ui">
         <h6 class="fw-bold" style="font-size: 15px; color: #1e293b; margin-bottom: 4px;">Uploaded Waste Photos</h6>
         <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Evidence from your request submission:</p>
         
         <div class="photos-gallery">
-            <div class="dummy-photo" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
-                <i class="fa fa-image fa-2x"></i>
-            </div>
-            <div class="dummy-photo" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
-                <i class="fa fa-image fa-2x"></i>
-            </div>
+            @forelse($images as $img)
+                <a href="{{ asset('storage/' . $img) }}" target="_blank" style="display: contents;">
+                    <img src="{{ asset('storage/' . $img) }}" alt="Waste Photo">
+                </a>
+            @empty
+                <div class="dummy-photo" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                    <i class="fa fa-image fa-2x"></i>
+                </div>
+            @endforelse
         </div>
     </div>
     
