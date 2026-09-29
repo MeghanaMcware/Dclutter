@@ -63,10 +63,11 @@
     <div class="container-fluid pt-3">
         <div class="page-title mb-3">
             <div class="row align-items-center">
-                <div class="col-12 col-sm-6">
-                    <h3 class="fw-bold">
+                <div class="col-12 col-sm-6 d-flex align-items-center">
+                    <h3 class="fw-bold mb-0 me-3">
                         Request Details: <span class="text-primary">{{ $wasteRequest->request_number }}</span>
                     </h3>
+                    
                 </div>
                 <div class="col-12 col-sm-6 text-sm-end">
                     <ol class="breadcrumb d-inline-flex mb-0 bg-transparent p-0">
@@ -87,7 +88,21 @@
                 <!-- Request Info Card -->
                 <div class="card card-custom mb-4">
                     <div class="card-body">
-                        <h5 class="section-title">Request Information</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="section-title mb-0">Request Information</h5>
+
+    <button type="button"
+            class="btn btn-success edit-request"
+            data-bs-toggle="modal"
+            data-bs-target="#assignVehicleModal"
+            data-db-id="{{ $wasteRequest->id }}"
+            data-request-number="{{ $wasteRequest->request_number }}"
+            data-constituency-id="{{ $wasteRequest->constituency_id }}"
+            data-constituency-name="{{ $wasteRequest->constituency?->name ?? 'N/A' }}"
+            title="Assign Vehicle">
+        <i class="fa fa-edit"></i> Assign Vehicle
+    </button>
+</div>
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="detail-label">Request ID</div>

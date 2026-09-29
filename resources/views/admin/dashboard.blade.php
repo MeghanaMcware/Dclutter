@@ -227,7 +227,7 @@ body {
 
 .action-link {
     color: #fff;
-    font-size: 16px;
+    font-size: 14px;
     text-decoration: none;
     transition: color 0.2s;
 }
@@ -324,6 +324,22 @@ body {
                 </div>
             </div>
         </div>
+        <div class="col-md-6 col-lg-3 ">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">pending pickups <i class="fa fa-clock text-warning" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-orange" id="statPendingPickups">1</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 ">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">Rescheduled pickups <i class="fa fa-calendar-alt text-secondary" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-yellow" id="statRescheduledPickups">2</div>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -389,7 +405,8 @@ body {
                                     <th>Display ID</th>
                                     <th>User Name</th>
                                     <th>Category</th>
-                                    <th>sub-Category </th>
+                                    <th>Phone Number</th>
+                                    <th>Constituency</th>
                                     <th>Status</th>
                                     <th>Submitted On</th>
                                     <th class="text-center">Actions</th>
@@ -407,12 +424,18 @@ body {
                                             {{ $req->category_ids ?: 'N/A' }}
                                         @endif
                                     </td>
-                                    <td style="color: #202935dc;font-weight:600;">
+                                    <!-- <td style="color: #202935dc;font-weight:600;">
                                         @if(is_array($req->subcategory_ids))
                                             {{ implode(', ', $req->subcategory_ids) }}
                                         @else
                                             {{ $req->subcategory_ids ?: 'N/A' }}
                                         @endif
+                                    </td> -->
+                                    <td style="color: #202935dc;font-weight:600;">
+                                        {{ $req->mobile_number ?: 'N/A' }}
+                                    </td>
+                                    <td style="color: #202935dc;font-weight:600;">
+                                        {{ $req->constituency?->name ?? 'N/A' }}
                                     </td>
                                     <td>
                                         @php

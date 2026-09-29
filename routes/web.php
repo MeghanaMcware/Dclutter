@@ -187,6 +187,8 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::get('/track-request', [UserPwaRequestController::class, 'track'])->name('track');
         Route::get('/request-details/{id?}', [UserPwaRequestController::class, 'show'])->name('details');
         Route::get('/ward-lookup', [UserPwaRequestController::class, 'lookupWard'])->name('ward_lookup');
+        Route::get('/history', [UserPwaRequestController::class, 'history'])->name('history');
+        Route::get('/history/{id}', [UserPwaRequestController::class, 'historyShow'])->name('history.show');
 
         // Standard Laravel Resource Routes for Requests
         Route::get('/requests', [UserPwaRequestController::class, 'track'])->name('requests.index');

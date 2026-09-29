@@ -206,9 +206,9 @@
             A single window platform for all your Debris & Bulk Waste Management needs.
         </div>
         
-        <div class="hero-illustration">
+        <!-- <div class="hero-illustration">
             <img src="{{ asset('frontendwebsite/img/hero-truck-new.png') }}" alt="Bengaluru Clean Streets Illustration">
-        </div>
+        </div> -->
     </div>
 
     <div class="action-buttons">
@@ -259,6 +259,7 @@
                 <div class="stat-val text-red">{{ number_format($pendingRequests) }}</div>
                 <div class="stat-lbl">Pending</div>
             </a>
+            
         </div>
     </div>
 
@@ -286,10 +287,19 @@
                             <i class="fa fa-calendar-alt me-1"></i><b>{{ $req->created_at->format('d M Y') }}</b> &bull; {{ is_array($req->category_ids) ? implode(', ', $req->category_ids) : $req->category_ids }}
                         </div>
                     </div>
-                    <span class="badge {{ $badgeClass }}" style="font-size: 11px; text-transform: capitalize; padding: 6px 10px;">
-                        {{ str_replace('_', ' ', $req->status) }}
-                    </span>
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <span class="badge {{ $badgeClass }}" style="font-size: 11px; text-transform: capitalize; padding: 6px 10px;">
+                            {{ str_replace('_', ' ', $req->status) }}
+                        </span>
+                       <span class="btn btn-sm btn-outline-primary"
+      style="font-size: 12px; padding: 2px 21px; font-weight: 600; cursor: pointer;"
+      onclick="window.location.href='{{ route('user.details', ['id' => $req->id]) }}'">
+    View
+</span>
+                    </div>
+                    
                 </a>
+            
             @endforeach
         </div>
     @endif

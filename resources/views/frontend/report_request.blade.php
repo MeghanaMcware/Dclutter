@@ -199,7 +199,7 @@
 .item-option {
     position: relative;
     overflow: hidden;
-    min-height: 56px;
+    min-height: 73px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -319,7 +319,7 @@
     .category-card-container p.subtitle { font-size: 12px; }
     .category-count { padding: 4px 8px; font-size: 10px; }
     .category-card-container .category-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px; }
-    .category-card-container .item-option { min-height: 48px; padding: 8px 10px; border-radius: 10px; gap: 8px; }
+    .category-card-container .item-option { min-height: 78px; padding: 8px 10px; border-radius: 10px; gap: 8px; }
     .category-icon { width: 32px; height: 32px; font-size: 15px; border-radius: 8px; }
     .item-option-text strong { font-size: 11px; }
 }
@@ -811,10 +811,25 @@ textarea.is-invalid ~ .invalid-feedback,
                 <div class="grid-ui">
                     <!-- Applicant Name -->
                     <div>
-                        <label>Applicant Full Name <span class="req">*</span></label>
-                        <input type="text" id="applicantNameInput"  oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').replace(/\s{2,}/g, ' ')" name="applicant_name" placeholder="Enter Full Name" required oninput="validateSingleField(this)">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter full applicant name.</div>
-                    </div>
+    <label>Applicant Full Name <span class="req">*</span></label>
+
+    <input type="text"
+           id="applicantNameInput"
+           name="applicant_name"
+           placeholder="Enter Full Name"
+           required
+           oninput="
+               this.value = this.value
+                   .replace(/[^a-zA-Z\s]/g, '')
+                   .replace(/\s{2,}/g, ' ')
+                   .replace(/\b\w/g, c => c.toUpperCase());
+               validateSingleField(this);
+           ">
+
+    <div class="invalid-feedback" style="color: #dc3545 !important;">
+        Please enter full applicant name.
+    </div>
+</div>
 
                     
                     <!-- Mobile Number -->
@@ -1198,16 +1213,131 @@ function focusInvalidField(el) {
     }, 80);
 }
 
-function handleImageSelection(event) {
+async function handleImageSelection(event) {
     if (isProgrammaticSync) return;
 
     const newFiles = event.target.files;
     if (!newFiles || newFiles.length === 0) return;
 
-    // Reset array to exact files picked in dialog
-    selectedWasteFiles = Array.from(newFiles);
+    if (typeof fetchCurrentLocation === 'function') {
+        fetchCurrentLocation({ silent: true });
+    }
 
-    updateImagePreview();
+    if (typeof showLoader === 'function') showLoader('Processing images...');
+
+    const processedFiles = [];
+    
+    // Quick helper to fetch precise GPS for the watermark
+    const getGps = () => new Promise(resolve => {
+        if (!navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(
+            pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            err => resolve(null),
+            { enableHighAccuracy: true, timeout: 3000 }
+        );
+    });
+    
+    const gps = await getGps();
+
+    for (let i = 0; i < newFiles.length; i++) {
+        const file = newFiles[i];
+        
+        // Prevent duplicates by checking original file size (since we resized/watermarked it)
+        const isDuplicate = selectedWasteFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size)) ||
+                            processedFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size));
+        if (isDuplicate) continue;
+
+        try {
+            const watermarked = await watermarkImage(file, gps);
+            processedFiles.push(watermarked);
+        } catch(e) {
+            processedFiles.push(file); // fallback
+        }
+    }
+
+    if (processedFiles.length > 0) {
+        selectedWasteFiles = [...selectedWasteFiles, ...processedFiles];
+        
+        isProgrammaticSync = true;
+        const dt = new DataTransfer();
+        selectedWasteFiles.forEach(f => dt.items.add(f));
+        const input = document.getElementById('wasteImagesInput');
+        if (input) input.files = dt.files;
+        isProgrammaticSync = false;
+        
+        updateImagePreview();
+    }
+
+    if (typeof hideLoader === 'function') hideLoader();
+}
+
+function watermarkImage(file, gps) {
+    return new Promise((resolve) => {
+        if (!file.type.startsWith('image/')) return resolve(file);
+        
+        let lat = gps ? gps.lat : (document.getElementById('latitudeInput')?.value || '');
+        let lng = gps ? gps.lng : (document.getElementById('longitudeInput')?.value || '');
+        let locText = "GPS: Not Available";
+        
+        // Treat default Bangalore coordinates as "Not fetched"
+        if (lat && lng && (lat != '12.9716' || lng != '77.5946')) {
+            locText = `Lat: ${Number(lat).toFixed(6)}, Lng: ${Number(lng).toFixed(6)}`;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width, height = img.height;
+            const MAX = 1600;
+            if (width > MAX || height > MAX) {
+                if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+                else { width = Math.round(width * MAX / height); height = MAX; }
+            }
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const time = new Date().toLocaleString();
+            const address = document.getElementById('addressInput')?.value || 'Location not provided';
+            
+            // Draw a full-width dark semi-transparent banner at the bottom
+            const titleFontSize = Math.max(18, Math.floor(width / 35));
+            const subFontSize = Math.max(12, Math.floor(width / 55));
+            const bannerHeight = titleFontSize + (subFontSize * 2) + 40;
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+            ctx.fillRect(0, height - bannerHeight, width, bannerHeight);
+            
+            ctx.textAlign = 'left';
+            
+            // Filename
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${titleFontSize}px sans-serif`;
+            ctx.fillText(file.name, 15, height - bannerHeight + titleFontSize + 10);
+            
+            // Address
+            ctx.font = `normal ${subFontSize}px sans-serif`;
+            const maxChars = Math.floor(width / (subFontSize * 0.6));
+            const truncAddress = address.length > maxChars ? address.substring(0, maxChars - 3) + '...' : address;
+            ctx.fillText(truncAddress, 15, height - bannerHeight + titleFontSize + subFontSize + 20);
+            
+            // GPS & Time
+            ctx.fillStyle = '#facc15'; // yellow-400
+            ctx.fillText(`${locText}  |  ${time}`, 15, height - 15);
+
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+                    newFile.originalSize = file.size; // Save original size to prevent duplicate uploads
+                    resolve(newFile);
+                } else {
+                    resolve(file);
+                }
+            }, 'image/jpeg', 0.85);
+        };
+        img.onerror = () => resolve(file);
+        img.src = URL.createObjectURL(file);
+    });
 }
 
 function removeImage(index) {
@@ -1393,15 +1523,6 @@ function toggleCategory(el) {
     }
 
     renderSubcategories();
-
-    if (cb.checked) {
-        setTimeout(() => {
-            const section = document.getElementById('subcategory-section');
-            if (section && section.style.display !== 'none') {
-                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 50);
-    }
 
     updateSubcategoryCount();
 }

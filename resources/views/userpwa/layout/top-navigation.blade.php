@@ -3,7 +3,7 @@
         <img src="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}" alt="Logo" class="logo-img">
         <div class="logo-text">
             <strong>DCLUTTER</strong>
-            <span>BENGALURU'S CLEAN STREETS</span>
+            <span>Building a Cleaner Bengaluru, Together </span>
         </div>
     </div>
     <button type="button" class="menu-btn" aria-label="Open menu" aria-controls="user-menu" aria-expanded="false">
@@ -22,7 +22,7 @@
             <i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Home</span>
         </a>
         <a href="{{ route('user.report') }}" class="{{ request()->routeIs('user.report*') ? 'active' : '' }}">
-            <i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Report</span>
+            <i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Raise Request </span>
         </a>
         <a href="{{ route('user.track') }}" class="{{ request()->routeIs('user.track*') ? 'active' : '' }}">
             <i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Track</span>

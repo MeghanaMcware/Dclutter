@@ -146,7 +146,7 @@
     }
 
     .welcome-header h2 strong {
-        display: block;
+        /* display: block; */
         color: var(--green);
         font: 800 18px / 1.2 'Manrope', sans-serif;
     }
