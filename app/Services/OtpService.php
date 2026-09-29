@@ -73,25 +73,7 @@ class OtpService
             ];
         }
 
-        // Edge Case: Resend Cooldown / Rate Limiting (Flood Prevention)
-        $recentOtp = Otp::where('mobile_number', $cleanMobile)
-            ->where('created_at', '>=', now()->subSeconds($this->cooldownSeconds))
-            ->latest('id')
-            ->first();
-
-        if ($recentOtp) {
-            $secondsRemaining = (int) ceil(max(1, $this->cooldownSeconds - now()->diffInSeconds($recentOtp->created_at)));
-            if ($secondsRemaining > 0) {
-                return [
-                    'success' => false,
-                    'code' => 'COOLDOWN_ACTIVE',
-                    'message' => "Please wait {$secondsRemaining} seconds before requesting a new OTP.",
-                    'seconds_remaining' => $secondsRemaining,
-                ];
-            }
-        }
-
-        // Edge Case: Invalidate all previously active, unverified OTPs for this number
+        // Invalidate all previously active, unverified OTPs for this number
         Otp::where('mobile_number', $cleanMobile)
             ->where('is_used', false)
             ->update(['is_used' => true]);

@@ -121,7 +121,7 @@
                                             <span style="font-weight: 600; color: #2c3e50;">{{ $vehicle->vehicle_number }}</span>
                                         </td>
                                         <td style="font-weight: 600; color: #2c3e50;">
-                                            {{ $vehicle->constituency?->name ?? 'N/A' }}
+                                            {{ $vehicle->constituency_names }}
                                         </td>
                                         <td style="font-weight: 600; color: #2c3e50;">
                                             {{ $vehicle->vehicle_type ?? 'N/A' }}

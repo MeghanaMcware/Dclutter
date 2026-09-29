@@ -42,8 +42,7 @@ class UserPwaAuthController extends Controller
         );
 
         if (!$result['success']) {
-            $status = ($result['code'] === 'COOLDOWN_ACTIVE') ? 429 : 422;
-            return response()->json($result, $status);
+            return response()->json($result, 422);
         }
 
         // Keep mobile in session for convenient form correlation

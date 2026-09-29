@@ -15,10 +15,11 @@ class AdminImportedRequestController extends Controller
      */
     public function index(Request $request)
     {
-        $corporations = Corporation::orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
 
-        $query = LegacyPickupRequest::with(['corporation', 'constituency', 'ward']);
+        $query = LegacyPickupRequest::with(['corporation', 'constituency', 'ward'])
+            ->forUserJurisdiction();
 
         // Search by applicant name, mobile, address, or excel id
         if ($request->filled('search')) {
@@ -47,8 +48,8 @@ class AdminImportedRequestController extends Controller
             $query->where('status', strtolower($request->status));
         }
 
+        $totalCount = (clone $query)->count();
         $importedRequests = $query->orderBy('id', 'asc')->paginate(20);
-        $totalCount = LegacyPickupRequest::count();
 
         return view('admin.requests.imported.index', compact('importedRequests', 'corporations', 'constituencies', 'totalCount'));
     }
@@ -58,7 +59,9 @@ class AdminImportedRequestController extends Controller
      */
     public function show($id)
     {
-        $requestData = LegacyPickupRequest::with(['corporation', 'constituency', 'ward'])->findOrFail($id);
+        $requestData = LegacyPickupRequest::with(['corporation', 'constituency', 'ward'])
+            ->forUserJurisdiction()
+            ->findOrFail($id);
 
         return view('admin.requests.imported.show', compact('requestData'));
     }

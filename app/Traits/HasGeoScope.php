@@ -98,11 +98,23 @@ trait HasGeoScope
         }
 
         if ($table === 'vehicles') {
-            return $query->whereHas('constituency', fn($q) => $q->whereIn('corporation_id', $corpIds));
+            return $query->where(function ($q) use ($corpIds) {
+                $constituencyIds = \App\Models\Constituency::whereIn('corporation_id', $corpIds)->pluck('id')->toArray();
+                foreach ($constituencyIds as $cId) {
+                    $q->orWhereJsonContains('constituency_ids', (int)$cId)
+                      ->orWhereJsonContains('constituency_ids', (string)$cId);
+                }
+            });
         }
 
         if ($table === 'dumps') {
-            return $query->whereHas('vehicle.constituency', fn($q) => $q->whereIn('corporation_id', $corpIds));
+            return $query->whereHas('vehicle', function ($q) use ($corpIds) {
+                $constituencyIds = \App\Models\Constituency::whereIn('corporation_id', $corpIds)->pluck('id')->toArray();
+                foreach ($constituencyIds as $cId) {
+                    $q->orWhereJsonContains('constituency_ids', (int)$cId)
+                      ->orWhereJsonContains('constituency_ids', (string)$cId);
+                }
+            });
         }
 
         if ($table === 'requests') {
@@ -134,14 +146,21 @@ trait HasGeoScope
         }
 
         if ($table === 'vehicles') {
-            return $query->where(function ($q) use ($constIds, $table) {
-                $q->whereIn($table . '.constituency_id', $constIds)
-                  ->orWhereNull($table . '.constituency_id');
+            return $query->where(function ($q) use ($constIds) {
+                foreach ($constIds as $cId) {
+                    $q->orWhereJsonContains('constituency_ids', (int)$cId)
+                      ->orWhereJsonContains('constituency_ids', (string)$cId);
+                }
             });
         }
 
         if ($table === 'dumps') {
-            return $query->whereHas('vehicle', fn($q) => $q->whereIn('constituency_id', $constIds));
+            return $query->whereHas('vehicle', function ($q) use ($constIds) {
+                foreach ($constIds as $cId) {
+                    $q->orWhereJsonContains('constituency_ids', (int)$cId)
+                      ->orWhereJsonContains('constituency_ids', (string)$cId);
+                }
+            });
         }
 
         if ($table === 'requests') {

@@ -85,7 +85,7 @@ class AdminRequestController extends Controller
             $q->forUserJurisdiction();
         }])->orderBy('name')->get();
         $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
-        $vehicles = Vehicle::forUserJurisdiction()->with(['owner', 'constituency'])->where('status', 1)->get();
+        $vehicles = Vehicle::forUserJurisdiction()->with(['owner'])->where('status', 1)->get();
 
         return view('admin.requests.index', compact('requests', 'corporations', 'constituencies', 'vehicles'));
     }
@@ -100,11 +100,12 @@ class AdminRequestController extends Controller
             ->orWhere('request_number', $id)
             ->firstOrFail();
 
-        $vehicleQuery = Vehicle::with(['owner', 'constituency'])->where('status', 1);
+        $vehicleQuery = Vehicle::with(['owner'])->where('status', 1);
         if ($wasteRequest->constituency_id) {
-            $vehicleQuery->where(function($q) use ($wasteRequest) {
-                $q->where('constituency_id', $wasteRequest->constituency_id)
-                  ->orWhereNull('constituency_id');
+            $constId = $wasteRequest->constituency_id;
+            $vehicleQuery->where(function($q) use ($constId) {
+                $q->whereJsonContains('constituency_ids', (int)$constId)
+                  ->orWhereJsonContains('constituency_ids', (string)$constId);
             });
         }
         $vehicles = $vehicleQuery->get();
@@ -225,9 +226,11 @@ class AdminRequestController extends Controller
         $wasteRequest = WasteRequest::with('constituency')->findOrFail($id);
 
         if ($wasteRequest->constituency_id) {
-            $vehicle = Vehicle::with('constituency')->findOrFail($request->vehicle_id);
-            if ($vehicle->constituency_id && $vehicle->constituency_id != $wasteRequest->constituency_id) {
-                $errorMsg = 'Vehicle ' . $vehicle->vehicle_number . ' belongs to ' . ($vehicle->constituency?->name ?? 'another constituency') . ' and cannot be assigned to this request (' . ($wasteRequest->constituency?->name ?? 'Constituency #' . $wasteRequest->constituency_id) . ').';
+            $vehicle = Vehicle::findOrFail($request->vehicle_id);
+            $vehicleConstIds = (array) ($vehicle->constituency_ids ?? []);
+            $vehicleConstIds = array_map('intval', array_filter($vehicleConstIds));
+            if (!empty($vehicleConstIds) && !in_array((int)$wasteRequest->constituency_id, $vehicleConstIds, true)) {
+                $errorMsg = 'Vehicle ' . $vehicle->vehicle_number . ' does not operate in ' . ($wasteRequest->constituency?->name ?? 'this constituency') . '.';
                 if ($request->ajax()) {
                     return response()->json([
                         'success' => false,

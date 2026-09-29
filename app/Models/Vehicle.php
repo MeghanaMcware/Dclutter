@@ -16,7 +16,7 @@ class Vehicle extends Model
     protected $fillable = [
         'vehicle_number',
         'user_id',
-        'constituency_id',
+        'constituency_ids',
         'vehicle_type',
         'capacity_tons',
         'vehicle_photo',
@@ -33,14 +33,22 @@ class Vehicle extends Model
     protected $casts = [
         'status' => 'boolean',
         'capacity_tons' => 'decimal:2',
+        'constituency_ids' => 'array',
     ];
 
     /**
-     * Constituency where this vehicle operates.
+     * Formatted string of all operating constituencies.
      */
-    public function constituency(): BelongsTo
+    public function getConstituencyNamesAttribute(): string
     {
-        return $this->belongsTo(Constituency::class, 'constituency_id');
+        $ids = $this->constituency_ids;
+        if (!empty($ids) && is_array($ids)) {
+            $names = Constituency::whereIn('id', $ids)->pluck('name')->toArray();
+            if (!empty($names)) {
+                return implode(', ', $names);
+            }
+        }
+        return 'N/A';
     }
 
     /**

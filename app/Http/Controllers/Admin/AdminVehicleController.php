@@ -16,9 +16,12 @@ class AdminVehicleController extends Controller
     /**
      * Display a listing of all registered vehicles.
      */
+    /**
+     * Display a listing of all registered vehicles.
+     */
     public function index()
     {
-        $vehicles = Vehicle::forUserJurisdiction()->with(['owner', 'constituency'])->latest()->get();
+        $vehicles = Vehicle::forUserJurisdiction()->with(['owner'])->latest()->get();
         return view('admin.vehicles.index', compact('vehicles'));
     }
 
@@ -39,7 +42,8 @@ class AdminVehicleController extends Controller
     {
         $request->validate([
             'vehicle_number' => 'required|string|max:255|unique:vehicles,vehicle_number',
-            'constituency_id' => 'required|exists:constituencies,id',
+            'constituency_ids' => 'required|array|min:1',
+            'constituency_ids.*' => 'exists:constituencies,id',
             'vehicle_type' => 'required|string|max:255',
             'capacity' => 'required|numeric|min:1',
             'owner_name' => 'required|string|max:255',
@@ -106,11 +110,13 @@ class AdminVehicleController extends Controller
         $capacityKg = (float) $request->capacity;
         $capacityTons = $capacityKg > 50 ? round($capacityKg / 1000, 2) : $capacityKg;
 
+        $constituencyIds = array_values(array_filter(array_map('intval', (array) ($request->input('constituency_ids') ?: []))));
+
         // 3. Create Vehicle Record
         $vehicle = Vehicle::create([
             'vehicle_number' => strtoupper(trim($request->vehicle_number)),
             'user_id' => $ownerUser->id,
-            'constituency_id' => $request->constituency_id,
+            'constituency_ids' => $constituencyIds,
             'vehicle_type' => $request->vehicle_type,
             'capacity_tons' => $capacityTons,
             'vehicle_photo' => $filePaths['vehicle_photo'],
@@ -132,7 +138,7 @@ class AdminVehicleController extends Controller
      */
     public function show($id)
     {
-        $vehicle = Vehicle::with(['owner', 'constituency'])->findOrFail($id);
+        $vehicle = Vehicle::with(['owner'])->findOrFail($id);
         return view('admin.vehicles.show', compact('vehicle'));
     }
 
@@ -141,7 +147,7 @@ class AdminVehicleController extends Controller
      */
     public function edit($id)
     {
-        $vehicle = Vehicle::with(['owner', 'constituency'])->findOrFail($id);
+        $vehicle = Vehicle::with(['owner'])->findOrFail($id);
         $corporations = Corporation::forUserJurisdiction()->with(['constituencies' => fn($q) => $q->forUserJurisdiction()])->orderBy('name')->get();
         $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
         return view('admin.vehicles.edit', compact('vehicle', 'corporations', 'constituencies'));
@@ -156,7 +162,8 @@ class AdminVehicleController extends Controller
 
         $request->validate([
             'vehicle_number' => 'required|string|max:255|unique:vehicles,vehicle_number,' . $id,
-            'constituency_id' => 'required|exists:constituencies,id',
+            'constituency_ids' => 'required|array|min:1',
+            'constituency_ids.*' => 'exists:constituencies,id',
             'vehicle_type' => 'required|string|max:255',
             'capacity' => 'required|numeric|min:1',
             'owner_name' => 'required|string|max:255',
@@ -178,9 +185,11 @@ class AdminVehicleController extends Controller
         $capacityKg = (float) $request->capacity;
         $capacityTons = $capacityKg > 50 ? round($capacityKg / 1000, 2) : $capacityKg;
 
+        $constituencyIds = array_values(array_filter(array_map('intval', (array) ($request->input('constituency_ids') ?: []))));
+
         $updateData = [
             'vehicle_number' => strtoupper(trim($request->vehicle_number)),
-            'constituency_id' => $request->constituency_id,
+            'constituency_ids' => $constituencyIds,
             'vehicle_type' => $request->vehicle_type,
             'capacity_tons' => $capacityTons,
             'driver_name' => $request->driver_name,
