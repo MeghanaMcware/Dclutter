@@ -8,6 +8,9 @@
     <a href="{{ route('user.track') }}" class="{{ request()->routeIs('user.track*') ? 'active' : '' }}">
         <i class="fa-solid fa-map-location-dot"></i>Track
     </a>
+    <a href="{{ route('user.history') }}" class="{{ request()->routeIs('user.history*') ? 'active' : '' }}">
+        <i class="fa-solid fa-clock-rotate-left"></i>History
+    </a>
     <a href="{{ route('user.profile') }}" class="{{ request()->routeIs('user.profile') ? 'active' : '' }}">
         <i class="fa-solid fa-bars"></i>Menu
     </a>
