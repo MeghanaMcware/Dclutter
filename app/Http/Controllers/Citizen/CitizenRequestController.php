@@ -234,24 +234,37 @@ class CitizenRequestController extends Controller
 
     /**
      * Track a waste request dynamically by request number or mobile number.
+     * When searched by mobile number, returns all raised requests.
      */
     public function trackRequest(Request $request)
     {
         $searchId = $request->query('id') ?? $request->query('query');
+        $wasteRequests = collect();
         $wasteRequest = null;
 
         if ($searchId) {
             $cleanSearch = trim($searchId);
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
-                ->where('request_number', $cleanSearch)
-                ->orWhere('request_number', '#' . $cleanSearch)
-                ->orWhere('id', $cleanSearch)
-                ->orWhere('mobile_number', $cleanSearch)
-                ->latest()
-                ->first();
+            $numericSearch = preg_replace('/[^0-9]/', '', $cleanSearch);
+            $last10Digits = strlen($numericSearch) >= 10 ? substr($numericSearch, -10) : $numericSearch;
+
+            $query = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'vehicle.owner', 'dump'])
+                ->where(function ($q) use ($cleanSearch, $numericSearch, $last10Digits) {
+                    $q->where('request_number', $cleanSearch)
+                      ->orWhere('request_number', '#' . $cleanSearch)
+                      ->orWhere('request_number', 'like', '%' . $cleanSearch . '%');
+
+                    if (!empty($numericSearch)) {
+                        $q->orWhere('id', $numericSearch)
+                          ->orWhere('mobile_number', $cleanSearch)
+                          ->orWhere('mobile_number', 'like', '%' . $last10Digits . '%');
+                    }
+                });
+
+            $wasteRequests = $query->latest()->get();
+            $wasteRequest = $wasteRequests->first();
         }
 
-        return view('frontend.track.track_request', compact('wasteRequest', 'searchId'));
+        return view('frontend.track.track_request', compact('wasteRequests', 'wasteRequest', 'searchId'));
     }
 
     /**
@@ -264,10 +277,15 @@ class CitizenRequestController extends Controller
 
         if ($reqId) {
             $cleanId = trim($reqId);
-            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'dump'])
+            $numericId = preg_replace('/[^0-9]/', '', $cleanId);
+
+            $wasteRequest = WasteRequest::with(['ward.constituency.corporation', 'vehicle.driver', 'vehicle.owner', 'dump'])
                 ->where('request_number', $cleanId)
                 ->orWhere('request_number', '#' . $cleanId)
-                ->orWhere('id', $cleanId)
+                ->orWhere('request_number', ltrim($cleanId, '#'))
+                ->when(!empty($numericId), function ($q) use ($numericId) {
+                    $q->orWhere('id', $numericId);
+                })
                 ->first();
         }
 

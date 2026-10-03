@@ -12,7 +12,7 @@
 }
 
 .request-ui {
-    max-width: auto;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 30px 20px 50px;
     color: var(--ink);
@@ -24,7 +24,7 @@
     align-items: center;
     gap: 9px;
     margin-bottom: 20px;
-    padding: 8px 12px 8px 9px;
+    padding: 8px 14px 8px 10px;
     border: 1px solid #dce8e0;
     border-radius: 999px;
     background: linear-gradient(135deg, #f7fcf8, #ffffff);
@@ -81,10 +81,12 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
 }
 
 .ref {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--ink);
 }
@@ -109,12 +111,29 @@
 .pill-dumped { background: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
 .pill-rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
+.details-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+}
+
+.section-label {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 22px 0 12px;
+    color: var(--ink);
+    border-bottom: 2px solid var(--green-light);
+    padding-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .facts {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    border-top: 1px solid var(--line);
-    padding-top: 20px;
     gap: 16px;
+    margin-top: 14px;
 }
 
 .facts small {
@@ -130,19 +149,25 @@
     color: var(--ink);
 }
 
-.details-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+.badge-tag {
+    display: inline-block;
+    background: #f0f4f2;
+    color: #2c3e50;
+    border: 1px solid #dce8e0;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+    margin-bottom: 4px;
 }
 
-.section-label {
-    font-size: 15px;
-    font-weight: 800;
-    margin: 22px 0 12px;
-    color: var(--ink);
-    border-bottom: 2px solid var(--green-light);
-    padding-bottom: 6px;
+.driver-info-box {
+    background: linear-gradient(135deg, #f8fbf9, #f1f8f4);
+    border: 1px solid #d4e7db;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 14px;
 }
 
 .timeline {
@@ -192,41 +217,125 @@
     margin-top: 2px;
 }
 
+/* Photo Gallery Cards */
+.image-group-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: #fafbfc;
+}
+
+.image-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
 .photos-gallery {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px;
-    margin-top: 14px;
+}
+
+.photo-thumb-wrap {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #dce4df;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    aspect-ratio: 4 / 3;
 }
 
 .photos-gallery img {
     width: 100%;
-    height: 140px;
+    height: 100%;
     object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid var(--line);
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.25s ease;
 }
 
-.photos-gallery img:hover {
-    transform: scale(1.03);
+.photo-thumb-wrap:hover img {
+    transform: scale(1.06);
 }
 
-@media (max-width: 768px) {
+.photo-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.btn-ui {
+    border: 0;
+    border-radius: 6px;
+    background: var(--green);
+    color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 24px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 3px 10px rgba(8, 125, 69, 0.2);
+}
+
+.btn-ui:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+}
+
+.btn-outline-ui {
+    border: 1px solid #dce8e0;
+    background: #ffffff;
+    color: var(--ink);
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-outline-ui:hover {
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+@media (max-width: 900px) {
     .details-grid { grid-template-columns: 1fr; }
-      .crumb { margin-bottom: 16px; }
     .facts { grid-template-columns: 1fr; }
 }
 </style>
 
 <main class="request-ui">
     <div class="crumb">
-        <a href="{{ url('/') }}">Home</a> / 
-        <a href="{{ route('citizen.track', ['id' => $wasteRequest?->request_number]) }}">Track Request</a> / 
-        Request Details
+        <a href="{{ url('/') }}"><i class="fa fa-home"></i> Home</a> 
+        <i class="fa fa-chevron-right"></i>
+        <a href="{{ route('citizen.track', ['id' => $wasteRequest?->request_number]) }}">Track Request</a> 
+        <i class="fa fa-chevron-right"></i>
+        <span class="crumb-current">Request Details</span>
     </div>
-    <h1>Request Details</h1>
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Request Details</h1>
+        <a href="{{ route('citizen.track', ['id' => $wasteRequest?->mobile_number ?? $wasteRequest?->request_number]) }}" class="btn-outline-ui">
+            <i class="fa fa-arrow-left"></i> Back to Track
+        </a>
+    </div>
 
     @if($wasteRequest)
         @php
@@ -234,57 +343,101 @@
             $pillMap = [
                 'pending' => 'pill-pending',
                 'assigned' => 'pill-assigned',
+                'not_available' => 'pill-pending',
                 'picked_up' => 'pill-picked_up',
                 'dumped' => 'pill-dumped',
                 'rejected' => 'pill-rejected',
             ];
+
+            // Normalize image arrays
+            $wasteImages = is_array($wasteRequest->waste_images) ? $wasteRequest->waste_images : (!empty($wasteRequest->waste_images) ? json_decode($wasteRequest->waste_images, true) : []);
+            $beforeImages = is_array($wasteRequest->before_pickup_images) ? $wasteRequest->before_pickup_images : (!empty($wasteRequest->before_pickup_images) ? json_decode($wasteRequest->before_pickup_images, true) : []);
+            $afterImages = is_array($wasteRequest->after_pickup_images) ? $wasteRequest->after_pickup_images : (!empty($wasteRequest->after_pickup_images) ? json_decode($wasteRequest->after_pickup_images, true) : []);
+            
+            $dumpImages = [];
+            if ($wasteRequest->dump) {
+                if (is_array($wasteRequest->dump->dump_images)) {
+                    $dumpImages = $wasteRequest->dump->dump_images;
+                } elseif (!empty($wasteRequest->dump->dump_images)) {
+                    $dumpImages = json_decode($wasteRequest->dump->dump_images, true) ?: [];
+                }
+            }
+
+            $totalImages = count($wasteImages ?? []) + count($beforeImages ?? []) + count($afterImages ?? []) + count($dumpImages ?? []);
         @endphp
 
+        <!-- Rescheduled Banner -->
+        @if($status == 'not_available' && $wasteRequest->next_pickup_date)
+            <div style="background: #fff8e1; border: 1px solid #ffe082; color: #856404; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                <i class="fa fa-calendar-alt fa-2x" style="color: #f39c12;"></i>
+                <div>
+                    <strong style="font-size: 14px;">Pickup Rescheduled for Sunday:</strong> Citizen requested next pickup on <strong>{{ $wasteRequest->next_pickup_date->format('d M Y (l)') }}</strong>.
+                    @if($wasteRequest->not_available_reason)
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 3px;"><strong>Reason:</strong> {{ $wasteRequest->not_available_reason }}</div>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <div class="details-grid">
+            <!-- Left Column: Request Information & Timeline -->
             <div class="card-ui">
                 <div class="topline">
                     <div>
                         <div class="ref" id="detailsReqId">{{ $wasteRequest->request_number }}</div>
                         <div class="sub" id="detailsReqDate">
-                            Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
+                            <i class="fa fa-clock me-1"></i> Submitted on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
                         </div>
                     </div>
                     <span class="pill {{ $pillMap[$status] ?? 'pill-pending' }}">
-                        {{ ucfirst(str_replace('_', ' ', $status)) }}
+                        {{ $status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $status)) }}
                     </span>
                 </div>
 
+                <!-- Applicant & Contact Info -->
+                <div class="section-label">
+                    <span><i class="fa fa-user me-2" style="color: var(--green);"></i> Applicant &amp; Contact Details</span>
+                </div>
                 <div class="facts">
                     <div>
-                        <small>Pickup Address</small>
-                        <b>{{ $wasteRequest->house_no }}, {{ $wasteRequest->address }} (Pincode: {{ $wasteRequest->pincode }})</b>
+                        <small>Applicant Name</small>
+                        <b>{{ $wasteRequest->applicant_name ?: 'Citizen' }}</b>
                     </div>
                     <div>
-                        <small>Waste Categories</small>
-                        <b>
-                            @if(is_array($wasteRequest->category_ids))
-                                {{ implode(', ', $wasteRequest->category_ids) }}
-                            @else
-                                {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
-                            @endif
-                        </b>
-                        <small>Sub Categories</small>
+                        <small>Mobile Number</small>
+                        <b>{{ $wasteRequest->mobile_number }}</b>
+                    </div>
+                </div>
+
+                <!-- Location & Geographic Info -->
+                <div class="section-label">
+                    <span><i class="fa fa-map-marker-alt me-2" style="color: var(--green);"></i> Pickup Location Details</span>
+                    @if($wasteRequest->latitude && $wasteRequest->longitude)
+                        <a href="https://www.google.com/maps?q={{ $wasteRequest->latitude }},{{ $wasteRequest->longitude }}" target="_blank" class="btn-outline-ui" style="padding: 2px 8px; font-size: 11px;">
+                            <i class="fa fa-location-arrow"></i> View Map
+                        </a>
+                    @endif
+                </div>
+                <div class="facts">
+                    <div>
+                        <small>House / Flat No.</small>
+                        <b>{{ $wasteRequest->house_no }}</b>
                     </div>
                     <div>
-                        <small>Waste Sub-Categories</small>
-                        <b>
-                            @if(!empty($wasteRequest->subcategory_ids))
-                                @if(is_array($wasteRequest->subcategory_ids))
-                                    {{ implode(', ', array_map(function($s) {
-                                        return \Illuminate\Support\Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
-                                    }, $wasteRequest->subcategory_ids)) }}
-                                @else
-                                    {{ $wasteRequest->subcategory_ids }}
-                                @endif
-                            @else
-                                N/A
-                            @endif
-                        </b>
+                        <small>Floor</small>
+                        <b>{{ $wasteRequest->floor_no ?? $wasteRequest->floor ?? 'Ground / Standard' }}</b>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <small>Complete Address</small>
+                        <b>{{ $wasteRequest->address }}</b>
+                    </div>
+                    <div>
+                        <small>Landmark</small>
+                        <b>{{ $wasteRequest->landmark ?? 'N/A' }}</b>
+                    </div>
+                    <div>
+                        <small>Pincode</small>
+                        <b>{{ $wasteRequest->pincode }}</b>
                     </div>
                     <div>
                         <small>Ward &amp; Zone</small>
@@ -295,35 +448,136 @@
                     </div>
                     <div>
                         <small>Corporation</small>
-                        <b>{{ $wasteRequest->corporation?->name ?? ($wasteRequest->ward?->constituency?->corporation?->name ?? 'N/A') }}</b>
-                    </div>
-                    <div>
-                        <small>Scheduled Pickup Date</small>
-                        <b>{{ $wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d M Y (l)') : 'Sunday Scheduled' }}</b>
-                    </div>
-                    <div>
-                        <small>Landmark</small>
-                        <b>{{ $wasteRequest->landmark ?? 'N/A' }}</b>
+                        <b>{{ $wasteRequest->corporation?->name ?? ($wasteRequest->ward?->constituency?->corporation?->name ?? 'BBMP') }}</b>
                     </div>
                 </div>
 
-                <div class="section-label">Status Timeline</div>
+                <!-- Waste Categories -->
+                <div class="section-label">
+                    <span><i class="fa fa-trash-alt me-2" style="color: var(--green);"></i> Waste Items &amp; Scheduling</span>
+                </div>
+                <div class="facts">
+                    <div>
+                        <small>Categories</small>
+                        <div>
+                            @if(is_array($wasteRequest->category_ids))
+                                @foreach($wasteRequest->category_ids as $cat)
+                                    <span class="badge-tag">{{ $cat }}</span>
+                                @endforeach
+                            @else
+                                <span class="badge-tag">{{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div>
+                        <small>Sub-Categories</small>
+                        <div>
+                            @if(!empty($wasteRequest->subcategory_ids))
+                                @php
+                                    $subCats = is_array($wasteRequest->subcategory_ids) ? $wasteRequest->subcategory_ids : [$wasteRequest->subcategory_ids];
+                                @endphp
+                                @foreach($subCats as $sub)
+                                    <span class="badge-tag">{{ \Illuminate\Support\Str::contains($sub, ': ') ? explode(': ', $sub)[1] : $sub }}</span>
+                                @endforeach
+                            @else
+                                <span style="font-size: 13px; color: var(--muted);">General Waste</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div>
+                        <small>Scheduled Pickup Date</small>
+                        <b>
+                            @if($wasteRequest->next_pickup_date)
+                                {{ $wasteRequest->next_pickup_date->format('d M Y (l)') }} (Rescheduled)
+                            @elseif($wasteRequest->preferred_pickup_date)
+                                {{ $wasteRequest->preferred_pickup_date->format('d M Y (l)') }}
+                            @else
+                                Sunday Scheduled
+                            @endif
+                        </b>
+                    </div>
+                    <div>
+                        <small>Request Source</small>
+                        <b style="text-transform: capitalize;">{{ $wasteRequest->source ?? 'Citizen Web' }}</b>
+                    </div>
+                </div>
+
+                <!-- Assigned Vehicle & Driver -->
+                <div class="section-label">
+                    <span><i class="fa fa-truck me-2" style="color: var(--green);"></i> Assigned Vehicle &amp; Driver</span>
+                </div>
+                @if($wasteRequest->vehicle)
+                    <div class="driver-info-box">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size: 15px; font-weight: 800; color: var(--green-dark);">
+                                <i class="fa fa-truck me-1"></i> {{ $wasteRequest->vehicle->vehicle_number }}
+                            </span>
+                            <span class="badge bg-success" style="font-size: 11px;">
+                                {{ $wasteRequest->vehicle->vehicle_type ?? 'Waste Truck' }} ({{ $wasteRequest->vehicle->capacity_tons ? $wasteRequest->vehicle->capacity_tons . ' Tons' : 'Standard' }})
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between" style="font-size: 13px;">
+                            <div>
+                                <span class="text-muted">Driver:</span> 
+                                <strong>{{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-muted">Phone:</span> 
+                                <strong>{{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number ?? 'N/A' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="p-3 border rounded text-center bg-light mt-2">
+                        <span class="text-muted" style="font-size: 13px;">
+                            <i class="fa fa-clock me-1"></i> Vehicle assignment is currently pending. You will be notified via WhatsApp once assigned.
+                        </span>
+                    </div>
+                @endif
+
+                <!-- Disposal Information (if Dumped) -->
+                @if($status == 'dumped' || $wasteRequest->dump)
+                    <div class="section-label">
+                        <span><i class="fa fa-recycle me-2" style="color: var(--green);"></i> Disposal / Processing Plant</span>
+                    </div>
+                    <div class="facts">
+                        <div>
+                            <small>Processing Facility</small>
+                            <b>{{ $wasteRequest->dump?->plant_name ?? 'Municipal Waste Processing Plant' }}</b>
+                        </div>
+                        <div>
+                            <small>Dumped Weight</small>
+                            <b>{{ $wasteRequest->dump?->dump_weight ? $wasteRequest->dump->dump_weight . ' Tons' : 'Recorded' }}</b>
+                        </div>
+                        <div>
+                            <small>Disposal Timestamp</small>
+                            <b>{{ $wasteRequest->dump?->dumped_at ? $wasteRequest->dump->dumped_at->format('d M Y, h:i A') : $wasteRequest->updated_at->format('d M Y, h:i A') }}</b>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Status Timeline -->
+                <div class="section-label">
+                    <span><i class="fa fa-stream me-2" style="color: var(--green);"></i> Lifecycle &amp; Status Timeline</span>
+                </div>
                 <div class="timeline">
                     <div>
                         <b>Request Submitted</b>
                         <small>{{ $wasteRequest->created_at->format('d M Y, h:i A') }}</small>
                     </div>
                     
-                    <div class="{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? '' : 'pending' }}">
+                    <div class="{{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? '' : 'pending' }}">
                         <b>Verified &amp; Processed</b>
-                        <small>{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? 'Verified by BBMP Team' : 'Processing verification' }}</small>
+                        <small>{{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? 'Verified by BBMP Team' : 'Processing verification' }}</small>
                     </div>
                     
-                    <div class="{{ in_array($status, ['assigned', 'picked_up', 'dumped']) ? '' : 'pending' }}">
-                        <b>Assigned to Vehicle</b>
+                    <div class="{{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? '' : 'pending' }}">
+                        <b>{{ $status == 'not_available' ? 'Pickup Rescheduled' : 'Vehicle Assigned' }}</b>
                         <small>
-                            @if($wasteRequest->vehicle)
-                                {{ $wasteRequest->vehicle->vehicle_number }} ({{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }})
+                            @if($status == 'not_available')
+                                Rescheduled for next Sunday: {{ $wasteRequest->next_pickup_date?->format('d M Y') }}
+                            @elseif($wasteRequest->vehicle)
+                                Assigned to {{ $wasteRequest->vehicle->vehicle_number }} (Driver: {{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned' }})
                             @else
                                 Pending vehicle assignment
                             @endif
@@ -331,42 +585,142 @@
                     </div>
                     
                     <div class="{{ in_array($status, ['picked_up', 'dumped']) ? '' : 'pending' }}">
-                        <b>On the Way / Picked Up</b>
-                        <small>{{ in_array($status, ['picked_up', 'dumped']) ? 'Picked up from location' : 'Pending pickup' }}</small>
+                        <b>Waste Picked Up</b>
+                        <small>
+                            @if(in_array($status, ['picked_up', 'dumped']))
+                                Collected by vehicle {{ $wasteRequest->vehicle?->vehicle_number }}
+                                @if(!empty($wasteRequest->before_pickup_coordinates))
+                                    (GPS: {{ $wasteRequest->before_pickup_coordinates }})
+                                @endif
+                            @else
+                                Awaiting scheduled pickup
+                            @endif
+                        </small>
                     </div>
                     
                     <div class="{{ $status == 'dumped' ? '' : 'pending' }}">
-                        <b>Disposed &amp; Dumped</b>
-                        <small>{{ $status == 'dumped' ? 'Dumped at processing facility' : 'Pending completion' }}</small>
+                        <b>Disposed &amp; Processed</b>
+                        <small>
+                            @if($status == 'dumped')
+                                Dumped at {{ $wasteRequest->dump?->plant_name ?? 'Processing Plant' }}
+                            @else
+                                Pending disposal
+                            @endif
+                        </small>
                     </div>
                 </div>
             </div>
 
-            <!-- Evidence Photos Card -->
+            <!-- Right Column: ALL IMAGES & EVIDENCE -->
             <div class="card-ui">
-                <div class="section-label" style="margin-top: 0;">Uploaded Waste Photos</div>
-                <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
-                    Digital photo evidence uploaded during request submission:
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="color: var(--ink); font-size: 16px;">
+                        <i class="fa fa-camera me-2" style="color: var(--green);"></i> Request Images &amp; Evidence
+                    </h5>
+                    <span class="badge bg-light text-dark border" style="font-size: 11px;">
+                        {{ $totalImages }} Photo(s)
+                    </span>
+                </div>
+                <p style="font-size: 12px; color: var(--muted); margin-bottom: 18px;">
+                    All photo records from citizen submission, driver collection, and disposal facility:
                 </p>
-                
-                @if(is_array($wasteRequest->waste_images) && count($wasteRequest->waste_images) > 0)
-                    <div class="photos-gallery">
-                        @foreach($wasteRequest->waste_images as $index => $imgPath)
-                            <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
-                                 alt="Waste Photo {{ $index + 1 }}" 
-                                 onclick="window.open(this.src, '_blank')"
-                                 onerror="this.src='https://placehold.co/400x300?text=Waste+Image'">
-                        @endforeach
+
+                <!-- 1. Uploaded Waste Photos (Submission) -->
+                <div class="image-group-card">
+                    <div class="image-group-header">
+                        <span><i class="fa fa-upload me-1 text-primary"></i> 1. Citizen Uploaded Waste Photos</span>
+                        <span class="badge bg-primary" style="font-size: 10px;">{{ count($wasteImages ?? []) }}</span>
                     </div>
-                @else
-                    <div class="p-4 border rounded text-center bg-light mt-3">
-                        <i class="fa fa-image fa-3x text-muted mb-2"></i>
-                        <p class="text-muted mb-0" style="font-size: 13px;">No waste photos uploaded for this request.</p>
+                    @if(!empty($wasteImages) && count($wasteImages) > 0)
+                        <div class="photos-gallery">
+                            @foreach($wasteImages as $index => $imgPath)
+                                <div class="photo-thumb-wrap">
+                                    <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                         alt="Waste Photo {{ $index + 1 }}" 
+                                         onclick="window.open(this.src, '_blank')"
+                                         title="Click to view full size"
+                                         onerror="this.src='https://placehold.co/400x300?text=Waste+Image'">
+                                    <span class="photo-badge">Photo {{ $index + 1 }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-muted mb-0" style="font-size: 12px;">No initial waste photos uploaded.</p>
+                    @endif
+                </div>
+
+                <!-- 2. Before-Pickup Photos (Collection Proof) -->
+                <div class="image-group-card">
+                    <div class="image-group-header">
+                        <span><i class="fa fa-clipboard-check me-1 text-warning"></i> 2. Before-Pickup Photos (Driver)</span>
+                        <span class="badge bg-warning text-dark" style="font-size: 10px;">{{ count($beforeImages ?? []) }}</span>
+                    </div>
+                    @if(!empty($beforeImages) && count($beforeImages) > 0)
+                        <div class="photos-gallery">
+                            @foreach($beforeImages as $index => $imgPath)
+                                <div class="photo-thumb-wrap">
+                                    <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                         alt="Before Pickup Photo {{ $index + 1 }}" 
+                                         onclick="window.open(this.src, '_blank')"
+                                         title="Click to view full size"
+                                         onerror="this.src='https://placehold.co/400x300?text=Before+Pickup'">
+                                    <span class="photo-badge">Before {{ $index + 1 }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-muted mb-0" style="font-size: 12px;">No before-pickup photos recorded yet.</p>
+                    @endif
+                </div>
+
+                <!-- 3. After-Pickup Photos (Cleaned Location Proof) -->
+                <div class="image-group-card">
+                    <div class="image-group-header">
+                        <span><i class="fa fa-check-circle me-1 text-success"></i> 3. After-Pickup Photos (Driver)</span>
+                        <span class="badge bg-success" style="font-size: 10px;">{{ count($afterImages ?? []) }}</span>
+                    </div>
+                    @if(!empty($afterImages) && count($afterImages) > 0)
+                        <div class="photos-gallery">
+                            @foreach($afterImages as $index => $imgPath)
+                                <div class="photo-thumb-wrap">
+                                    <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                         alt="After Pickup Photo {{ $index + 1 }}" 
+                                         onclick="window.open(this.src, '_blank')"
+                                         title="Click to view full size"
+                                         onerror="this.src='https://placehold.co/400x300?text=After+Pickup'">
+                                    <span class="photo-badge">After {{ $index + 1 }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-muted mb-0" style="font-size: 12px;">No after-pickup photos recorded yet.</p>
+                    @endif
+                </div>
+
+                <!-- 4. Disposal / Dump Plant Photos -->
+                @if(!empty($dumpImages) && count($dumpImages) > 0)
+                    <div class="image-group-card">
+                        <div class="image-group-header">
+                            <span><i class="fa fa-industry me-1 text-info"></i> 4. Processing Plant Dump Photos</span>
+                            <span class="badge bg-info text-dark" style="font-size: 10px;">{{ count($dumpImages) }}</span>
+                        </div>
+                        <div class="photos-gallery">
+                            @foreach($dumpImages as $index => $imgPath)
+                                <div class="photo-thumb-wrap">
+                                    <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                         alt="Dump Plant Photo {{ $index + 1 }}" 
+                                         onclick="window.open(this.src, '_blank')"
+                                         title="Click to view full size"
+                                         onerror="this.src='https://placehold.co/400x300?text=Dump+Photo'">
+                                    <span class="photo-badge">Plant {{ $index + 1 }}</span>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
-                
+
                 <div class="mt-4 pt-3 border-top">
-                    <a href="{{ route('citizen.track', ['id' => $wasteRequest->request_number]) }}" class="btn-ui w-100 text-center">
+                    <a href="{{ route('citizen.track', ['id' => $wasteRequest->mobile_number ?? $wasteRequest->request_number]) }}" class="btn-ui w-100 text-center">
                         <i class="fa fa-arrow-left me-1"></i> Back to Track Request
                     </a>
                 </div>
