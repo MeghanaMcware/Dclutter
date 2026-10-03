@@ -231,9 +231,10 @@
                                 <option value="">All Status</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Assigned">Assigned</option>
+                                <option value="Rescheduled">Rescheduled</option>
                                 <option value="Picked Up">Picked Up</option>
                                 <option value="Dumped">Dumped</option>
-                                <option value="Rejected">Rejected</option>
+                                <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -335,16 +336,20 @@
                                                 $statusClasses = [
                                                     'pending' => 'status-pending',
                                                     'assigned' => 'status-assigned',
-                                                    'not_available' => 'status-pending',
+                                                    'scheduled' => 'status-assigned',
+                                                    'not_available' => 'status-in-progress',
+                                                    'rescheduled' => 'status-in-progress',
                                                     'picked_up' => 'status-in-progress',
                                                     'dumped' => 'status-completed',
+                                                    'completed' => 'status-completed',
                                                     'rejected' => 'status-rejected',
+                                                    'cancelled' => 'status-rejected',
                                                 ];
                                             @endphp
                                             <span class="status-badge {{ $statusClasses[$req->status] ?? 'status-pending' }}">
-                                                {{ $req->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $req->status)) }}
+                                                {{ $req->status_label }}
                                             </span>
-                                            @if($req->status == 'not_available' && $req->next_pickup_date)
+                                            @if(in_array($req->status, ['not_available', 'rescheduled']) && $req->next_pickup_date)
                                                 <div class="text-muted mt-1" style="font-size: 11px; white-space: nowrap;">
                                                     <i class="fa fa-calendar-alt text-warning me-1"></i>{{ $req->next_pickup_date->format('d M Y') }}
                                                 </div>
@@ -356,9 +361,11 @@
                                                 <a href="{{ route('admin.requests.show', $req->id) }}" class="btn btn-primary" title="View">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="{{ $req->id }}" data-request-number="{{ $req->request_number }}" data-constituency-id="{{ $req->constituency_id }}" data-constituency-name="{{ $req->constituency?->name ?? 'N/A' }}" title="Assign Vehicle">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
+                                                @if(!in_array($req->status, ['dumped', 'completed']))
+                                                    <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="{{ $req->id }}" data-request-number="{{ $req->request_number }}" data-constituency-id="{{ $req->constituency_id }}" data-constituency-name="{{ $req->constituency?->name ?? 'N/A' }}" title="Assign Vehicle">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -643,22 +650,31 @@
                     const statusClassMap = {
                         'pending': 'status-pending',
                         'assigned': 'status-assigned',
+                        'scheduled': 'status-assigned',
                         'picked_up': 'status-in-progress',
                         'dumped': 'status-completed',
-                        'rejected': 'status-rejected'
+                        'completed': 'status-completed',
+                        'rejected': 'status-rejected',
+                        'cancelled': 'status-rejected',
+                        'not_available': 'status-in-progress',
+                        'rescheduled': 'status-in-progress'
                     };
 
                     data.requests.forEach(req => {
                         const statusClass = statusClassMap[req.status] || 'status-pending';
                         const statusHtml = `<span class="status-badge ${statusClass}">${req.status_label}</span>`;
+                        const isDumpedOrCompleted = ['dumped', 'completed'].includes(req.status);
+                        const assignBtnHtml = isDumpedOrCompleted ? '' : `
+                            <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="${req.id}" data-request-number="${req.request_number}" data-constituency-id="${req.constituency_id || ''}" data-constituency-name="${req.constituency || ''}" title="Assign Vehicle">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        `;
                         const actionsHtml = `
                             <div class="d-flex justify-content-center gap-2">
                                 <a href="${req.show_url}" class="btn btn-primary" title="View">
                                     <i class="fa fa-eye"></i>
                                 </a>
-                                <button type="button" class="btn btn-success edit-request" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" data-db-id="${req.id}" data-request-number="${req.request_number}" data-constituency-id="${req.constituency_id || ''}" data-constituency-name="${req.constituency || ''}" title="Assign Vehicle">
-                                    <i class="fa fa-edit"></i>
-                                </button>
+                                ${assignBtnHtml}
                             </div>
                         `;
 

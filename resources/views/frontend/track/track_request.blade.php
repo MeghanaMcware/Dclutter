@@ -276,139 +276,156 @@
         <button type="submit" class="btn-ui">Track</button>
     </form>
 
-    @if($wasteRequest)
-        @php
-            $status = $wasteRequest->status;
-            
-            // Stepper logic
-            $stepFillWidth = '20%';
-            if ($status == 'assigned' || $status == 'not_available') $stepFillWidth = '45%';
-            elseif ($status == 'picked_up') $stepFillWidth = '70%';
-            elseif ($status == 'dumped') $stepFillWidth = '100%';
+    @php
+        $results = isset($wasteRequests) && $wasteRequests->isNotEmpty() ? $wasteRequests : ($wasteRequest ? collect([$wasteRequest]) : collect());
+    @endphp
 
-            $pillMap = [
-                'pending' => 'pill-pending',
-                'assigned' => 'pill-assigned',
-                'not_available' => 'pill-pending',
-                'picked_up' => 'pill-picked_up',
-                'dumped' => 'pill-dumped',
-                'rejected' => 'pill-rejected',
-            ];
-        @endphp
-
-        <div class="card-ui track-box">
-            <div class="topline">
-                <div>
-                    <div class="ref" id="trackReqId">{{ $wasteRequest->request_number }}</div>
-                    <div class="sub" id="trackReqDate">
-                        Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
-                    </div>
-                    <div class="sub" id="trackCategory">
-                        <strong>Category:</strong> 
-                        @if(is_array($wasteRequest->category_ids))
-                            {{ implode(', ', $wasteRequest->category_ids) }}
-                        @else
-                            {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
-                        @endif
-                        @if(!empty($wasteRequest->subcategory_ids))
-                            | <strong>Sub Category:</strong>
-                            @if(is_array($wasteRequest->subcategory_ids))
-                                {{ implode(', ', array_map(function($s) {
-                                    return \Illuminate\Support\Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
-                                }, $wasteRequest->subcategory_ids)) }}
-                            @else
-                                {{ $wasteRequest->subcategory_ids }}
-                            @endif
-                        @endif
-                    </div>
+    @if($results->isNotEmpty())
+        @if($results->count() > 1)
+            <div class="mb-3 d-flex justify-content-between align-items-center" style="background: var(--green-light); border: 1px solid #cde0d2; border-radius: 8px; padding: 10px 16px; margin-top: 10px;">
+                <div style="font-size: 14px; font-weight: 700; color: var(--green-dark);">
+                    <i class="fa fa-list-check me-2"></i> Found <strong>{{ $results->count() }}</strong> requests for "<strong>{{ $searchId }}</strong>"
                 </div>
-                <span class="pill {{ $pillMap[$status] ?? 'pill-pending' }}">
-                    {{ $status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $status)) }}
-                </span>
+                <div style="font-size: 12px; color: var(--muted); font-weight: 600;">
+                    Showing all raised requests (newest first)
+                </div>
             </div>
+        @endif
 
-            @if($status == 'not_available' && $wasteRequest->next_pickup_date)
-                <div style="background: #fff8e1; border: 1px solid #ffe082; color: #856404; padding: 12px 16px; border-radius: 8px; margin-top: 16px; font-size: 13px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fa fa-calendar-alt" style="font-size: 16px;"></i>
+        @foreach($results as $wasteRequest)
+            @php
+                $status = $wasteRequest->status;
+                
+                // Stepper logic
+                $stepFillWidth = '20%';
+                if ($status == 'assigned' || $status == 'not_available') $stepFillWidth = '45%';
+                elseif ($status == 'picked_up') $stepFillWidth = '70%';
+                elseif ($status == 'dumped') $stepFillWidth = '100%';
+
+                $pillMap = [
+                    'pending' => 'pill-pending',
+                    'assigned' => 'pill-assigned',
+                    'not_available' => 'pill-pending',
+                    'picked_up' => 'pill-picked_up',
+                    'dumped' => 'pill-dumped',
+                    'rejected' => 'pill-rejected',
+                ];
+            @endphp
+
+            <div class="card-ui track-box mb-4">
+                <div class="topline">
                     <div>
-                        <strong>Pickup Rescheduled for Sunday:</strong> Citizen requested next pickup on <strong>{{ $wasteRequest->next_pickup_date->format('d M Y (l)') }}</strong>.
-                        @if($wasteRequest->not_available_reason)
-                            <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">Reason: {{ $wasteRequest->not_available_reason }}</div>
-                        @endif
+                        <div class="ref" id="trackReqId-{{ $wasteRequest->id }}">{{ $wasteRequest->request_number }}</div>
+                        <div class="sub" id="trackReqDate-{{ $wasteRequest->id }}">
+                            Requested on: {{ $wasteRequest->created_at->format('d M Y, h:i A') }}
+                        </div>
+                        <div class="sub" id="trackCategory-{{ $wasteRequest->id }}">
+                            <strong>Category:</strong> 
+                            @if(is_array($wasteRequest->category_ids))
+                                {{ implode(', ', $wasteRequest->category_ids) }}
+                            @else
+                                {{ $wasteRequest->category_ids ?? 'D-Clutter Waste' }}
+                            @endif
+                            @if(!empty($wasteRequest->subcategory_ids))
+                                | <strong>Sub Category:</strong>
+                                @if(is_array($wasteRequest->subcategory_ids))
+                                    {{ implode(', ', array_map(function($s) {
+                                        return \Illuminate\Support\Str::contains($s, ': ') ? explode(': ', $s)[1] : $s;
+                                    }, $wasteRequest->subcategory_ids)) }}
+                                @else
+                                    {{ $wasteRequest->subcategory_ids }}
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                    <span class="pill {{ $pillMap[$status] ?? 'pill-pending' }}">
+                        {{ $status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $status)) }}
+                    </span>
+                </div>
+
+                @if($status == 'not_available' && $wasteRequest->next_pickup_date)
+                    <div style="background: #fff8e1; border: 1px solid #ffe082; color: #856404; padding: 12px 16px; border-radius: 8px; margin-top: 16px; font-size: 13px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa fa-calendar-alt" style="font-size: 16px;"></i>
+                        <div>
+                            <strong>Pickup Rescheduled for Sunday:</strong> Citizen requested next pickup on <strong>{{ $wasteRequest->next_pickup_date->format('d M Y (l)') }}</strong>.
+                            @if($wasteRequest->not_available_reason)
+                                <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">Reason: {{ $wasteRequest->not_available_reason }}</div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Stepper Progress Flow -->
+                <div class="status-flow">
+                    <div class="status-flow-line-fill" style="width: {{ $stepFillWidth }};"></div>
+                    
+                    <span class="completed">Request<br>Submitted</span>
+                    
+                    <span class="{{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? 'completed' : ($status == 'pending' ? 'active-stage' : 'pending-step') }}">
+                        Verified
+                    </span>
+                    
+                    <span class="{{ in_array($status, ['picked_up', 'dumped']) ? 'completed' : (in_array($status, ['assigned', 'not_available']) ? 'active-stage' : 'pending-step') }}">
+                        {{ $status == 'not_available' ? 'Rescheduled' : 'Assigned' }}
+                    </span>
+                    
+                    <span class="{{ $status == 'dumped' ? 'completed' : ($status == 'picked_up' ? 'active-stage' : 'pending-step') }}">
+                        Picked Up
+                    </span>
+                    
+                    <span class="{{ $status == 'dumped' ? 'completed active-stage' : 'pending-step' }}">
+                        Disposed
+                    </span>
+                </div>
+
+                <!-- Facts Grid -->
+                <div class="facts">
+                    <div>
+                        <small>Scheduled Pickup Date</small>
+                        <b>
+                            @if($wasteRequest->next_pickup_date)
+                                {{ $wasteRequest->next_pickup_date->format('d M Y (l)') }} (Rescheduled)
+                            @elseif($wasteRequest->preferred_pickup_date)
+                                {{ $wasteRequest->preferred_pickup_date->format('d M Y (l)') }}
+                            @else
+                                Sunday Scheduled
+                            @endif
+                        </b>
+                    </div>
+                    <div>
+                        <small>Assigned Vehicle</small>
+                        <b>
+                            @if($wasteRequest->vehicle)
+                                {{ $wasteRequest->vehicle->vehicle_number }}
+                            @else
+                                Pending Assignment
+                            @endif
+                        </b>
+                    </div>
+                    <div>
+                        <small>Driver Details</small>
+                        <b>
+                            @if($wasteRequest->vehicle)
+                                {{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }}
+                                @if($wasteRequest->vehicle->driver_phone || $wasteRequest->vehicle->owner?->mobile_number)
+                                    ({{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number }})
+                                @endif
+                            @else
+                                Not Assigned
+                            @endif
+                        </b>
+                    </div>
+                    <div>
+                        <small>Pickup Address</small>
+                        <b>{{ $wasteRequest->house_no }}, {{ Str::limit($wasteRequest->address, 30) }}</b>
                     </div>
                 </div>
-            @endif
 
-            <!-- Stepper Progress Flow -->
-            <div class="status-flow">
-                <div class="status-flow-line-fill" style="width: {{ $stepFillWidth }};"></div>
-                
-                <span class="completed">Request<br>Submitted</span>
-                
-                <span class="{{ in_array($status, ['assigned', 'not_available', 'picked_up', 'dumped']) ? 'completed' : ($status == 'pending' ? 'active-stage' : 'pending-step') }}">
-                    Verified
-                </span>
-                
-                <span class="{{ in_array($status, ['picked_up', 'dumped']) ? 'completed' : (in_array($status, ['assigned', 'not_available']) ? 'active-stage' : 'pending-step') }}">
-                    {{ $status == 'not_available' ? 'Rescheduled' : 'Assigned' }}
-                </span>
-                
-                <span class="{{ $status == 'dumped' ? 'completed' : ($status == 'picked_up' ? 'active-stage' : 'pending-step') }}">
-                    Picked Up
-                </span>
-                
-                <span class="{{ $status == 'dumped' ? 'completed active-stage' : 'pending-step' }}">
-                    Disposed
-                </span>
-            </div>
-
-            <!-- Facts Grid -->
-            <div class="facts">
-                <div>
-                    <small>Scheduled Pickup Date</small>
-                    <b>
-                        @if($wasteRequest->next_pickup_date)
-                            {{ $wasteRequest->next_pickup_date->format('d M Y (l)') }} (Rescheduled)
-                        @elseif($wasteRequest->preferred_pickup_date)
-                            {{ $wasteRequest->preferred_pickup_date->format('d M Y (l)') }}
-                        @else
-                            Sunday Scheduled
-                        @endif
-                    </b>
-                </div>
-                <div>
-                    <small>Assigned Vehicle</small>
-                    <b>
-                        @if($wasteRequest->vehicle)
-                            {{ $wasteRequest->vehicle->vehicle_number }}
-                        @else
-                            Pending Assignment
-                        @endif
-                    </b>
-                </div>
-                <div>
-                    <small>Driver Details</small>
-                    <b>
-                        @if($wasteRequest->vehicle)
-                            {{ $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Assigned Driver' }}
-                            @if($wasteRequest->vehicle->driver_phone || $wasteRequest->vehicle->owner?->mobile_number)
-                                ({{ $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number }})
-                            @endif
-                        @else
-                            Not Assigned
-                        @endif
-                    </b>
-                </div>
-                <div>
-                    <small>Pickup Address</small>
-                    <b>{{ $wasteRequest->house_no }}, {{ Str::limit($wasteRequest->address, 30) }}</b>
+                <div style="margin-top: 20px;">
+                    <a class="btn-ui" href="{{ route('citizen.details', ['id' => $wasteRequest->request_number]) }}">View Full Details</a>
                 </div>
             </div>
-
-            <div style="margin-top: 20px;">
-                <a class="btn-ui" href="{{ route('citizen.details', ['id' => $wasteRequest->request_number]) }}">View Full Details</a>
-            </div>
-        </div>
+        @endforeach
     @else
         <div class="card-ui track-box text-center py-5">
             @if(!empty($searchId))

@@ -78,7 +78,7 @@
                 <div class="label">Pending Pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">{{ number_format(\App\Models\Request::where('status', 'picked_up')->sum('approx_weight_kg'), 1) }} kg</div>
+                <div class="num">{{ number_format(\App\Models\RequestUpdate::where('action', 'before_pickup')->sum('approx_weight_kg') ?? 0, 1) }} kg</div>
                 <div class="label">Waste Collected</div>
             </div>
         </div>
@@ -104,8 +104,8 @@
                     </div>
                     <div class="trip-time">{{ Str::limit($req->address, 30) }}</div>
                 </div>
-                <span class="{{ $req->status == 'picked_up' ? 'badge-in-progress' : 'badge-upcoming' }}">
-                    {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                <span class="{{ $req->status == 'picked_up' ? 'badge-in-progress' : ($req->status == 'not_available' ? 'badge bg-warning text-dark px-2 py-1' : 'badge-upcoming') }}">
+                    {{ $req->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $req->status)) }}
                 </span>
             </div>
         @empty

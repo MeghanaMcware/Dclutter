@@ -12,10 +12,10 @@ class PlantController extends Controller
 {
     public function index(Request $request)
     {
-        $corporations = Corporation::orderBy('name')->get();
-        $constituencies = Constituency::orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->orderBy('name')->get();
 
-        $query = Plant::with(['corporation', 'constituency']);
+        $query = Plant::forUserJurisdiction()->with(['corporation', 'constituency']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -38,8 +38,8 @@ class PlantController extends Controller
 
     public function create()
     {
-        $corporations = Corporation::orderBy('name')->get();
-        $constituencies = Constituency::with('corporation')->orderBy('name')->get();
+        $corporations = Corporation::forUserJurisdiction()->orderBy('name')->get();
+        $constituencies = Constituency::forUserJurisdiction()->with('corporation')->orderBy('name')->get();
 
         return view('admin.masters.plant.create', compact('corporations', 'constituencies'));
     }
@@ -114,5 +114,21 @@ class PlantController extends Controller
         $plant->delete();
 
         return redirect()->route('admin.masters.plants.index')->with('success', 'Plant Location deleted successfully!');
+    }
+
+    /**
+     * Toggle active/inactive status for plant location.
+     */
+    public function toggleStatus(Request $request, $id)
+    {
+        $plant = Plant::findOrFail($id);
+        $plant->status = !$plant->status;
+        $plant->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => (bool) $plant->status,
+            'message' => 'Plant location status updated successfully!',
+        ]);
     }
 }

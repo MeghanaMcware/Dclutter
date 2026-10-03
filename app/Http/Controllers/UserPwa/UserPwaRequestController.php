@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Request as WasteRequest;
 use App\Models\Ward;
 use App\Services\OtpService;
+use App\Services\WasteRequestService;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,14 +15,11 @@ use Illuminate\Support\Facades\Log;
 
 class UserPwaRequestController extends Controller
 {
-    protected OtpService $otpService;
-    protected WhatsAppService $whatsappService;
-
-    public function __construct(OtpService $otpService, WhatsAppService $whatsappService)
-    {
-        $this->otpService = $otpService;
-        $this->whatsappService = $whatsappService;
-    }
+    public function __construct(
+        protected OtpService $otpService,
+        protected WhatsAppService $whatsappService,
+        protected WasteRequestService $wasteRequestService
+    ) {}
 
     /**
      * Show Report Request Form for User PWA
@@ -158,40 +156,6 @@ class UserPwaRequestController extends Controller
             'waste_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
         ]);
 
-        // Process uploaded waste photos
-        $uploadedImagePaths = [];
-        if ($request->hasFile('waste_images')) {
-            foreach ($request->file('waste_images') as $file) {
-                if ($file->isValid()) {
-                    $path = $file->store('waste_images', 'public');
-                    $uploadedImagePaths[] = $path;
-                }
-            }
-        }
-
-        // Determine Ward, Constituency, Corporation hierarchy
-        $wardId = $request->input('ward_id');
-        $constituencyId = null;
-        $corporationId = null;
-
-        if ($wardId) {
-            $ward = Ward::with('constituency.corporation')->find($wardId);
-            if ($ward) {
-                $constituencyId = $ward->constituency_id;
-                $corporationId = $ward->constituency?->corporation_id;
-            }
-        } elseif ($request->filled('latitude') && $request->filled('longitude')) {
-            $ward = Ward::findWardByLatLng($request->latitude, $request->longitude);
-            if ($ward) {
-                $wardId = $ward->id;
-                $constituencyId = $ward->constituency_id;
-                $corporationId = $ward->constituency?->corporation_id;
-            }
-        }
-
-        // Generate unique request tracking number
-        $requestNumber = WasteRequest::generateRequestNumber();
-
         try {
             // Find or associate user by mobile if not logged in
             $userId = Auth::id();
@@ -202,43 +166,14 @@ class UserPwaRequestController extends Controller
                 }
             }
 
-            // Create waste request
-            $wasteRequestData = [
-                'request_number' => $requestNumber,
-                'source' => 'userpwa',
-                'user_id' => $userId,
-                'applicant_name' => $request->input('applicant_name') ?: (Auth::user()?->name ?: 'User'),
-                'mobile_number' => $request->input('mobile_number') ?: Auth::user()?->mobile_number,
-                'category_ids' => $request->input('pickup_items'),
-                'subcategory_ids' => $request->input('pickup_subitems', []),
-                'waste_images' => $uploadedImagePaths,
-                'house_no' => $request->input('house_no'),
-                'floor_no' => $request->input('floor_no') ?: $request->input('floor'),
-                'address' => $request->input('address'),
-                'landmark' => $request->input('landmark'),
-                'pincode' => $request->input('pincode'),
-                'latitude' => $request->input('latitude') ?: 12.9716,
-                'longitude' => $request->input('longitude') ?: 77.5946,
-                'corporation_id' => $corporationId,
-                'constituency_id' => $constituencyId,
-                'ward_id' => $wardId,
-                'preferred_pickup_date' => $request->input('preferred_pickup_date'),
-                'terms_accepted' => 1,
-                'status' => 'pending',  
-            ];
+            $validated['user_id'] = $userId;
+            $validated['terms_accepted'] = 1;
 
-            $wasteRequest = WasteRequest::create($wasteRequestData);
-
-            // Trigger WhatsApp Notification
-            try {
-                $this->whatsappService->sendRegistrationConfirmation(
-                    $wasteRequest->mobile_number,
-                    $wasteRequest->applicant_name,
-                    $wasteRequest->request_number
-                );
-            } catch (\Throwable $e) {
-                Log::error('WhatsApp Confirmation Exception: ' . $e->getMessage());
-            }
+            $wasteRequest = $this->wasteRequestService->createRequest(
+                $validated,
+                $request->file('waste_images', []),
+                'userpwa'
+            );
 
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -337,7 +272,7 @@ class UserPwaRequestController extends Controller
             });
         }
 
-        $requests = $query->latest()->get();
+        $requests = $query->latest()->paginate(10);
 
         return view('userpwa.history.index', compact('requests'));
     }

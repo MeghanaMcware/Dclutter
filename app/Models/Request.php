@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasGeoScope;
+use App\Traits\HasStatusCounts;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Request extends Model
 {
-    use HasFactory, HasGeoScope;
+    use HasFactory, HasGeoScope, HasStatusCounts;
 
     protected $table = 'requests';
 
@@ -22,9 +23,6 @@ class Request extends Model
         'category_ids',
         'subcategory_ids',
         'waste_images',
-        'picked_up_images',
-        'before_pickup_images',
-        'approx_weight_kg',
         'house_no',
         'floor_no',
         'address',
@@ -32,23 +30,17 @@ class Request extends Model
         'pincode',
         'latitude',
         'longitude',
-        'before_pickup_latitude',
-        'before_pickup_longitude',
-        'after_pickup_latitude',
-        'after_pickup_longitude',
         'corporation_id',
         'constituency_id',
         'ward_id',
         'preferred_pickup_date',
+        'next_pickup_date',
         'status',
         'vehicle_id',
         'assigned_at',
         'picked_up_at',
         'dump_id',
         'remarks',
-        'not_available_reason',
-        'next_pickup_date',
-        'not_available_at',
         'terms_accepted',
     ];
 
@@ -57,21 +49,98 @@ class Request extends Model
         'category_ids' => 'array',
         'subcategory_ids' => 'array',
         'waste_images' => 'array',
-        'picked_up_images' => 'array',
-        'before_pickup_images' => 'array',
-        'approx_weight_kg' => 'decimal:2',
         'preferred_pickup_date' => 'date',
+        'next_pickup_date' => 'date',
         'assigned_at' => 'datetime',
         'picked_up_at' => 'datetime',
-        'not_available_at' => 'datetime',
-        'next_pickup_date' => 'date',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
-        'before_pickup_latitude' => 'decimal:8',
-        'before_pickup_longitude' => 'decimal:8',
-        'after_pickup_latitude' => 'decimal:8',
-        'after_pickup_longitude' => 'decimal:8',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dynamic Accessors from Request Updates (Zero-Breakage Compatibility)
+    |--------------------------------------------------------------------------
+    */
+
+    public function getBeforePickupImagesAttribute(): ?array
+    {
+        $update = $this->updates->firstWhere('action', 'before_pickup');
+        return $update?->before_pickup_images ?? null;
+    }
+
+    public function getPickedUpImagesAttribute(): ?array
+    {
+        $update = $this->updates->firstWhere('action', 'picked_up');
+        return $update?->picked_up_images ?? null;
+    }
+
+    public function getAfterPickupImagesAttribute(): ?array
+    {
+        return $this->picked_up_images;
+    }
+
+    public function getApproxWeightKgAttribute(): ?float
+    {
+        $update = $this->updates->first(fn($u) => !is_null($u->approx_weight_kg));
+        if ($update && !is_null($update->approx_weight_kg)) {
+            return (float) $update->approx_weight_kg;
+        }
+        if ($this->dump && !is_null($this->dump->dump_weight)) {
+            return (float) ($this->dump->dump_weight * 1000);
+        }
+        return null;
+    }
+
+    public function getBeforePickupLatitudeAttribute(): ?float
+    {
+        $update = $this->updates->firstWhere('action', 'before_pickup');
+        return $update?->latitude ? (float) $update->latitude : null;
+    }
+
+    public function getBeforePickupLongitudeAttribute(): ?float
+    {
+        $update = $this->updates->firstWhere('action', 'before_pickup');
+        return $update?->longitude ? (float) $update->longitude : null;
+    }
+
+    public function getAfterPickupLatitudeAttribute(): ?float
+    {
+        $update = $this->updates->firstWhere('action', 'picked_up');
+        return $update?->latitude ? (float) $update->latitude : null;
+    }
+
+    public function getAfterPickupLongitudeAttribute(): ?float
+    {
+        $update = $this->updates->firstWhere('action', 'picked_up');
+        return $update?->longitude ? (float) $update->longitude : null;
+    }
+
+    public function getNotAvailableReasonAttribute(): ?string
+    {
+        $update = $this->updates->firstWhere('action', 'rescheduled');
+        return $update?->not_available_reason ?? null;
+    }
+
+    public function getNotAvailableAtAttribute(): ?\Carbon\Carbon
+    {
+        $update = $this->updates->firstWhere('action', 'rescheduled');
+        return $update?->created_at ?? null;
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        $st = strtolower($this->status ?? 'pending');
+        return match($st) {
+            'pending' => 'Pending',
+            'assigned', 'scheduled' => 'Assigned',
+            'rescheduled', 'not_available' => 'Rescheduled',
+            'picked_up' => 'Picked Up',
+            'dumped', 'completed' => 'Dumped',
+            'cancelled', 'rejected' => 'Cancelled',
+            default => ucfirst(str_replace('_', ' ', $st)),
+        };
+    }
 
     /**
      * Auto-generate unique tracking reference number (#DCL-2026-XXXXXX).
@@ -154,6 +223,14 @@ class Request extends Model
     public function dumpRecord(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Dump::class, 'request_id')->latestOfMany();
+    }
+
+    /**
+     * Chronological update history and audit trail.
+     */
+    public function updates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(RequestUpdate::class, 'request_id')->latest('id');
     }
 
     public function getFloorAttribute()

@@ -29,12 +29,11 @@
             };
             $statusLabel = match($st) {
                 'pending' => 'Pending',
-                'assigned', 'scheduled' => 'Scheduled',
-                'picked_up', 'completed' => 'Completed',
-                'dumped' => 'Dumped',
-                'not_available', 'rescheduled' => 'Rescheduled',
-                'rejected' => 'Rejected',
-                'cancelled' => 'Cancelled',
+                'assigned', 'scheduled' => 'Assigned',
+                'rescheduled', 'not_available' => 'Rescheduled',
+                'picked_up' => 'Picked Up',
+                'dumped', 'completed' => 'Dumped',
+                'cancelled', 'rejected' => 'Cancelled',
                 default => ucfirst(str_replace('_', ' ', $st)),
             };
         @endphp
