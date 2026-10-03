@@ -102,6 +102,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Vehicles Resource Routes
     Route::patch('vehicles/{id}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggle-status');
     Route::resource('vehicles', AdminVehicleController::class);
+
+    // Dump & Pickup Management (UI Only)
+    Route::get('/dump', function() {
+        return view('admin.dump.index');
+    })->name('dump.index');
+    Route::get('/dump/show/{id}', function($id) {
+        return view('admin.dump.show', compact('id'));
+    })->name('dump.show');
 });
 
 /*
