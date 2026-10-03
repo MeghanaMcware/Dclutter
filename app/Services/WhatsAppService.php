@@ -135,7 +135,7 @@ class WhatsAppService
         string $password,
         ?string $loginUrl = null
     ): bool {
-        $loginUrl = $loginUrl ?: url('/vehicle/login');
+        $loginUrl = $loginUrl ?: 'vehicle/login';
         $passwordLine = str_starts_with(strtolower($password), 'password:') ? $password : "Password: {$password}";
 
         return $this->sendCampaign(

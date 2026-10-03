@@ -146,7 +146,7 @@ class AdminVehicleController extends Controller
         // 4. Send WhatsApp Credentials Notification to Driver and Owner
         try {
             $whatsAppService = app(\App\Services\WhatsAppService::class);
-            $loginUrl = route('vehicle.login');
+            $loginUrl = 'vehicle/login';
             $defaultPassword = '1234';
 
             // Send to driver
