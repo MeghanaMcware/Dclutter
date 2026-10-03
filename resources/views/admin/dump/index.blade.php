@@ -117,22 +117,38 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><span class="text-primary fw-bold">REQ-1001</span></td>
-                                                <td>Plastic</td>
-                                                <td>PET Bottles</td>
-                                                <td>Sector 1, Area A</td>
-                                                <td>Central Zone</td>
-                                                <td>John Doe</td>
-                                                <td>9876543210</td>
-                                                <td>TS-09-XX-1234</td>
-                                                <td>Ramesh (9988776655)</td>
-                                                <td><span class="status-badge status-completed">Picked Up</span></td>
-                                                <td>2026-10-01</td>
-                                                <td>
-                                                    <a href="{{ url('admin/dump/show/1') }}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View</a>
-                                                </td>
-                                            </tr>
+                                            @forelse($pickupRequests as $req)
+                                                <tr>
+                                                    <td><span class="text-primary fw-bold">{{ $req->request_number }}</span></td>
+                                                    <td>{{ is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?: 'N/A') }}</td>
+                                                    <td>{{ is_array($req->subcategory_ids) ? implode(', ', $req->subcategory_ids) : ($req->subcategory_ids ?: 'N/A') }}</td>
+                                                    <td>{{ $req->house_no . (($req->floor_no ?? $req->floor) ? ' (Floor: ' . ($req->floor_no ?? $req->floor) . ')' : '') . ', ' . Str::limit($req->address, 30) }}</td>
+                                                    <td>{{ $req->constituency?->name ?? 'N/A' }}</td>
+                                                    <td>{{ $req->applicant_name }}</td>
+                                                    <td>{{ $req->mobile_number }}</td>
+                                                    <td>{{ $req->vehicle?->vehicle_number ?? 'N/A' }}</td>
+                                                    <td>{{ ($req->vehicle?->driver_name ?? 'Driver') . ' (' . ($req->vehicle?->driver_phone ?? $req->vehicle?->owner?->mobile_number ?? 'N/A') . ')' }}</td>
+                                                    <td>
+                                                        @php
+                                                            $st = strtolower($req->status ?? 'picked_up');
+                                                            $badgeClass = match($st) {
+                                                                'dumped', 'completed' => 'status-completed',
+                                                                'picked_up' => 'status-in-progress',
+                                                                default => 'status-pending'
+                                                            };
+                                                        @endphp
+                                                        <span class="status-badge {{ $badgeClass }}">{{ $req->status_label }}</span>
+                                                    </td>
+                                                    <td>{{ $req->picked_up_at ? $req->picked_up_at->format('d M Y') : ($req->created_at ? $req->created_at->format('d M Y') : 'N/A') }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.dump.show', $req->id) }}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="12" class="text-center text-muted py-4">No pickup records found.</td>
+                                                </tr>
+                                            @endforelse
                                         </tbody>
                                     </table>
                                 </div>
@@ -159,22 +175,36 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><span class="text-primary fw-bold">REQ-1002</span></td>
-                                                <td>E-Waste</td>
-                                                <td>Batteries</td>
-                                                <td>Central Dump Yard</td>
-                                                <td>North Zone</td>
-                                                <td>Jane Smith</td>
-                                                <td>8765432109</td>
-                                                <td>TS-08-YY-5678</td>
-                                                <td>Suresh (8877665544)</td>
-                                                <td><span class="status-badge status-in-progress">In Transit</span></td>
-                                                <td>2026-10-02</td>
-                                                <td>
-                                                    <a href="{{ url('admin/dump/show/2') }}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View</a>
-                                                </td>
-                                            </tr>
+                                            @forelse($dumpRequests as $req)
+                                                @php
+                                                    $dumpObj = $req->dump ?: $req->dumpRecord;
+                                                    $veh = $req->vehicle ?: ($dumpObj?->vehicle ?? null);
+                                                    $driverName = $veh?->driver_name ?: 'Driver';
+                                                    $driverPhone = $veh?->driver_phone ?: ($veh?->owner?->mobile_number ?: 'N/A');
+                                                    $plantName = $dumpObj?->plant_name ?: 'Processing Facility';
+                                                    $dumpDate = $dumpObj?->dumped_at ?: $req->updated_at;
+                                                @endphp
+                                                <tr>
+                                                    <td><span class="text-primary fw-bold">{{ $req->request_number }}</span></td>
+                                                    <td>{{ is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?: 'N/A') }}</td>
+                                                    <td>{{ is_array($req->subcategory_ids) ? implode(', ', $req->subcategory_ids) : ($req->subcategory_ids ?: 'N/A') }}</td>
+                                                    <td>{{ $plantName }}</td>
+                                                    <td>{{ $req->constituency?->name ?? 'N/A' }}</td>
+                                                    <td>{{ $req->applicant_name }}</td>
+                                                    <td>{{ $req->mobile_number }}</td>
+                                                    <td>{{ $veh?->vehicle_number ?? 'N/A' }}</td>
+                                                    <td>{{ $driverName . ' (' . $driverPhone . ')' }}</td>
+                                                    <td><span class="status-badge status-completed">Dumped</span></td>
+                                                    <td>{{ $dumpDate ? $dumpDate->format('d M Y') : 'N/A' }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.dump.show', $req->id) }}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="12" class="text-center text-muted py-4">No dump records found.</td>
+                                                </tr>
+                                            @endforelse
                                         </tbody>
                                     </table>
                                 </div>

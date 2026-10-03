@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AdminImportedRequestController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminVehicleController;
+use App\Http\Controllers\Admin\AdminDumpController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubcategoryController;
 use App\Http\Controllers\Admin\UserController;
@@ -106,13 +107,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('vehicles/{id}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggle-status');
     Route::resource('vehicles', AdminVehicleController::class);
 
-    // Dump & Pickup Management (UI Only)
-    Route::get('/dump', function() {
-        return view('admin.dump.index');
-    })->name('dump.index');
-    Route::get('/dump/show/{id}', function($id) {
-        return view('admin.dump.show', compact('id'));
-    })->name('dump.show');
+    // Dump & Pickup Management
+    Route::get('/dump', [AdminDumpController::class, 'index'])->name('dump.index');
+    Route::get('/dump/show/{id}', [AdminDumpController::class, 'show'])->name('dump.show');
 });
 
 /*
