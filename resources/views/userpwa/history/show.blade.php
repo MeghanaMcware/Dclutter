@@ -228,7 +228,82 @@
         </div>
     </div>
     
+    @if(in_array($status, ['picked_up', 'in_transit', 'completed', 'dumped']))
+    <div class="card-ui">
+        <h6 class="fw-bold" style="font-size: 15px; color: #1e293b; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            Pickup Summary / Driver Validation
+        </h6>
+        <div class="facts-list">
+            <div class="fact-item">
+                <small>Picked Up At</small>
+                <b>{{ $wasteRequest->picked_up_at ? \Carbon\Carbon::parse($wasteRequest->picked_up_at)->format('d M Y, h:i A') : 'N/A' }}</b>
+            </div>
+            <div class="fact-item">
+                <small>Approx Weight (Kg)</small>
+                <b>{{ $wasteRequest->approx_weight_kg ?? 'N/A' }} Kg</b>
+            </div>
+        </div>
+        
+        @php
+            $pickedUpImages = is_string($wasteRequest->picked_up_images) ? json_decode($wasteRequest->picked_up_images, true) : $wasteRequest->picked_up_images;
+        @endphp
+        @if(is_array($pickedUpImages) && count($pickedUpImages) > 0)
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; margin-top: 15px;">Evidence photos taken during pickup:</p>
+            <div class="photos-gallery">
+                @foreach($pickedUpImages as $img)
+                    <a href="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" target="_blank" style="display: contents;">
+                        <img src="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" alt="Pickup Photo" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'bg-light p-3 text-center text-muted\'>Image unavailable</div>';">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
+    @endif
+
+    @if(in_array($status, ['completed', 'dumped']) && $wasteRequest->dump)
+    <div class="card-ui">
+        <h6 class="fw-bold" style="font-size: 15px; color: #1e293b; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            Disposal / Plant Processing Details
+        </h6>
+        <div class="facts-list">
+            <div class="fact-item">
+                <small>Disposed At</small>
+                <b>{{ $wasteRequest->dump->dumped_at ? \Carbon\Carbon::parse($wasteRequest->dump->dumped_at)->format('d M Y, h:i A') : 'N/A' }}</b>
+            </div>
+            <div class="fact-item">
+                <small>Disposal Plant</small>
+                <b>{{ $wasteRequest->dump->plant_name ?? 'N/A' }}</b>
+            </div>
+            <div class="fact-item">
+                <small>Dump Weight (Kg)</small>
+                <b>{{ $wasteRequest->dump->dump_weight ?? 'N/A' }} Kg</b>
+            </div>
+            @if($wasteRequest->dump->remarks)
+            <div class="fact-item">
+                <small>Remarks</small>
+                <b>{{ $wasteRequest->dump->remarks }}</b>
+            </div>
+            @endif
+        </div>
+
+        @php
+            $dumpImages = is_string($wasteRequest->dump->dump_images) ? json_decode($wasteRequest->dump->dump_images, true) : $wasteRequest->dump->dump_images;
+        @endphp
+        @if(is_array($dumpImages) && count($dumpImages) > 0)
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; margin-top: 15px;">Evidence photos at disposal site:</p>
+            <div class="photos-gallery">
+                @foreach($dumpImages as $img)
+                    <a href="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" target="_blank" style="display: contents;">
+                        <img src="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" alt="Dump Photo" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'bg-light p-3 text-center text-muted\'>Image unavailable</div>';">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
+    @endif
+
     <a href="{{ route('user.history') }}" class="btn-back">
+
         <i class="fa fa-arrow-left"></i> Back to History
     </a>
 </div>

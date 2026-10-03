@@ -371,38 +371,43 @@
 .file-upload-box {
     display: flex;
     align-items: center;
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 0;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 8px;
     cursor: pointer;
-    background: #fff;
+    background: #f8fafc;
     transition: all 0.2s ease;
-    height: 42px;
+    min-height: 56px;
     position: relative;
 }
+.file-upload-box:hover {
+    background: #f1f5f9;
+}
 .file-upload-box.is-valid {
-    border-color: var(--green);
-    border-width: 2px;
+    border-color: var(--green, #22c55e);
+    border-style: solid;
     background: #f0fdf4;
 }
 .file-upload-btn {
-    padding: 0 16px;
-    font-weight: 500;
-    color: var(--ink);
-    border-right: 1px solid var(--line);
-    height: 100%;
+    padding: 8px 16px;
+    font-weight: 600;
+    color: #fff;
+    background: #0e7a43;
+    border: none;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    background: transparent;
+    gap: 8px;
+    pointer-events: none;
 }
 .file-upload-text {
     padding: 0 16px;
-    color: var(--muted);
+    color: #64748b;
     font-size: 14px;
     flex-grow: 1;
 }
 .file-upload-box.is-valid .file-upload-text {
-    color: var(--ink);
+    color: var(--ink, #1e293b);
     font-weight: 500;
 }
 .file-upload-check {
@@ -937,7 +942,9 @@ textarea.is-invalid ~ .invalid-feedback,
                         <div class="custom-file-upload">
                             <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" capture="environment" multiple style="display:none;" onchange="handleImageSelection(event)">
                             <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
-                                <div class="file-upload-btn">Choose Files</div>
+                                <button type="button" class="file-upload-btn">
+                                    <i class="fa-solid fa-camera"></i> Choose Files
+                                </button>
                                 <div class="file-upload-text" id="fileUploadText">No files selected</div>
                                 <i class="bi bi-check-lg text-success file-upload-check" style="display:none;" id="fileUploadCheck"></i>
                             </div>
@@ -987,8 +994,9 @@ textarea.is-invalid ~ .invalid-feedback,
 
                     <!-- Floor No (now optional) -->
                     <div>
-                        <label>Floor No / Level</label>
-                        <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. Ground Floor, 2nd Floor" oninput="validateSingleField(this)">
+                        <label>Floor No / Level <span class="req">*</span></label>
+                        <input type="number" id="floorNoInput" name="floor_no" placeholder="e.g. 1" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); validateSingleField(this)">
+                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
                     </div>
 
                     <!-- Ward (Readonly - Auto-Mapped from GPS) -->
@@ -1384,7 +1392,7 @@ function updateImagePreview() {
             div.innerHTML = `
                 <img src="${blobUrl}" alt="Preview">
                 <div class="image-preview-remove" onclick="removeImage(${i})">
-                    <i class="bi bi-x"></i>
+                    <i class="fa-solid fa-xmark"></i>
                 </div>
             `;
             container.appendChild(div);
@@ -1711,7 +1719,7 @@ function validateStep(step) {
         const wardId = document.getElementById('wardIdInput');
         const pincode = document.getElementById('pincodeInput');
         const mobile = document.getElementById('mobileInput');
-        const floorNo = document.getElementById('floorNoInput'); // optional, not required
+        const floorNo = document.getElementById('floorNoInput');
 
         let valid = true;
         let firstInvalidEl = null;
@@ -1734,7 +1742,7 @@ function validateStep(step) {
         }
 
         // Required fields only — floorNo intentionally excluded
-        [applicantName, mobile, address, houseNo, landmark, wardDisplay, pincode].forEach(el => {
+        [applicantName, mobile, address, houseNo, floorNo, landmark, wardDisplay, pincode].forEach(el => {
             if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                 if (el) {
                     el.classList.remove('is-valid');
@@ -1749,16 +1757,6 @@ function validateStep(step) {
                 }
             }
         });
-
-        // Floor No is optional — just reflect valid state if filled, never block submission
-        if (floorNo) {
-            floorNo.classList.remove('is-invalid');
-            if (floorNo.value && floorNo.value.trim() !== '') {
-                floorNo.classList.add('is-valid');
-            } else {
-                floorNo.classList.remove('is-valid');
-            }
-        }
 
         if (!wardId || !wardId.value) {
             if (wardDisplay) {
@@ -1912,7 +1910,7 @@ function initLeafletMap() {
     window.searchOnMap = function() {
         const query = document.getElementById('mapSearchInput').value;
         if (!query) return;
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bengaluru')}`)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bengaluru')}&email=test@example.com`)
             .then(res => res.json())
             .then(data => {
                 if (data && data.length > 0) {
@@ -1963,9 +1961,9 @@ function updatePickupLocation(lat, lng) {
 
         // 2. Safe reverse geocoding with 2.5s AbortController timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`, {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&email=test@example.com`, {
             signal: controller.signal,
             headers: { 'Accept-Language': 'en' }
         })
@@ -1976,13 +1974,13 @@ function updatePickupLocation(lat, lng) {
         })
         .then(data => {
             const addrEl = document.getElementById('addressInput');
-            if (data && data.display_name && addrEl && !addrEl.value) {
+            if (data && data.display_name && addrEl ) {
                 addrEl.value = data.display_name;
                 validateSingleField(addrEl);
             }
 
             const pinEl = document.getElementById('pincodeInput');
-            if (data && data.address && data.address.postcode && pinEl && !pinEl.value) {
+            if (data && data.address && data.address.postcode && pinEl ) {
                 pinEl.value = data.address.postcode;
                 validateSingleField(pinEl);
             }
@@ -1990,7 +1988,7 @@ function updatePickupLocation(lat, lng) {
         .catch(err => {
             clearTimeout(timeoutId);
             const addrEl = document.getElementById('addressInput');
-            if (addrEl && !addrEl.value) {
+            if (addrEl ) {
                 addrEl.value = `Site Location near ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E, Bengaluru`;
                 validateSingleField(addrEl);
             }
@@ -2042,13 +2040,13 @@ window.fetchCurrentLocation = function(options = {}) {
                 document.getElementById('mapCoordinates').innerText = `Location selected: ${demoLat.toFixed(4)}° N, ${demoLng.toFixed(4)}° E`;
             }
             const addrEl = document.getElementById('addressInput');
-            if (addrEl && !addrEl.value) {
+            if (addrEl ) {
                 addrEl.value = "Millers Tank Bund Road, Kaverappa Layout, Vasanth Nagar, Bengaluru, Karnataka 560052";
                 validateSingleField(addrEl);
             }
 
             const pinEl = document.getElementById('pincodeInput');
-            if (pinEl && !pinEl.value) {
+            if (pinEl ) {
                 pinEl.value = "560052";
                 validateSingleField(pinEl);
             }
@@ -2281,3 +2279,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

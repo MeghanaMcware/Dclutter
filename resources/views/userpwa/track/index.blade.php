@@ -431,8 +431,8 @@
         <label class="entries-picker" for="entriesPerPage">
             Show
             <select id="entriesPerPage" onchange="changePageSize(this.value)">
-                <option value="5" selected>5</option>
-                <option value="10">10</option>
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
                 <option value="15">15</option>
                 <option value="20">20</option>
                 <option value="50">50</option>
@@ -563,7 +563,7 @@
 <script>
     let currentFilter = 'all';
     let currentPage = 1;
-    let pageSize = 5;
+    let pageSize = 10;
 
     function setTabFilter(el, filter) {
         currentFilter = filter;
@@ -642,7 +642,7 @@
         const summary = document.getElementById('page-summary');
         if (!wrapper || !bar) return;
 
-        if (total === 0 || totalPages <= 1) {
+        if (total === 0) {
             wrapper.style.display = 'none';
             bar.innerHTML = '';
             return;

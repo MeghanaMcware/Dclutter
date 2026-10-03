@@ -35,10 +35,10 @@
     }
     .bottom-nav a {
         text-align: center;
-        color: #94a3b8;
+        color: #0e7a43;
         text-decoration: none;
-        font-size: 10px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: bold;
         flex: 1;
     }
     .bottom-nav a i {

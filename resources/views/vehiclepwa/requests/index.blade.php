@@ -1050,35 +1050,50 @@
                 '';
 
             return `
-                    <div class="request-card request-item-row" data-search="${searchText}" data-status="${item.status.toLowerCase()}">
-                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="request-card request-item-row" data-search="${searchText}" data-status="${item.status.toLowerCase()}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge-cwd-id">${item.ref}</span>
                             ${statusBadge}
                         </div>
-                        <div>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" class="btn-get-directions">
-                                <i class="fa-solid fa-diamond-turn-right"></i> Get Directions
-                            </a>
-                        </div>
-                        <hr class="card-divider">
                         <div class="d-flex justify-content-between align-items-end">
                             <div>
                                 <div class="card-info-item">
-                                    <i class="fa-solid fa-recycle text-success"></i>
-                                    <span class="card-info-label">Category:</span>
-                                    <span class="card-info-value">${item.category}</span>
+                                    <i class="fa-solid fa-user text-primary" style="width: 16px; text-align: center; margin-right: 2px;"></i>
+                                    <span class="card-info-label">Name:</span>
+                                    <span class="card-info-value">${item.applicant}</span>
                                 </div>
                                 <div class="card-info-item" style="margin-top: 4px;">
-                                    <i class="fa-solid fa-list-ul text-info"></i>
-                                    <span class="card-info-label">Sub Category:</span>
-                                    <span class="card-info-value">${item.subCategory}</span>
+                                    <i class="fa-solid fa-phone text-success" style="width: 16px; text-align: center; margin-right: 2px;"></i>
+                                    <span class="card-info-label">Phone:</span>
+                                    <span class="card-info-value"><a href="tel:${item.mobile}" style="text-decoration:none; color:inherit;">${item.mobile}</a></span>
+                                </div>
+                                <div class="card-info-item" style="margin-top: 4px;">
+                                    <i class="fa-regular fa-calendar-days text-warning" style="width: 16px; text-align: center; margin-right: 2px;"></i>
+                                    <span class="card-info-label">Date:</span>
+                                    <span class="card-info-value">${item.date}</span>
                                 </div>
                                 ${rescheduledInfo}
                             </div>
-                            <button type="button" class="btn-view-card" data-request-index="${index}">
-                                <i class="fa-regular fa-eye"></i> View
-                            </button>
                         </div>
+                        <hr class="card-divider">
+                          
+                          <div class="d-flex gap-2 mb-2">
+                             ${ item.status === 'PICKED_UP' ? 
+                                `<button class="btn btn-secondary w-100 py-1 font-13" disabled><i class="fa-solid fa-check"></i> Picked Up</button>` : 
+                                (item.beforePickupDone ? 
+                                `<a href="{{ url('/vehicle/after-pickup') }}/${item.id}" class="btn w-100 py-1 font-13 fw-bold" style="background:#1f4e79; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> After Pickup</a>` : 
+                                `<a href="{{ url('/vehicle/before-pickup') }}/${item.id}" class="btn w-100 py-1 font-13 fw-bold" style="background:#0e7a43; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> Before Pickup</a>`)
+                             }
+                          </div>
+
+                          <div class="d-flex justify-content-between align-items-center">
+                              <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" class="btn-get-directions" style="margin-top: 0; width: 48%; text-align: center;">
+                                  <i class="fa-solid fa-location-dot"></i> Location
+                              </a>
+                              <button type="button" class="btn-view-card" data-request-index="${index}" style="width: 48%; margin-top: 0;">
+                                  <i class="fa-regular fa-eye"></i> View
+                              </button>
+                          </div>
                     </div>`;
         }).join('');
 

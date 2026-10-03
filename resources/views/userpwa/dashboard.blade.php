@@ -206,9 +206,9 @@
             A single window platform for all your Debris & Bulk Waste Management needs.
         </div>
         
-        <!-- <div class="hero-illustration">
+        <div class="hero-illustration">
             <img src="{{ asset('frontendwebsite/img/hero-truck-new.png') }}" alt="Bengaluru Clean Streets Illustration">
-        </div> -->
+        </div>
     </div>
 
     <div class="action-buttons">
@@ -280,7 +280,7 @@
                         $badgeClass = 'bg-danger';
                     }
                 @endphp
-                <a href="{{ route('user.details', ['id' => $req->request_number]) }}" class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 border text-decoration-none bg-white shadow-sm" style="border-color: #e2e8f0 !important;">
+                <a href="{{ route('user.details', ['id' => $req->id]) }}" class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 border text-decoration-none bg-white shadow-sm" style="border-color: #e2e8f0 !important;">
                     <div>
                         <div class="fw-bold text-dark font-13">{{ $req->request_number }}</div>
                         <div class="text-muted font-11 mt-1">
@@ -292,8 +292,7 @@
                             {{ str_replace('_', ' ', $req->status) }}
                         </span>
                        <span class="btn btn-sm btn-outline-primary"
-      style="font-size: 12px; padding: 2px 21px; font-weight: 600; cursor: pointer;"
-      onclick="window.location.href='{{ route('user.details', ['id' => $req->id]) }}'">
+      style="font-size: 12px; padding: 2px 21px; font-weight: 600; cursor: pointer;" onclick="window.location.href='{{ route('user.details', ['id' => $req->id]) }}'">
     View
 </span>
                     </div>
@@ -301,6 +300,10 @@
                 </a>
             
             @endforeach
+            
+            <div class="mt-3 d-flex justify-content-center">
+                {{ $recentRequests->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     @endif
 </div>

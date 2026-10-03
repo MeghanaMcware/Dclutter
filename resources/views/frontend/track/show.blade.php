@@ -718,7 +718,7 @@
                         </div>
                     </div>
                 @endif
-
+                
                 <div class="mt-4 pt-3 border-top">
                     <a href="{{ route('citizen.track', ['id' => $wasteRequest->mobile_number ?? $wasteRequest->request_number]) }}" class="btn-ui w-100 text-center">
                         <i class="fa fa-arrow-left me-1"></i> Back to Track Request
