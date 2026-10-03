@@ -15,9 +15,9 @@ class VehiclePwaController extends Controller
         protected WasteRequestService $wasteRequestService
     ) {}
     /**
-     * Helper to get logged in driver's vehicle ID.
+     * Helper to get logged in driver's vehicle.
      */
-    protected function getDriverVehicleId()
+    protected function getDriverVehicle()
     {
         if (!Auth::check()) {
             return null;
@@ -28,6 +28,21 @@ class VehiclePwaController extends Controller
             ->orWhere('driver_phone', $user->mobile_number)
             ->first();
 
+        // If vehicle is found but marked inactive, log out immediately
+        if ($vehicle && !$vehicle->status) {
+            Auth::logout();
+            return null;
+        }
+
+        return $vehicle;
+    }
+
+    /**
+     * Helper to get logged in driver's vehicle ID.
+     */
+    protected function getDriverVehicleId()
+    {
+        $vehicle = $this->getDriverVehicle();
         return $vehicle?->id;
     }
 
@@ -36,22 +51,6 @@ class VehiclePwaController extends Controller
      */
     public function dashboard()
     {
-        $vehicleId = $this->getDriverVehicleId();
-
-        $assignedQuery = WasteRequest::whereIn('status', ['assigned', 'not_available']);
-        $pickedUpQuery = WasteRequest::where('status', 'picked_up');
-        $recentQuery = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available']);
-
-        if ($vehicleId) {
-            $assignedQuery->where('vehicle_id', $vehicleId);
-            $pickedUpQuery->where('vehicle_id', $vehicleId);
-            $recentQuery->where('vehicle_id', $vehicleId);
-        }
-
-        $assignedCount = $assignedQuery->count();
-        $pickedUpCount = $pickedUpQuery->count();
-        $recentRequests = $recentQuery->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->take(5)->get();
-
         $user = Auth::user();
         if (!$user || !$user->hasRole('vehicle')) {
             return redirect()->route('vehicle.login')->withErrors([
@@ -64,9 +63,29 @@ class VehiclePwaController extends Controller
             ->orWhere('driver_phone', $user->mobile_number)
             ->first();
 
-        if (!$vehicle && $vehicleId) {
-            $vehicle = Vehicle::with('owner')->find($vehicleId);
+        if (!$vehicle) {
+            Auth::logout();
+            return redirect()->route('vehicle.login')->withErrors([
+                'mobile' => 'No registered vehicle record found for this account.',
+            ]);
         }
+
+        if (!$vehicle->status) {
+            Auth::logout();
+            return redirect()->route('vehicle.login')->withErrors([
+                'mobile' => "Vehicle ({$vehicle->vehicle_number}) is currently inactive. Please contact the administrator.",
+            ]);
+        }
+
+        $vehicleId = $vehicle->id;
+
+        $assignedQuery = WasteRequest::whereIn('status', ['assigned', 'not_available'])->where('vehicle_id', $vehicleId);
+        $pickedUpQuery = WasteRequest::where('status', 'picked_up')->where('vehicle_id', $vehicleId);
+        $recentQuery = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available'])->where('vehicle_id', $vehicleId);
+
+        $assignedCount = $assignedQuery->count();
+        $pickedUpCount = $pickedUpQuery->count();
+        $recentRequests = $recentQuery->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->take(5)->get();
 
         $driverName = !empty(trim($user?->name ?? '')) ? $user->name : ($vehicle?->driver_name ?: 'N/A');
         $driverMobile = !empty($user?->mobile_number) ? $user->mobile_number : ($vehicle?->driver_phone ?: 'N/A');
@@ -217,22 +236,26 @@ class VehiclePwaController extends Controller
         $nextDate = $request->input('next_date') ?? $request->input('next_pickup_date');
 
         try {
-            $this->wasteRequestService->reschedule(
+            $updatedRequest = $this->wasteRequestService->reschedule(
                 $wasteRequest,
                 $request->reason,
                 $nextDate
             );
 
+            $nextPickupFormatted = $updatedRequest->next_pickup_date ? \Carbon\Carbon::parse($updatedRequest->next_pickup_date)->format('d M Y (l)') : 'Upcoming Sunday';
+            $msg = "Request #{$updatedRequest->request_number} rescheduled for {$nextPickupFormatted} ({$request->reason}).";
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Status updated: Waste Not Available.',
+                    'status' => $updatedRequest->status,
+                    'message' => $msg,
                     'redirect_url' => route('vehicle.trip_progress'),
                 ]);
             }
 
             return redirect()->route('vehicle.trip_progress')
-                ->with('info', 'Status updated: Waste Not Available.');
+                ->with('info', $msg);
         } catch (\InvalidArgumentException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -420,13 +443,13 @@ class VehiclePwaController extends Controller
 
         $wasteRequest = null;
         if ($reqId) {
-            $wasteRequest = WasteRequest::find($reqId);
+            $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])->find($reqId);
         } elseif ($pickupId) {
-            $wasteRequest = WasteRequest::where('request_number', $pickupId)->first();
+            $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])->where('request_number', $pickupId)->first();
         }
 
         if (!$wasteRequest) {
-            $wasteRequest = WasteRequest::where('status', 'picked_up')->first();
+            $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])->where('status', 'picked_up')->first();
         }
 
         // If request is already dumped or completed, block access and redirect back
@@ -434,9 +457,49 @@ class VehiclePwaController extends Controller
             return redirect()->route('vehicle.dump')->with('warning', 'This waste request has already been dumped.');
         }
 
-        $plants = \App\Models\Plant::orderBy('name')->get();
+        // Get driver's vehicle details and assigned constituencies
+        $vehicleId = $this->getDriverVehicleId();
+        $user = Auth::user();
+        $vehicle = null;
 
-        return view('vehiclepwa.dumpform', compact('wasteRequest', 'plants'));
+        if ($vehicleId) {
+            $vehicle = Vehicle::find($vehicleId);
+        }
+        if (!$vehicle && $user) {
+            $vehicle = Vehicle::where('user_id', $user->id)
+                ->orWhere('driver_phone', $user->mobile_number)
+                ->first();
+        }
+        if (!$vehicle && $wasteRequest?->vehicle) {
+            $vehicle = $wasteRequest->vehicle;
+        }
+
+        // Extract vehicle belonging constituency IDs
+        $constituencyIds = [];
+        if ($vehicle && !empty($vehicle->constituency_ids)) {
+            $rawIds = is_array($vehicle->constituency_ids) ? $vehicle->constituency_ids : json_decode($vehicle->constituency_ids, true);
+            if (is_array($rawIds)) {
+                $constituencyIds = array_values(array_filter(array_map('intval', $rawIds)));
+            }
+        }
+
+        // Fallback: If vehicle has no constituency IDs configured, use request's constituency if available
+        if (empty($constituencyIds) && $wasteRequest?->constituency_id) {
+            $constituencyIds = [(int) $wasteRequest->constituency_id];
+        }
+
+        // Query dump yard / plant locations strictly belonging to vehicle's constituencies AND active status
+        $plantsQuery = \App\Models\Plant::active()->with(['constituency', 'corporation']);
+
+        if (!empty($constituencyIds)) {
+            $plantsQuery->whereIn('constituency_id', $constituencyIds);
+        } else {
+            $plantsQuery->whereRaw('1 = 0');
+        }
+
+        $plants = $plantsQuery->orderBy('name')->get();
+
+        return view('vehiclepwa.dumpform', compact('wasteRequest', 'plants', 'vehicle'));
     }
 
     /**
@@ -453,6 +516,19 @@ class VehiclePwaController extends Controller
             'dump_photos' => 'nullable|array',
             'dump_photos.*' => 'image|max:1024',
         ]);
+
+        // Validate that selected plant is not inactive
+        $submittedPlant = \App\Models\Plant::where('name', $request->dump_location)->first();
+        if ($submittedPlant && !$submittedPlant->status) {
+            $msg = "The dump location '{$request->dump_location}' is currently inactive and cannot accept waste.";
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                ], 422);
+            }
+            return back()->withInput()->withErrors(['dump_location' => $msg]);
+        }
 
         // Match request by request_id OR pickup_id (request_number)
         $wasteRequest = null;
@@ -512,38 +588,55 @@ class VehiclePwaController extends Controller
     }
 
 
+    /**
+     * Vehicle Request History List.
+     */
     public function history(Request $request)
     {
         $vehicleId = $this->getDriverVehicleId();
         
-        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
-            ->whereIn('status', ['dumped', 'completed', 'picked_up']);
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dumpRecord', 'dump']);
             
         if ($vehicleId) {
             $query->where('vehicle_id', $vehicleId);
         }
+
+        // Status Filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'dumped') {
+                $query->whereIn('status', ['dumped', 'completed']);
+            } else {
+                $query->where('status', $request->status);
+            }
+        } else {
+            $query->whereIn('status', ['dumped', 'completed', 'picked_up', 'not_available', 'assigned']);
+        }
         
-        
+        // Search Term Filter
         if ($request->filled('search')) {
             $term = trim($request->search);
             $query->where(function($q) use ($term) {
                 $q->where('request_number', 'like', "%{$term}%")
                   ->orWhere('applicant_name', 'like', "%{$term}%")
-                  ->orWhere('mobile_number', 'like', "%{$term}%");
+                  ->orWhere('mobile_number', 'like', "%{$term}%")
+                  ->orWhere('address', 'like', "%{$term}%")
+                  ->orWhere('house_no', 'like', "%{$term}%");
             });
         }
         
-        $requests = $query->orderBy('updated_at', 'desc')->paginate(10);
-
+        $requests = $query->orderByRaw('COALESCE(picked_up_at, assigned_at, updated_at, created_at) DESC')->paginate(10);
         
         return view('vehiclepwa.history.index', compact('requests'));
     }
 
+    /**
+     * Vehicle Request History Full Details View.
+     */
     public function historyShow($id)
     {
         $vehicleId = $this->getDriverVehicleId();
         
-        $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle', 'dumpRecord'])
+        $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dumpRecord', 'dump', 'user'])
             ->where('id', $id);
             
         if ($vehicleId) {

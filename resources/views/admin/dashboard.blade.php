@@ -279,7 +279,7 @@ body {
         <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Pending Requests <i class="fa fa-clock-o text-warning" style="font-size: 15px;"></i></div>
+                    <div class="stat-title">Pending <i class="fa fa-clock-o text-warning" style="font-size: 15px;"></i></div>
                     <div class="stat-value val-orange" id="statPendingRequests">{{ number_format($pendingRequests) }}</div>
                 </div>
             </div>
@@ -287,15 +287,15 @@ body {
         <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Scheduled Pickups <i class="fa fa-calendar text-primary" style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-blue" id="statScheduledPickups">{{ number_format($scheduledPickups) }}</div>
+                    <div class="stat-title">Assigned <i class="fa fa-truck text-primary" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-blue" id="statAssignedRequests">{{ number_format($assignedRequests) }}</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Rescheduled Requests <i class="fa fa-history text-warning" style="font-size: 15px;"></i></div>
+                    <div class="stat-title">Rescheduled <i class="fa fa-history text-warning" style="font-size: 15px;"></i></div>
                     <div class="stat-value val-purple" id="statRescheduledRequests">{{ number_format($rescheduledRequests) }}</div>
                 </div>
             </div>
@@ -303,7 +303,15 @@ body {
         <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Dumped Requests <i class="fa fa-recycle text-success" style="font-size: 15px;"></i></div>
+                    <div class="stat-title">Picked Up <i class="fa fa-truck-ramp-box text-info" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-blue" id="statPickedUpRequests">{{ number_format($pickedUpRequests) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">Dumped <i class="fa fa-recycle text-success" style="font-size: 15px;"></i></div>
                     <div class="stat-value val-green" id="statDumpedRequests">{{ number_format($dumpedRequests) }}</div>
                 </div>
             </div>
@@ -311,16 +319,8 @@ body {
         <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Completed Pickups <i class="fa fa-check-circle text-success" style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-green" id="statCompletedPickups">{{ number_format($completedPickups) }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-xl-3">
-            <div class="dash-card">
-                <div class="stat-box">
-                    <div class="stat-title">Cancelled Pickups <i class="fa fa-ban text-danger" style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-red" id="statCancelledPickups">{{ number_format($cancelledPickups) }}</div>
+                    <div class="stat-title">Cancelled <i class="fa fa-ban text-danger" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-red" id="statCancelledRequests">{{ number_format($cancelledRequests) }}</div>
                 </div>
             </div>
         </div>
@@ -550,12 +550,12 @@ body {
             catChart.render();
         }
 
-        // 4. Donut Chart: Pickup status breakdown (Exact Original Template Settings)
+        // 4. Donut Chart: Request status breakdown (Pending, Assigned, Rescheduled, Picked Up, Dumped, Cancelled)
         var donutEl = document.querySelector("#donutchart");
         var donutChart = null;
         if (donutEl) {
             donutEl.innerHTML = '';
-            var statS = statusSeries.length > 0 && Math.max.apply(Math, statusSeries) > 0 ? statusSeries : [1, 0, 0, 0];
+            var statS = statusSeries.length > 0 && Math.max.apply(Math, statusSeries) > 0 ? statusSeries : [1, 0, 0, 0, 0, 0];
             var donutchartOptions = {
                 chart: {
                     width: 380,
@@ -574,7 +574,7 @@ body {
                         }
                     }
                 }],
-                colors: ['#3489eb', '#eb9b34', '#51bb25', '#f41b35']
+                colors: ['#f59e0b', '#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#ef4444']
             };
             donutChart = new ApexCharts(donutEl, donutchartOptions);
             donutChart.render();
@@ -611,20 +611,20 @@ body {
                     var elPending = document.getElementById('statPendingRequests');
                     if (elPending) elPending.innerText = data.stats.pendingRequests;
 
-                    var elSched = document.getElementById('statScheduledPickups');
-                    if (elSched) elSched.innerText = data.stats.scheduledPickups;
+                    var elAssigned = document.getElementById('statAssignedRequests');
+                    if (elAssigned) elAssigned.innerText = data.stats.assignedRequests;
 
                     var elResched = document.getElementById('statRescheduledRequests');
                     if (elResched) elResched.innerText = data.stats.rescheduledRequests;
 
+                    var elPickedUp = document.getElementById('statPickedUpRequests');
+                    if (elPickedUp) elPickedUp.innerText = data.stats.pickedUpRequests;
+
                     var elDumped = document.getElementById('statDumpedRequests');
                     if (elDumped) elDumped.innerText = data.stats.dumpedRequests;
 
-                    var elComp = document.getElementById('statCompletedPickups');
-                    if (elComp) elComp.innerText = data.stats.completedPickups;
-
-                    var elCanc = document.getElementById('statCancelledPickups');
-                    if (elCanc) elCanc.innerText = data.stats.cancelledPickups;
+                    var elCanc = document.getElementById('statCancelledRequests');
+                    if (elCanc) elCanc.innerText = data.stats.cancelledRequests;
 
                     var elUsers = document.getElementById('statTotalUsers');
                     if (elUsers) elUsers.innerText = data.stats.totalUsers;
@@ -664,7 +664,10 @@ body {
                     if (donutChart) {
                         var updatedStatS = data.statusBreakdown.series.length > 0 && Math.max.apply(Math, data.statusBreakdown.series) > 0 
                             ? data.statusBreakdown.series 
-                            : [1, 0, 0, 0];
+                            : [1, 0, 0, 0, 0];
+                        donutChart.updateOptions({
+                            labels: data.statusBreakdown.labels
+                        });
                         donutChart.updateSeries(updatedStatS);
                     }
 

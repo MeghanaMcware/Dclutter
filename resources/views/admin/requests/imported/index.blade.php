@@ -223,9 +223,20 @@
                                                 <a href="{{ route('admin.imported-requests.show', $req->id) }}" class="btn btn-primary" title="View">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <a data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-secondary" title="Assign Vehicle">
-                                                    <i class="fa fa-truck"></i>
-                                                </a>
+                                                @if(!in_array($req->status, ['dumped', 'completed']))
+                                                    <button type="button" 
+                                                            class="btn btn-success edit-legacy-request" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#assignLegacyVehicleModal" 
+                                                            data-db-id="{{ $req->id }}" 
+                                                            data-ref-id="{{ $req->excel_id ?? ('#' . $req->id) }}" 
+                                                            data-applicant="{{ $req->applicant_name ?? 'Citizen' }}"
+                                                            data-constituency-id="{{ $req->constituency_id }}" 
+                                                            data-constituency-name="{{ $req->constituency?->name ?? ($req->division_name ?? 'N/A') }}" 
+                                                            title="Assign Vehicle & Promote to Active">
+                                                        <i class="fa fa-truck"></i>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -238,43 +249,47 @@
                         </table>
                     </div>
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-     <div class="modal-content">
-            <form action="" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="assignVehicleModalLabel">
-                        <i class="fa fa-truck text-primary me-2"></i> Assign Vehicle to Request ##DCL-2026-000022
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="vehicle_id">Select Vehicle <span class="text-danger">*</span></label>
-                        <select class="form-select" id="vehicle_id" name="vehicle_id" required>
-                            <option value="" disabled selected>-- Choose Available Vehicle --</option>
-                           
-                                <option value="">
-                                   KA07S7242 - Truck (Driver: suprith)
-                                </option>
-                            
-                        </select>
+                    <!-- Assign Vehicle Modal -->
+                    <div class="modal fade" id="assignLegacyVehicleModal" tabindex="-1" aria-labelledby="assignLegacyVehicleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold" id="assignLegacyVehicleModalLabel">
+                                        <i class="fa fa-truck text-primary me-2"></i> Assign Vehicle to Legacy Request <span id="modalRefId" class="text-primary"></span>
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" id="modalLegacyDbId">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Applicant Name</label>
+                                        <input type="text" id="modalApplicantName" class="form-control" readonly style="background-color: #f8f9fa;">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Constituency / Division</label>
+                                        <input type="text" id="modalConstituencyName" class="form-control" readonly style="background-color: #f8f9fa;">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold" for="assignVehicleSelect">Select Available Vehicle <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="assignVehicleSelect" required>
+                                            <option value="" disabled selected>-- Choose Available Vehicle --</option>
+                                        </select>
+                                        <div id="vehicleError" class="text-danger small mt-1" style="display: none;">
+                                            Please select a vehicle.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold" for="modalRemarks">Approval / Assignment Remarks <span class="text-muted font-11 fw-normal">(Optional)</span></label>
+                                        <textarea class="form-control" id="modalRemarks" rows="2" placeholder="Enter any notes or remarks for this assignment..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" id="submitAssignVehicleBtn" class="btn btn-primary"><i class="fa fa-check me-1"></i> Assign Vehicle & Promote</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="remarks">Approval / Assignment Remarks <span class="text-muted font-11 fw-normal">(Optional)</span></label>
-                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Enter any notes or remarks for this approval/assignment...">Remarks</textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-save me-1"></i> Assign Vehicle</button>
-                </div>
-            </form>
-        </div>
-  </div>
-</div>
 
                     <!-- Clean Bootstrap 5 Server-Side Pagination Bar -->
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
@@ -300,5 +315,123 @@ function submitExport() {
     const params = new URLSearchParams(new FormData(form)).toString();
     window.location.href = "{{ route('admin.imported-requests.export') }}?" + params;
 }
+
+$(document).ready(function() {
+    const vehicles = [
+        @foreach($vehicles as $vehicle)
+        {
+            id: {{ $vehicle->id }},
+            number: '{{ addslashes($vehicle->vehicle_number) }}',
+            type: '{{ addslashes($vehicle->vehicle_type ?? "Garbage Truck") }}',
+            driver: '{{ addslashes($vehicle->driver_name ?? $vehicle->owner?->name ?? "N/A") }}',
+            driver_phone: '{{ addslashes($vehicle->driver_phone ?? $vehicle->owner?->mobile_number ?? "N/A") }}',
+            constituency_ids: @json($vehicle->constituency_ids ?? []),
+        },
+        @endforeach
+    ];
+
+    let currentRow = null;
+
+    // Open Assign Vehicle Modal
+    $(document).on('click', '.edit-legacy-request', function() {
+        currentRow = $(this).closest('tr');
+        const dbId = $(this).data('db-id');
+        const refId = $(this).data('ref-id');
+        const applicant = $(this).data('applicant');
+        const constituencyId = $(this).data('constituency-id');
+        const constituencyName = $(this).data('constituency-name');
+
+        $('#modalLegacyDbId').val(dbId);
+        $('#modalRefId').text(refId);
+        $('#modalApplicantName').val(applicant);
+        $('#modalConstituencyName').val(constituencyName);
+        $('#modalRemarks').val('');
+        $('#vehicleError').hide();
+
+        // Populate Vehicle Dropdown filtered by constituency if available
+        const $select = $('#assignVehicleSelect');
+        $select.empty();
+
+        const filtered = constituencyId 
+            ? vehicles.filter(v => {
+                if (!v.constituency_ids) return false;
+                const ids = Array.isArray(v.constituency_ids) ? v.constituency_ids : [];
+                return ids.includes(Number(constituencyId)) || ids.includes(String(constituencyId));
+            }) 
+            : vehicles;
+
+        if (filtered.length === 0) {
+            $select.append(new Option('No active vehicles registered for ' + (constituencyName || 'this area'), '', true, true));
+            $select.prop('disabled', true);
+            $('#submitAssignVehicleBtn').prop('disabled', true);
+        } else {
+            $select.prop('disabled', false);
+            $('#submitAssignVehicleBtn').prop('disabled', false);
+            $select.append(new Option('-- Choose Available Vehicle (' + filtered.length + ' available) --', ''));
+            filtered.forEach(v => {
+                $select.append(new Option(v.number + ' - ' + v.type + ' (Driver: ' + v.driver + ')', v.id));
+            });
+        }
+    });
+
+    // Submit Assign Vehicle via AJAX
+    $('#submitAssignVehicleBtn').on('click', function() {
+        const dbId = $('#modalLegacyDbId').val();
+        const vehicleId = $('#assignVehicleSelect').val();
+        const remarks = $('#modalRemarks').val();
+
+        if (!vehicleId) {
+            $('#vehicleError').show();
+            return;
+        }
+
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i> Processing...');
+
+        $.ajax({
+            url: "{{ url('/admin/imported-requests') }}/" + dbId + "/assign-vehicle",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                vehicle_id: vehicleId,
+                remarks: remarks
+            },
+            success: function(response) {
+                $btn.prop('disabled', false).html('<i class="fa fa-check me-1"></i> Assign Vehicle & Promote');
+                $('#assignLegacyVehicleModal').modal('hide');
+
+                if (currentRow) {
+                    // Update status badge to Assigned in table row
+                    currentRow.find('td').eq(7).html('<span class="status-badge status-assigned">Assigned</span>');
+                }
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Assigned & Unified Successfully!',
+                        html: response.message + '<br><br><a href="{{ url("/admin/requests") }}/' + response.unified_request_id + '" class="btn btn-sm btn-primary" target="_blank">View Active Request #' + response.unified_request_number + '</a>',
+                        confirmButtonColor: '#28a745'
+                    });
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr) {
+                $btn.prop('disabled', false).html('<i class="fa fa-check me-1"></i> Assign Vehicle & Promote');
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to assign vehicle. Please try again.';
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: msg,
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert(msg);
+                }
+            }
+        });
+    });
+});
 </script>
 @endsection

@@ -268,7 +268,8 @@ class AdminReportController extends Controller
                 'Mobile Number',
                 'Vehicle No.',
                 'Driver Phone',
-                'Pickup Date',
+                'Pickup Requested Date',
+                'Actual Pickup Date',
                 'Dump Date',
                 'Dump Plant',
                 'Status',
@@ -278,8 +279,9 @@ class AdminReportController extends Controller
             foreach ($requests as $req) {
                 $categories = is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?? 'N/A');
                 $subcategories = is_array($req->subcategory_ids) ? implode(', ', $req->subcategory_ids) : ($req->subcategory_ids ?? 'N/A');
-                $pickupDate = $req->picked_up_at ? $req->picked_up_at->format('d-m-Y') : ($req->preferred_pickup_date ? $req->preferred_pickup_date->format('d-m-Y') : 'N/A');
-                $dumpDate = ($req->dump?->dumped_at ?? $req->dump?->created_at ?? $req->dumpRecord?->dumped_at ?? $req->dumpRecord?->created_at)?->format('d-m-Y') ?? 'N/A';
+                $pickupRequestedDate = $req->preferred_pickup_date ? $req->preferred_pickup_date->format('d-m-Y') : ($req->created_at ? $req->created_at->format('d-m-Y') : 'N/A');
+                $actualPickupDate = $req->picked_up_at ? $req->picked_up_at->format('d-m-Y h:i A') : 'Not Picked Up';
+                $dumpDate = ($req->dump?->dumped_at ?? $req->dump?->created_at ?? $req->dumpRecord?->dumped_at ?? $req->dumpRecord?->created_at)?->format('d-m-Y h:i A') ?? 'N/A';
                 $statusLabel = self::STATUS_OPTIONS[$req->status] ?? ucfirst(str_replace('_', ' ', $req->status));
 
                 fputcsv($file, [
@@ -293,7 +295,8 @@ class AdminReportController extends Controller
                     $req->mobile_number,
                     $req->vehicle?->vehicle_number ?? 'N/A',
                     $req->vehicle?->driver_phone ?? $req->vehicle?->owner?->mobile_number ?? 'N/A',
-                    $pickupDate,
+                    $pickupRequestedDate,
+                    $actualPickupDate,
                     $dumpDate,
                     $req->dump?->plant_name ?? $req->dumpRecord?->plant_name ?? 'N/A',
                     $statusLabel,

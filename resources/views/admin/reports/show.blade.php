@@ -90,7 +90,8 @@
         </div>
 
         @php
-            $pickupDate = $wasteRequest->picked_up_at ? $wasteRequest->picked_up_at->format('d-m-Y h:i A') : ($wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d-m-Y') : 'N/A');
+            $requestedPickupDate = $wasteRequest->preferred_pickup_date ? $wasteRequest->preferred_pickup_date->format('d-m-Y') : ($wasteRequest->created_at ? $wasteRequest->created_at->format('d-m-Y') : 'N/A');
+            $actualPickupDate = $wasteRequest->picked_up_at ? $wasteRequest->picked_up_at->format('d-m-Y h:i A') : 'Not Picked Up';
             $dumpDate = ($wasteRequest->dump?->dumped_at ?? $wasteRequest->dump?->created_at ?? $wasteRequest->dumpRecord?->dumped_at ?? $wasteRequest->dumpRecord?->created_at)?->format('d-m-Y h:i A') ?? 'N/A';
             
             $statusClass = match($wasteRequest->status) {
@@ -148,7 +149,7 @@
                                     <th class="bg-light">Category</th>
                                     <td>
                                         <span style="font-size:13px;">
-                                            @if(is_array($wasteRequest->category_ids))
+                                             @if(is_array($wasteRequest->category_ids))
                                                 {{ implode(', ', $wasteRequest->category_ids) }}
                                             @else
                                                 {{ $wasteRequest->category_ids ?? 'N/A' }}
@@ -180,7 +181,7 @@
                                     <th class="bg-light">Assigned Vehicle No</th>
                                     <td>
                                         <span style="font-size:13px;" class="fw-semibold">
-                                            {{ $wasteRequest->vehicle?->vehicle_number ?? 'Not Assigned' }}
+                                             {{ $wasteRequest->vehicle?->vehicle_number ?? 'Not Assigned' }}
                                         </span>
                                     </td>
                                 </tr>
@@ -193,8 +194,12 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th class="bg-light">Pickup Date & Time</th>
-                                    <td><span style="font-size:13px;">{{ $pickupDate }}</span></td>
+                                    <th class="bg-light">Pickup Requested Date</th>
+                                    <td><span style="font-size:13px;">{{ $requestedPickupDate }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Actual Pickup Date & Time</th>
+                                    <td><span style="font-size:13px;">{{ $actualPickupDate }}</span></td>
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Dump Date & Time</th>

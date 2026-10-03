@@ -49,14 +49,27 @@ class AdminVehicleController extends Controller
             'owner_name' => 'required|string|max:255',
             'owner_phone' => 'required|string|regex:/^[0-9]{10}$/',
             'driver_name' => 'required|string|max:255',
-            'driver_phone' => 'required|string|regex:/^[0-9]{10}$/',
-            'license_number' => 'required|string|max:255',
+            'driver_phone' => 'required|string|regex:/^[0-9]{10}$/|unique:vehicles,driver_phone',
+            'license_number' => 'required|string|max:255|unique:vehicles,license_number',
             'vehicle_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'rc_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
             'fitness_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
             'insurance_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
             'license_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'vehicle_number.unique' => 'This vehicle registration number is already registered in the system.',
+            'driver_phone.unique' => 'This driver phone number is already registered with another vehicle.',
+            'license_number.unique' => 'This driver license number is already registered with another vehicle.',
         ]);
+
+        // Normalized duplicate check for vehicle number (e.g., KA-07-S-7242 vs KA07S7242)
+        $cleanVehicleNum = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $request->vehicle_number));
+        $existingNormalized = Vehicle::whereRaw("REPLACE(REPLACE(REPLACE(UPPER(vehicle_number), ' ', ''), '-', ''), '_', '') = ?", [$cleanVehicleNum])->first();
+        if ($existingNormalized) {
+            return back()->withInput()->withErrors([
+                'vehicle_number' => "A vehicle with registration number '{$existingNormalized->vehicle_number}' already exists in the system.",
+            ]);
+        }
 
         // 1. Create or update User account for Vehicle Owner/Driver
         $ownerUser = User::where('mobile_number', $request->owner_phone)->first();
@@ -130,7 +143,40 @@ class AdminVehicleController extends Controller
             'status' => true,
         ]);
 
-        return redirect()->route('admin.vehicles.index')->with('success', 'Vehicle and Owner account created successfully!');
+        // 4. Send WhatsApp Credentials Notification to Driver and Owner
+        try {
+            $whatsAppService = app(\App\Services\WhatsAppService::class);
+            $loginUrl = route('vehicle.login');
+            $defaultPassword = '1234';
+
+            // Send to driver
+            if ($request->driver_phone) {
+                $whatsAppService->sendVehicleCreationCredentials(
+                    destination: $request->driver_phone,
+                    name: $request->driver_name,
+                    vehicleNumber: $vehicle->vehicle_number,
+                    mobileNumber: $request->driver_phone,
+                    password: $defaultPassword,
+                    loginUrl: $loginUrl
+                );
+            }
+
+            // Also send to owner if owner phone is different
+            if ($request->owner_phone && $request->owner_phone !== $request->driver_phone) {
+                $whatsAppService->sendVehicleCreationCredentials(
+                    destination: $request->owner_phone,
+                    name: $request->owner_name,
+                    vehicleNumber: $vehicle->vehicle_number,
+                    mobileNumber: $request->owner_phone,
+                    password: $defaultPassword,
+                    loginUrl: $loginUrl
+                );
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send WhatsApp vehicle creation credentials: " . $e->getMessage());
+        }
+
+        return redirect()->route('admin.vehicles.index')->with('success', 'Vehicle created and login credentials dispatched via WhatsApp successfully!');
     }
 
     /**
@@ -169,9 +215,29 @@ class AdminVehicleController extends Controller
             'owner_name' => 'required|string|max:255',
             'owner_phone' => 'required|string|regex:/^[0-9]{10}$/',
             'driver_name' => 'required|string|max:255',
-            'driver_phone' => 'required|string|regex:/^[0-9]{10}$/',
-            'license_number' => 'required|string|max:255',
+            'driver_phone' => 'required|string|regex:/^[0-9]{10}$/|unique:vehicles,driver_phone,' . $id,
+            'license_number' => 'required|string|max:255|unique:vehicles,license_number,' . $id,
+            'vehicle_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'rc_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'fitness_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'insurance_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'license_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'vehicle_number.unique' => 'This vehicle registration number is already registered in the system.',
+            'driver_phone.unique' => 'This driver phone number is already registered with another vehicle.',
+            'license_number.unique' => 'This driver license number is already registered with another vehicle.',
         ]);
+
+        // Normalized duplicate check for vehicle number (e.g., KA-07-S-7242 vs KA07S7242), excluding current vehicle
+        $cleanVehicleNum = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $request->vehicle_number));
+        $existingNormalized = Vehicle::where('id', '!=', $id)
+            ->whereRaw("REPLACE(REPLACE(REPLACE(UPPER(vehicle_number), ' ', ''), '-', ''), '_', '') = ?", [$cleanVehicleNum])
+            ->first();
+        if ($existingNormalized) {
+            return back()->withInput()->withErrors([
+                'vehicle_number' => "A vehicle with registration number '{$existingNormalized->vehicle_number}' already exists in the system.",
+            ]);
+        }
 
         // Update owner user name if changed
         if ($vehicle->owner) {

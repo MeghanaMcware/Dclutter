@@ -45,11 +45,16 @@ class UserController extends Controller
             'role' => 'required|string|in:agm,dgm',
             'corporation' => 'required_if:role,dgm|array',
             'constituency' => 'required_if:role,agm|array',
+        ], [
+            'phone.unique' => 'This phone number is already registered with another user account.',
+            'email.unique' => 'This email address is already registered with another user account.',
+            'corporation.required_if' => 'Please select at least one corporation for DGM jurisdiction.',
+            'constituency.required_if' => 'Please select at least one constituency for AGM jurisdiction.',
         ]);
 
         $role = $request->role;
-        $corporationIds = ($role === 'dgm') ? array_map('intval', $request->input('corporation', [])) : null;
-        $constituencyIds = ($role === 'agm') ? array_map('intval', $request->input('constituency', [])) : null;
+        $corporationIds = ($role === 'dgm') ? array_values(array_filter(array_map('intval', (array) $request->input('corporation', [])))) : null;
+        $constituencyIds = ($role === 'agm') ? array_values(array_filter(array_map('intval', (array) $request->input('constituency', [])))) : null;
 
         $user = User::create([
             'name' => $request->name,
@@ -100,14 +105,20 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|regex:/^[0-9]{10}$/|unique:users,mobile_number,' . $id,
             'email' => 'required|email|max:255|unique:users,email,' . $id,
+            'password' => 'nullable|string|min:6',
             'role' => 'required|string|in:agm,dgm',
             'corporation' => 'required_if:role,dgm|array',
             'constituency' => 'required_if:role,agm|array',
+        ], [
+            'phone.unique' => 'This phone number is already registered with another user account.',
+            'email.unique' => 'This email address is already registered with another user account.',
+            'corporation.required_if' => 'Please select at least one corporation for DGM jurisdiction.',
+            'constituency.required_if' => 'Please select at least one constituency for AGM jurisdiction.',
         ]);
 
         $role = $request->role;
-        $corporationIds = ($role === 'dgm') ? array_map('intval', $request->input('corporation', [])) : null;
-        $constituencyIds = ($role === 'agm') ? array_map('intval', $request->input('constituency', [])) : null;
+        $corporationIds = ($role === 'dgm') ? array_values(array_filter(array_map('intval', (array) $request->input('corporation', [])))) : null;
+        $constituencyIds = ($role === 'agm') ? array_values(array_filter(array_map('intval', (array) $request->input('constituency', [])))) : null;
 
         $userData = [
             'name' => $request->name,

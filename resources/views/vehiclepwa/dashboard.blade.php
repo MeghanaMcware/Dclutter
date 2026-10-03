@@ -78,7 +78,7 @@
                 <div class="label">Pending Pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">{{ number_format(\App\Models\Request::where('status', 'picked_up')->sum('approx_weight_kg'), 1) }} kg</div>
+                <div class="num">{{ number_format(\App\Models\RequestUpdate::where('action', 'before_pickup')->sum('approx_weight_kg') ?? 0, 1) }} kg</div>
                 <div class="label">Waste Collected</div>
             </div>
         </div>

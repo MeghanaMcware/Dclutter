@@ -89,7 +89,24 @@ class VehicleAuthController extends Controller
             ]);
         }
 
-        // 4. Log in and redirect to dashboard
+        // 4. Strict Check: Vehicle MUST exist and be active
+        $vehicle = Vehicle::where('user_id', $matchedUser->id)
+            ->orWhere('driver_phone', $matchedUser->mobile_number)
+            ->first();
+
+        if (!$vehicle) {
+            return back()->withInput()->withErrors([
+                'mobile' => 'No vehicle registration found for this account. Please contact the administrator.',
+            ]);
+        }
+
+        if (!$vehicle->status) {
+            return back()->withInput()->withErrors([
+                'mobile' => "This vehicle ({$vehicle->vehicle_number}) is currently inactive. Inactive vehicles are not permitted to log in.",
+            ]);
+        }
+
+        // 5. Log in and redirect to dashboard
         Auth::login($matchedUser);
         $request->session()->regenerate();
         return redirect()->route('vehicle.dashboard');

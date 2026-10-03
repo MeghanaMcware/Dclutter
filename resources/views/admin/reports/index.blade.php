@@ -242,7 +242,8 @@ table.dataTable tbody td {
                                     <th class="text-dark">Constituency</th>
                                     <th class="text-dark">Category</th>
                                     <th class="text-dark">Status</th>
-                                    <th class="text-dark">Pickup Date</th>
+                                    <th class="text-dark">Requested Pickup Date</th>
+                                    <th class="text-dark">Actual Pickup Date</th>
                                     <th class="text-dark">Dump Date</th>
                                     <th class="text-dark text-center">Action</th>
                                 </tr>
@@ -250,8 +251,9 @@ table.dataTable tbody td {
                             <tbody>
                                 @forelse($requests as $req)
                                     @php
-                                        $pickupDate = $req->picked_up_at ? $req->picked_up_at->format('d-m-Y') : ($req->preferred_pickup_date ? $req->preferred_pickup_date->format('d-m-Y') : 'N/A');
-                                        $dumpDate = ($req->dump?->dumped_at ?? $req->dump?->created_at ?? $req->dumpRecord?->dumped_at ?? $req->dumpRecord?->created_at)?->format('d-m-Y') ?? 'N/A';
+                                        $requestedPickupDate = $req->preferred_pickup_date ? $req->preferred_pickup_date->format('d-m-Y') : ($req->created_at ? $req->created_at->format('d-m-Y') : 'N/A');
+                                        $actualPickupDate = $req->picked_up_at ? $req->picked_up_at->format('d-m-Y h:i A') : 'Not Picked Up';
+                                        $dumpDate = ($req->dump?->dumped_at ?? $req->dump?->created_at ?? $req->dumpRecord?->dumped_at ?? $req->dumpRecord?->created_at)?->format('d-m-Y h:i A') ?? 'N/A';
                                         
                                         $statusClass = match($req->status) {
                                             'pending' => 'status-pending',
@@ -281,7 +283,8 @@ table.dataTable tbody td {
                                                 {{ $statusLabel }}
                                             </span>
                                         </td>
-                                        <td>{{ $pickupDate }}</td>
+                                        <td>{{ $requestedPickupDate }}</td>
+                                        <td>{{ $actualPickupDate }}</td>
                                         <td>{{ $dumpDate }}</td>
                                         <td class="text-center">
                                             <a href="{{ route('admin.reports.show', $req->id) }}" class="btn btn-primary btn-sm px-3">
@@ -291,7 +294,7 @@ table.dataTable tbody td {
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted py-4">No reports found matching criteria.</td>
+                                        <td colspan="9" class="text-center text-muted py-4">No reports found matching criteria.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

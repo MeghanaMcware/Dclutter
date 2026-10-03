@@ -21,8 +21,19 @@ class AdminRequestController extends Controller
             ->forUserJurisdiction();
 
         // Status Filter
-        if ($request->filled('status')) {
-            $query->where('status', strtolower(str_replace(' ', '_', $request->status)));
+        if ($request->filled('status') && $request->status !== 'all') {
+            $statusVal = strtolower(str_replace(' ', '_', $request->status));
+            if ($statusVal === 'rescheduled' || $statusVal === 'not_available') {
+                $query->whereIn('status', ['not_available', 'rescheduled']);
+            } elseif ($statusVal === 'assigned' || $statusVal === 'scheduled') {
+                $query->whereIn('status', ['assigned', 'scheduled']);
+            } elseif ($statusVal === 'dumped' || $statusVal === 'completed') {
+                $query->whereIn('status', ['dumped', 'completed']);
+            } elseif ($statusVal === 'cancelled' || $statusVal === 'rejected') {
+                $query->whereIn('status', ['cancelled', 'rejected']);
+            } else {
+                $query->where('status', $statusVal);
+            }
         }
 
         // Corporation Filter
@@ -72,7 +83,7 @@ class AdminRequestController extends Controller
                         'vehicle_number' => $req->vehicle?->vehicle_number ?? 'N/A',
                         'driver_number' => $req->vehicle?->driver_phone ?? $req->vehicle?->owner?->mobile_number ?? 'N/A',
                         'status' => $req->status,
-                        'status_label' => $req->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $req->status)),
+                        'status_label' => $req->status_label,
                         'created_at' => $req->created_at->format('d M Y'),
                         'created_at_order' => $req->created_at->format('Y-m-d'),
                         'show_url' => route('admin.requests.show', $req->id),
@@ -95,7 +106,7 @@ class AdminRequestController extends Controller
      */
     public function show($id)
     {
-        $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle', 'dump'])
+        $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dump', 'dumpRecord.vehicle', 'updates'])
             ->where('id', $id)
             ->orWhere('request_number', $id)
             ->firstOrFail();
@@ -122,8 +133,19 @@ class AdminRequestController extends Controller
             ->forUserJurisdiction();
 
         // Status Filter
-        if ($request->filled('status')) {
-            $query->where('status', strtolower(str_replace(' ', '_', $request->status)));
+        if ($request->filled('status') && $request->status !== 'all') {
+            $statusVal = strtolower(str_replace(' ', '_', $request->status));
+            if ($statusVal === 'rescheduled' || $statusVal === 'not_available') {
+                $query->whereIn('status', ['not_available', 'rescheduled']);
+            } elseif ($statusVal === 'assigned' || $statusVal === 'scheduled') {
+                $query->whereIn('status', ['assigned', 'scheduled']);
+            } elseif ($statusVal === 'dumped' || $statusVal === 'completed') {
+                $query->whereIn('status', ['dumped', 'completed']);
+            } elseif ($statusVal === 'cancelled' || $statusVal === 'rejected') {
+                $query->whereIn('status', ['cancelled', 'rejected']);
+            } else {
+                $query->where('status', $statusVal);
+            }
         }
 
         // Corporation Filter
@@ -182,6 +204,8 @@ class AdminRequestController extends Controller
                 'Mobile Number',
                 'Vehicle No.',
                 'Driver Number',
+                'Pickup Requested Date',
+                'Actual Pickup Date',
                 'Status',
                 'Created At'
             ]);
@@ -190,7 +214,9 @@ class AdminRequestController extends Controller
                 $categories = is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?? 'N/A');
                 $subcategories = is_array($req->subcategory_ids) ? implode(', ', $req->subcategory_ids) : ($req->subcategory_ids ?? 'N/A');
                 $location = $req->house_no . (($req->floor_no ?? $req->floor) ? ' (Floor: ' . ($req->floor_no ?? $req->floor) . ')' : '') . ', ' . $req->address;
-                $statusLabel = $req->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $req->status));
+                $pickupRequestedDate = $req->preferred_pickup_date ? $req->preferred_pickup_date->format('d-m-Y') : ($req->created_at ? $req->created_at->format('d-m-Y') : 'N/A');
+                $actualPickupDate = $req->picked_up_at ? $req->picked_up_at->format('d-m-Y h:i A') : 'Not Picked Up';
+                $statusLabel = $req->status_label;
 
                 fputcsv($file, [
                     $req->request_number,
@@ -202,6 +228,8 @@ class AdminRequestController extends Controller
                     $req->mobile_number,
                     $req->vehicle?->vehicle_number ?? 'N/A',
                     $req->vehicle?->driver_phone ?? $req->vehicle?->owner?->mobile_number ?? 'N/A',
+                    $pickupRequestedDate,
+                    $actualPickupDate,
                     $statusLabel,
                     $req->created_at->format('d M Y h:i A')
                 ]);

@@ -336,15 +336,13 @@
                                                 <label class="status-switch">
                                                     <input
                                                         type="checkbox"
+                                                        class="plant-status-switch"
+                                                        data-id="{{ $plant->id }}"
+                                                        data-url="{{ route('admin.masters.plants.toggle-status', $plant->id) }}"
                                                         {{ $plant->status ? 'checked' : '' }}
-                                                        onchange="toggleStatus(this)"
                                                     >
                                                     <span class="status-slider"></span>
                                                 </label>
-
-                                                <!-- <span class="status-text {{ $plant->status ? 'status-active' : 'status-inactive' }}">
-                                                    {{ $plant->status ? 'Active' : 'Inactive' }}
-                                                </span> -->
                                             </td>
 
                                             {{-- ACTION --}}
@@ -368,15 +366,6 @@
                                                     >
                                                         <i class="fa fa-pencil"></i>
                                                     </a>
-
-                                                    {{-- DELETE --}}
-                                                    <!-- <form action="{{ route('admin.masters.plants.destroy', $plant->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this plant location?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm text-white action-btn" title="Delete">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </form> -->
 
                                                 </div>
                                             </td>
@@ -419,7 +408,7 @@
 $(document).ready(function () {
 
     /* DATATABLE INITIALIZATION */
-    if ($('#dumpLocationsTable').length) {
+    if ($('#dumpLocationsTable').length && !$.fn.DataTable.isDataTable('#dumpLocationsTable')) {
         $('#dumpLocationsTable').DataTable({
             pageLength: 10,
             ordering: true,
@@ -429,22 +418,56 @@ $(document).ready(function () {
         });
     }
 
+    /* AJAX STATUS TOGGLE */
+    $(document).on('change', '.plant-status-switch', function () {
+        const toggleInput = $(this);
+        const url = toggleInput.data('url') || ("{{ url('/admin/masters/plants') }}/" + toggleInput.data('id') + '/toggle-status');
+        const isChecked = toggleInput.is(':checked');
+
+        $.ajax({
+            url: url,
+            type: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Status Updated',
+                        text: response.message || 'Plant status updated successfully!',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            },
+            error: function (xhr) {
+                toggleInput.prop('checked', !isChecked);
+                const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to update plant status.';
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errMsg,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                } else {
+                    alert(errMsg);
+                }
+            }
+        });
+    });
+
 });
-
-/* STATUS TOGGLE */
-function toggleStatus(toggle) {
-    const statusText = toggle.closest('td').querySelector('.status-text');
-
-    if (toggle.checked) {
-        statusText.textContent = 'Active';
-        statusText.classList.remove('status-inactive');
-        statusText.classList.add('status-active');
-    } else {
-        statusText.textContent = 'Inactive';
-        statusText.classList.remove('status-active');
-        statusText.classList.add('status-inactive');
-    }
-}
 
 </script>
 

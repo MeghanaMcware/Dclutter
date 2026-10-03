@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasGeoScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Plant extends Model
 {
-    use HasFactory;
+    use HasFactory, HasGeoScope;
 
     protected $fillable = [
         'name',
@@ -33,5 +34,15 @@ class Plant extends Model
     public function constituency()
     {
         return $this->belongsTo(Constituency::class);
+    }
+
+    /**
+     * Scope a query to only include active plant locations.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('status', 1)->orWhere('status', true);
+        });
     }
 }

@@ -125,6 +125,27 @@ class WhatsAppService
     }
 
     /**
+     * 6. Send Vehicle Creation & Login Credentials to Driver / Owner via WhatsApp
+     */
+    public function sendVehicleCreationCredentials(
+        string $destination,
+        string $name,
+        string $vehicleNumber,
+        string $mobileNumber,
+        string $password,
+        ?string $loginUrl = null
+    ): bool {
+        $loginUrl = $loginUrl ?: url('/vehicle/login');
+        $passwordLine = str_starts_with(strtolower($password), 'password:') ? $password : "Password: {$password}";
+
+        return $this->sendCampaign(
+            'vehicle creation',
+            $destination,
+            [$name, $vehicleNumber, $mobileNumber, $passwordLine, $loginUrl]
+        );
+    }
+
+    /**
      * 6. Send 6-Digit WhatsApp OTP via campaign 'otp'
      */
     public function sendOtp(string $destination, string $otp, string $firstName = 'user'): bool

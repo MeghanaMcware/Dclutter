@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Dump;
 use App\Models\Request as WasteRequest;
+use App\Models\RequestUpdate;
 use App\Models\Vehicle;
 use App\Models\Ward;
 use Carbon\Carbon;
@@ -14,13 +15,33 @@ use InvalidArgumentException;
 
 class WasteRequestService
 {
-    // Status Constants (Single Source of Truth)
+    // Unified Status Constants (Single Source of Truth)
     public const STATUS_PENDING       = 'pending';
     public const STATUS_ASSIGNED      = 'assigned';
-    public const STATUS_PICKED_UP     = 'picked_up';
+    public const STATUS_RESCHEDULED   = 'rescheduled';
     public const STATUS_NOT_AVAILABLE = 'not_available';
+    public const STATUS_PICKED_UP     = 'picked_up';
     public const STATUS_DUMPED        = 'dumped';
+    public const STATUS_CANCELLED     = 'cancelled';
     public const STATUS_REJECTED      = 'rejected';
+    public const STATUS_CLOSED        = 'closed';
+
+    /**
+     * Unified Status Labels
+     */
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_PENDING       => 'Pending',
+            self::STATUS_ASSIGNED      => 'Assigned',
+            self::STATUS_RESCHEDULED   => 'Rescheduled',
+            self::STATUS_NOT_AVAILABLE => 'Rescheduled',
+            self::STATUS_PICKED_UP     => 'Picked Up',
+            self::STATUS_DUMPED        => 'Dumped',
+            self::STATUS_CANCELLED     => 'Cancelled',
+            self::STATUS_REJECTED      => 'Cancelled',
+        ];
+    }
 
     public function __construct(
         protected WhatsAppService $whatsAppService,
@@ -86,7 +107,7 @@ class WasteRequestService
 
         // 4. Create Waste Request Record in Transaction
         $wasteRequest = DB::transaction(function () use ($data, $uploadedPaths, $geo, $requestNumber, $source) {
-            return WasteRequest::create([
+            $createdRequest = WasteRequest::create([
                 'request_number' => $requestNumber,
                 'source' => $source,
                 'user_id' => $data['user_id'] ?? (auth()->check() ? auth()->id() : null),
@@ -109,6 +130,18 @@ class WasteRequestService
                 'terms_accepted' => !empty($data['terms_accepted']) ? 1 : 0,
                 'status' => self::STATUS_PENDING,
             ]);
+
+            RequestUpdate::create([
+                'request_id' => $createdRequest->id,
+                'user_id' => $createdRequest->user_id,
+                'action' => 'created',
+                'status' => self::STATUS_PENDING,
+                'latitude' => $createdRequest->latitude,
+                'longitude' => $createdRequest->longitude,
+                'remarks' => 'Request created via ' . ucfirst($source),
+            ]);
+
+            return $createdRequest;
         });
 
         // 5. Trigger WhatsApp Registration Confirmation
@@ -177,6 +210,15 @@ class WasteRequestService
             }
 
             $request->save();
+
+            RequestUpdate::create([
+                'request_id' => $request->id,
+                'user_id' => auth()->id(),
+                'vehicle_id' => $vehicleId,
+                'action' => 'assigned',
+                'status' => $request->status,
+                'remarks' => $remarks ?? 'Vehicle assigned',
+            ]);
         });
 
         // Trigger WhatsApp assignment notifications to Driver and Citizen
@@ -236,17 +278,22 @@ class WasteRequestService
             }
         }
 
-        $request->before_pickup_images = $existingBefore;
-        if (isset($data['approx_weight_kg'])) {
-            $request->approx_weight_kg = $data['approx_weight_kg'];
-        }
-        if (!empty($data['latitude'])) {
-            $request->before_pickup_latitude = $data['latitude'];
-        }
-        if (!empty($data['longitude'])) {
-            $request->before_pickup_longitude = $data['longitude'];
-        }
-        $request->save();
+        $weight = isset($data['approx_weight_kg']) ? (float)$data['approx_weight_kg'] : null;
+        $lat = !empty($data['latitude']) ? (float)$data['latitude'] : null;
+        $lng = !empty($data['longitude']) ? (float)$data['longitude'] : null;
+
+        RequestUpdate::create([
+            'request_id' => $request->id,
+            'user_id' => auth()->id(),
+            'vehicle_id' => $request->vehicle_id,
+            'action' => 'before_pickup',
+            'status' => $request->status,
+            'approx_weight_kg' => $weight,
+            'before_pickup_images' => $existingBefore,
+            'latitude' => $lat,
+            'longitude' => $lng,
+            'remarks' => 'Driver completed before-pickup inspection',
+        ]);
 
         return $request;
     }
@@ -276,16 +323,24 @@ class WasteRequestService
             }
         }
 
-        $request->picked_up_images = $existingAfter;
-        if (!empty($data['latitude'])) {
-            $request->after_pickup_latitude = $data['latitude'];
-        }
-        if (!empty($data['longitude'])) {
-            $request->after_pickup_longitude = $data['longitude'];
-        }
+        $lat = !empty($data['latitude']) ? (float)$data['latitude'] : null;
+        $lng = !empty($data['longitude']) ? (float)$data['longitude'] : null;
+
         $request->picked_up_at = now();
         $request->status = self::STATUS_PICKED_UP;
         $request->save();
+
+        RequestUpdate::create([
+            'request_id' => $request->id,
+            'user_id' => auth()->id(),
+            'vehicle_id' => $request->vehicle_id,
+            'action' => 'picked_up',
+            'status' => self::STATUS_PICKED_UP,
+            'picked_up_images' => $existingAfter,
+            'latitude' => $lat,
+            'longitude' => $lng,
+            'remarks' => 'Waste loaded on vehicle and marked picked up',
+        ]);
 
         // Trigger WhatsApp Collection Notification
         try {
@@ -305,9 +360,10 @@ class WasteRequestService
      * 5. Reschedule Request / Citizen Not Available (Used by Driver PWA).
      * 
      * Edge Cases Handled:
-     * - Cannot reschedule if already DUMPED.
+     * - Cannot reschedule if already DUMPED / completed.
      * - Cannot reschedule if already PICKED_UP (waste is already on vehicle).
-     * - Ensures next_pickup_date is an upcoming Sunday.
+     * - Every unavailable reason ('Door Closed', 'Call Not Attended', 'Not Ready Today', 'Asking for Next Date')
+     *   is scheduled for a future Sunday pickup date so it is NEVER lost or permanently closed.
      */
     public function reschedule(WasteRequest|int $wasteRequest, string $reason, ?string $nextDate = null): WasteRequest
     {
@@ -329,15 +385,24 @@ class WasteRequestService
             }
             $sundayDate = $parsed->toDateString();
         } else {
-            // Default to next upcoming Sunday
+            // Default to next upcoming Sunday so the driver visits again in the future
             $sundayDate = Carbon::now()->next(Carbon::SUNDAY)->toDateString();
         }
 
         $request->status = self::STATUS_NOT_AVAILABLE;
-        $request->not_available_reason = $reason;
         $request->next_pickup_date = $sundayDate;
-        $request->not_available_at = now();
         $request->save();
+
+        RequestUpdate::create([
+            'request_id' => $request->id,
+            'user_id' => auth()->id(),
+            'vehicle_id' => $request->vehicle_id,
+            'action' => 'rescheduled',
+            'status' => self::STATUS_NOT_AVAILABLE,
+            'not_available_reason' => $reason,
+            'next_pickup_date' => $sundayDate,
+            'remarks' => 'Pickup rescheduled: ' . $reason,
+        ]);
 
         return $request;
     }
@@ -384,6 +449,19 @@ class WasteRequestService
             $request->dump_id = $dumpRecord->id;
             $request->status = self::STATUS_DUMPED;
             $request->save();
+
+            RequestUpdate::create([
+                'request_id' => $request->id,
+                'user_id' => auth()->id(),
+                'vehicle_id' => $dumpRecord->vehicle_id,
+                'dump_id' => $dumpRecord->id,
+                'action' => 'dumped',
+                'status' => self::STATUS_DUMPED,
+                'approx_weight_kg' => $dumpRecord->dump_weight ? $dumpRecord->dump_weight * 1000 : null,
+                'latitude' => $dumpRecord->dump_latitude,
+                'longitude' => $dumpRecord->dump_longitude,
+                'remarks' => 'Dumped at ' . $dumpRecord->plant_name,
+            ]);
 
             return $dumpRecord;
         });

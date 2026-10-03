@@ -76,6 +76,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/export', [AdminImportedRequestController::class, 'export'])->name('export');
         Route::get('/', [AdminImportedRequestController::class, 'index'])->name('index');
         Route::get('/{id}', [AdminImportedRequestController::class, 'show'])->name('show');
+        Route::post('/{id}/assign-vehicle', [AdminImportedRequestController::class, 'assignVehicle'])->name('assign-vehicle');
     });
 
 
@@ -97,6 +98,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('subcategories/{subcategory}/toggle-status', [SubcategoryController::class, 'toggleStatus'])->name('subcategories.toggle-status');
 
         Route::resource('users', UserController::class);
+        Route::patch('plants/{id}/toggle-status', [PlantController::class, 'toggleStatus'])->name('plants.toggle-status');
         Route::resource('plants', PlantController::class);
     });
 

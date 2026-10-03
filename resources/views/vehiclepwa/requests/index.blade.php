@@ -813,6 +813,9 @@
                 statusBadgeElem.className = 'badge bg-warning text-dark py-1 px-2 font-12';
                 statusBadgeElem.innerHTML = '<i class="fa-solid fa-calendar-days me-1"></i> RESCHEDULED: ' + (item
                     .nextPickupDate || 'SUNDAY');
+            } else if (item.status === 'CLOSED') {
+                statusBadgeElem.className = 'badge bg-secondary text-white py-1 px-2 font-12';
+                statusBadgeElem.innerHTML = '<i class="fa-solid fa-ban me-1"></i> CLOSED' + (item.notAvailableReason ? ': ' + item.notAvailableReason : '');
             } else {
                 statusBadgeElem.className = 'badge-status-pending font-12';
                 statusBadgeElem.innerHTML = '<i class="fa-regular fa-clock me-1"></i> ' + item.status;
@@ -1016,8 +1019,8 @@
                     if (res.ok && data.success) {
                         Swal.fire({
                             title: 'Status Updated!',
-                            text: 'Request marked as Waste Not Available.',
-                            icon: 'info',
+                            text: data.message || 'Status has been successfully updated.',
+                            icon: 'success',
                             confirmButtonColor: '#0e7a43'
                         }).then(() => {
                             location.reload();
@@ -1051,6 +1054,9 @@
             } else if (item.status === 'NOT_AVAILABLE') {
                 statusBadge =
                     '<span class="badge bg-warning text-dark py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-calendar-days"></i> RESCHEDULED</span>';
+            } else if (item.status === 'CLOSED') {
+                statusBadge =
+                    '<span class="badge bg-secondary text-white py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-ban"></i> CLOSED</span>';
             }
             const searchText = `${item.ref} ${item.applicant} ${item.location} ${item.category} ${item.status}`
                 .toLowerCase();

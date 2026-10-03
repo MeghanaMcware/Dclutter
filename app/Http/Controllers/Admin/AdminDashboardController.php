@@ -35,14 +35,16 @@ class AdminDashboardController extends Controller
             }
         }
 
-        // 1. Top KPI Metrics based on filtered query
-        $totalRequests = (clone $baseQuery)->count();
-        $pendingRequests = (clone $baseQuery)->where('status', 'pending')->count();
-        $scheduledPickups = (clone $baseQuery)->whereIn('status', ['assigned', 'scheduled'])->count();
-        $rescheduledRequests = (clone $baseQuery)->whereIn('status', ['not_available', 'rescheduled'])->count();
-        $dumpedRequests = (clone $baseQuery)->where('status', 'dumped')->count();
-        $completedPickups = (clone $baseQuery)->whereIn('status', ['picked_up', 'completed'])->count();
-        $cancelledPickups = (clone $baseQuery)->whereIn('status', ['rejected', 'cancelled'])->count();
+        // 1. Top KPI Metrics based on filtered query using HasGeoScope trait statusCounts()
+        $statusStats = (clone $baseQuery)->statusCounts();
+        $totalRequests = $statusStats['total'];
+        $pendingRequests = $statusStats['pending'];
+        $assignedRequests = $statusStats['assigned'];
+        $rescheduledRequests = $statusStats['rescheduled'];
+        $pickedUpRequests = $statusStats['picked_up'];
+        $dumpedRequests = $statusStats['dumped'];
+        $cancelledRequests = $statusStats['cancelled'];
+        
         $totalUsers = User::role('citizen')->count();
         if ($totalUsers === 0) {
             $totalUsers = User::count();
@@ -66,7 +68,7 @@ class AdminDashboardController extends Controller
                 ->count();
             $receivedCounts[] = $received;
 
-            // Count requests completed on this date
+            // Count requests dumped/completed on this date
             $completed = (clone $baseQuery)
                 ->where(function ($q) use ($dateString) {
                     $q->whereDate('picked_up_at', $dateString)
@@ -113,14 +115,16 @@ class AdminDashboardController extends Controller
             $categorySeries = array_values($activeCatCounts);
         }
 
-        // 4. Pickup Status Breakdown Donut matching exact labels: Requested, Scheduled, Completed, Cancelled
-        $statusRequested = (clone $baseQuery)->where('status', 'pending')->count();
-        $statusScheduled = (clone $baseQuery)->whereIn('status', ['assigned', 'scheduled'])->count();
-        $statusCompleted = (clone $baseQuery)->whereIn('status', ['picked_up', 'dumped', 'completed'])->count();
-        $statusCancelled = (clone $baseQuery)->whereIn('status', ['rejected', 'cancelled', 'not_available', 'rescheduled'])->count();
-
-        $statusLabels = ['Requested', 'Scheduled', 'Completed', 'Cancelled'];
-        $statusSeries = [$statusRequested, $statusScheduled, $statusCompleted, $statusCancelled];
+        // 4. Request Status Breakdown Donut: Pending, Assigned, Rescheduled, Picked Up, Dumped, Cancelled
+        $statusLabels = ['Pending', 'Assigned', 'Rescheduled', 'Picked Up', 'Dumped', 'Cancelled'];
+        $statusSeries = [
+            $statusStats['pending'],
+            $statusStats['assigned'],
+            $statusStats['rescheduled'],
+            $statusStats['picked_up'],
+            $statusStats['dumped'],
+            $statusStats['cancelled'],
+        ];
 
         // 5. Recent 10 Requests
         $recentRequests = (clone $baseQuery)
@@ -141,12 +145,12 @@ class AdminDashboardController extends Controller
                 'stats' => [
                     'totalRequests' => number_format($totalRequests),
                     'pendingRequests' => number_format($pendingRequests),
-                    'scheduledPickups' => number_format($scheduledPickups),
+                    'assignedRequests' => number_format($assignedRequests),
                     'rescheduledRequests' => number_format($rescheduledRequests),
+                    'pickedUpRequests' => number_format($pickedUpRequests),
                     'dumpedRequests' => number_format($dumpedRequests),
-                    'completedPickups' => number_format($completedPickups),
+                    'cancelledRequests' => number_format($cancelledRequests),
                     'totalUsers' => number_format($totalUsers),
-                    'cancelledPickups' => number_format($cancelledPickups),
                 ],
                 'trend' => [
                     'categories' => $trendDates,
@@ -169,12 +173,12 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard', compact(
             'totalRequests',
             'pendingRequests',
-            'scheduledPickups',
+            'assignedRequests',
             'rescheduledRequests',
+            'pickedUpRequests',
             'dumpedRequests',
-            'completedPickups',
+            'cancelledRequests',
             'totalUsers',
-            'cancelledPickups',
             'trendDates',
             'receivedCounts',
             'completedCounts',

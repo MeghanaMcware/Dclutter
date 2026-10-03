@@ -289,7 +289,7 @@
                     </div>
                     <div class="d-flex flex-column align-items-end gap-2">
                         <span class="badge {{ $badgeClass }}" style="font-size: 11px; text-transform: capitalize; padding: 6px 10px;">
-                            {{ str_replace('_', ' ', $req->status) }}
+                            {{ $req->status_label }}
                         </span>
                        <span class="btn btn-sm btn-outline-primary"
       style="font-size: 12px; padding: 2px 21px; font-weight: 600; cursor: pointer;" onclick="window.location.href='{{ route('user.details', ['id' => $req->id]) }}'">

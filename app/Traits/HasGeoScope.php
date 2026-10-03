@@ -121,6 +121,10 @@ trait HasGeoScope
             return $query->whereIn($table . '.corporation_id', $corpIds);
         }
 
+        if ($table === 'plants') {
+            return $query->whereIn($table . '.corporation_id', $corpIds);
+        }
+
         if ($table === 'legacy_pickup_requests') {
             return $query->whereIn($table . '.corporation_id', $corpIds);
         }
@@ -142,6 +146,10 @@ trait HasGeoScope
         }
 
         if ($table === 'wards') {
+            return $query->whereIn($table . '.constituency_id', $constIds);
+        }
+
+        if ($table === 'plants') {
             return $query->whereIn($table . '.constituency_id', $constIds);
         }
 
@@ -228,6 +236,23 @@ trait HasGeoScope
                 $sub->where('user_id', $user->id)
                     ->orWhere('driver_phone', $user->mobile_number);
             });
+        }
+
+        if ($table === 'plants') {
+            $vehicle = \App\Models\Vehicle::where('user_id', $user->id)
+                ->orWhere('driver_phone', $user->mobile_number)
+                ->first();
+            $constIds = $vehicle?->constituency_ids;
+            if (is_string($constIds)) {
+                $constIds = json_decode($constIds, true);
+            }
+            $constIds = is_array($constIds) ? array_values(array_filter(array_map('intval', $constIds))) : [];
+            if (!empty($constIds)) {
+                return $query->where(function ($q) use ($constIds) {
+                    $q->whereIn('plants.constituency_id', $constIds)
+                      ->orWhereNull('plants.constituency_id');
+                });
+            }
         }
 
         return $query;
