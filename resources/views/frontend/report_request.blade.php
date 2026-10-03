@@ -730,7 +730,7 @@ textarea.is-invalid ~ .invalid-feedback,
             <i class="bi bi-info-circle-fill me-1"></i> Step 1 of 4: Category Select
         </div>
 
-        @if ($errors->any())
+        @if (isset($errors) && $errors->any())
             <div class="alert alert-danger mb-4" role="alert">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)

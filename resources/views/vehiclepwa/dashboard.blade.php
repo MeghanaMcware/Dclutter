@@ -104,8 +104,8 @@
                     </div>
                     <div class="trip-time">{{ Str::limit($req->address, 30) }}</div>
                 </div>
-                <span class="{{ $req->status == 'picked_up' ? 'badge-in-progress' : 'badge-upcoming' }}">
-                    {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                <span class="{{ $req->status == 'picked_up' ? 'badge-in-progress' : ($req->status == 'not_available' ? 'badge bg-warning text-dark px-2 py-1' : 'badge-upcoming') }}">
+                    {{ $req->status == 'not_available' ? 'Rescheduled' : ucfirst(str_replace('_', ' ', $req->status)) }}
                 </span>
             </div>
         @empty

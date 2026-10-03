@@ -73,6 +73,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Imported Legacy Requests Management
     Route::prefix('imported-requests')->name('imported-requests.')->group(function () {
+        Route::get('/export', [AdminImportedRequestController::class, 'export'])->name('export');
         Route::get('/', [AdminImportedRequestController::class, 'index'])->name('index');
         Route::get('/{id}', [AdminImportedRequestController::class, 'show'])->name('show');
     });

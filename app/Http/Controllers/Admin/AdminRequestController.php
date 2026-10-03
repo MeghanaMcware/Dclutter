@@ -213,6 +213,10 @@ class AdminRequestController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    public function __construct(
+        protected \App\Services\WasteRequestService $wasteRequestService
+    ) {}
+
     /**
      * Assign or re-assign a vehicle to a waste request.
      */
@@ -223,73 +227,40 @@ class AdminRequestController extends Controller
             'remarks' => 'nullable|string|max:1000',
         ]);
 
-        $wasteRequest = WasteRequest::with('constituency')->findOrFail($id);
+        try {
+            $wasteRequest = $this->wasteRequestService->assignVehicle(
+                (int) $id,
+                (int) $request->vehicle_id,
+                $request->input('remarks')
+            );
 
-        if ($wasteRequest->constituency_id) {
-            $vehicle = Vehicle::findOrFail($request->vehicle_id);
-            $vehicleConstIds = (array) ($vehicle->constituency_ids ?? []);
-            $vehicleConstIds = array_map('intval', array_filter($vehicleConstIds));
-            if (!empty($vehicleConstIds) && !in_array((int)$wasteRequest->constituency_id, $vehicleConstIds, true)) {
-                $errorMsg = 'Vehicle ' . $vehicle->vehicle_number . ' does not operate in ' . ($wasteRequest->constituency?->name ?? 'this constituency') . '.';
-                if ($request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $errorMsg,
-                    ], 422);
-                }
-                return redirect()->back()->with('error', $errorMsg);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vehicle assigned successfully to request #' . $wasteRequest->request_number,
+                    'vehicle_number' => $wasteRequest->vehicle?->vehicle_number ?? '',
+                    'driver_number' => $wasteRequest->vehicle?->driver_phone ?? $wasteRequest->vehicle?->owner?->mobile_number ?? '',
+                ]);
             }
-        }
 
-        $wasteRequest->vehicle_id = $request->vehicle_id;
-        if ($request->filled('remarks')) {
-            $wasteRequest->remarks = $request->remarks;
-        }
-        $wasteRequest->assigned_at = now();
-        if ($wasteRequest->status === 'pending') {
-            $wasteRequest->status = 'assigned';
-        }
-        $wasteRequest->save();
-
-        $wasteRequest->load('vehicle.owner');
-        if ($wasteRequest->vehicle) {
-            $driverName = $wasteRequest->vehicle->driver_name ?? $wasteRequest->vehicle->owner?->name ?? 'Driver';
-            $driverPhone = $wasteRequest->vehicle->driver_phone ?? $wasteRequest->vehicle->owner?->mobile_number ?? '9999999999';
-            $vehicleNo = $wasteRequest->vehicle->vehicle_number;
-
-            try {
-                $wa = app(\App\Services\WhatsAppService::class);
-                // 1. Notify Driver
-                $wa->sendVehicleAssignmentToDriver(
-                    $driverPhone,
-                    $driverName,
-                    $vehicleNo,
-                    $wasteRequest->request_number,
-                    $wasteRequest->address
-                );
-                // 2. Notify Citizen User
-                $wa->sendVehicleAssignmentToUser(
-                    $wasteRequest->mobile_number,
-                    $wasteRequest->applicant_name,
-                    $wasteRequest->request_number,
-                    $vehicleNo,
-                    $driverName,
-                    $driverPhone
-                );
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('WhatsApp Assignment Notification Exception: ' . $e->getMessage());
+            return redirect()->back()->with('success', 'Vehicle assigned successfully to request #' . $wasteRequest->request_number);
+        } catch (\InvalidArgumentException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
             }
+            return redirect()->back()->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Assign Vehicle Error: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to assign vehicle: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to assign vehicle.');
         }
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Vehicle assigned successfully to request #' . $wasteRequest->request_number,
-                'vehicle_number' => $wasteRequest->vehicle?->vehicle_number ?? '',
-                'driver_number' => $wasteRequest->vehicle?->driver_phone ?? $wasteRequest->vehicle?->owner?->mobile_number ?? '',
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Vehicle assigned successfully to request #' . $wasteRequest->request_number);
     }
 }

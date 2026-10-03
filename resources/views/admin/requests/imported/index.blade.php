@@ -170,7 +170,7 @@
                                     <i class="fa fa-filter"></i> Filter
                                 </button>
                                 <a href="{{ route('admin.imported-requests.index') }}" class="btn btn-reset-outline text-decoration-none d-flex align-items-center justify-content-center">Reset</a>
-                                <button type="button" class="btn btn-export d-flex align-items-center gap-1" onclick="exportTableToCSV('imported_requests.csv')">
+                                <button type="button" class="btn btn-export d-flex align-items-center gap-1" onclick="submitExport()">
                                     <i class="fa fa-download"></i> Export
                                 </button>
                             </div>
@@ -295,26 +295,10 @@
 
 @section('script')
 <script>
-function exportTableToCSV(filename) {
-    let csv = [];
-    let rows = document.querySelectorAll("#admin-imported-requests-table tr");
-    
-    for (let i = 0; i < rows.length; i++) {
-        let row = [], cols = rows[i].querySelectorAll("td, th");
-        for (let j = 0; j < cols.length - 1; j++) {
-            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/"/g, '""');
-            row.push('"' + data + '"');
-        }
-        csv.push(row.join(","));
-    }
-
-    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
-    let downloadLink = document.createElement("a");
-    downloadLink.download = filename;
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
+function submitExport() {
+    const form = document.getElementById('importedFilterForm');
+    const params = new URLSearchParams(new FormData(form)).toString();
+    window.location.href = "{{ route('admin.imported-requests.export') }}?" + params;
 }
 </script>
 @endsection

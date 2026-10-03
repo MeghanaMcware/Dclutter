@@ -41,7 +41,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|regex:/^[0-9]{10}$/|unique:users,mobile_number',
             'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:4',
+            'password' => 'required|string|min:6',
             'role' => 'required|string|in:agm,dgm',
             'corporation' => 'required_if:role,dgm|array',
             'constituency' => 'required_if:role,agm|array',

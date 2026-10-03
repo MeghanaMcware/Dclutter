@@ -74,6 +74,14 @@ class Request extends Model
     ];
 
     /**
+     * Accessor for after_pickup_images alias.
+     */
+    public function getAfterPickupImagesAttribute(): ?array
+    {
+        return $this->picked_up_images;
+    }
+
+    /**
      * Auto-generate unique tracking reference number (#DCL-2026-XXXXXX).
      */
     public static function generateRequestNumber(): string

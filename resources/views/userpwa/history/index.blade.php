@@ -244,7 +244,7 @@
             </div>
         @endforelse
 
-        @if($requests->hasPages())
+        @if(method_exists($requests, 'hasPages') && $requests->hasPages())
             <div class="pagination-wrapper d-flex justify-content-center mt-4">
                 {{ $requests->withQueryString()->links('pagination::bootstrap-5') }}
             </div>

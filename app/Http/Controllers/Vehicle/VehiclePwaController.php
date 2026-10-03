@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Vehicle;
 use App\Http\Controllers\Controller;
 use App\Models\Request as WasteRequest;
 use App\Models\Vehicle;
+use App\Services\WasteRequestService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class VehiclePwaController extends Controller
 {
+    public function __construct(
+        protected WasteRequestService $wasteRequestService
+    ) {}
     /**
      * Helper to get logged in driver's vehicle ID.
      */
@@ -34,23 +38,9 @@ class VehiclePwaController extends Controller
     {
         $vehicleId = $this->getDriverVehicleId();
 
-        $assignedQuery = WasteRequest::where(function ($q) {
-            $q->where('status', 'assigned')
-              ->orWhere(function ($sub) {
-                  $sub->where('status', 'not_available')
-                      ->whereNotNull('next_pickup_date')
-                      ->whereDate('next_pickup_date', '<=', now()->toDateString());
-              });
-        });
+        $assignedQuery = WasteRequest::whereIn('status', ['assigned', 'not_available']);
         $pickedUpQuery = WasteRequest::where('status', 'picked_up');
-        $recentQuery = WasteRequest::where(function ($q) {
-            $q->whereIn('status', ['assigned', 'picked_up'])
-              ->orWhere(function ($sub) {
-                  $sub->where('status', 'not_available')
-                      ->whereNotNull('next_pickup_date')
-                      ->whereDate('next_pickup_date', '<=', now()->toDateString());
-              });
-        });
+        $recentQuery = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available']);
 
         if ($vehicleId) {
             $assignedQuery->where('vehicle_id', $vehicleId);
@@ -98,14 +88,7 @@ class VehiclePwaController extends Controller
     public function requests(Request $request)
     {
         $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
-            ->where(function ($q) {
-                $q->whereIn('status', ['assigned', 'picked_up'])
-                  ->orWhere(function ($sub) {
-                      $sub->where('status', 'not_available')
-                          ->whereNotNull('next_pickup_date')
-                          ->whereDate('next_pickup_date', '<=', now()->toDateString());
-                  });
-            });
+            ->whereIn('status', ['assigned', 'picked_up', 'not_available']);
 
         if ($vehicleId = $this->getDriverVehicleId()) {
             $query->where('vehicle_id', $vehicleId);
@@ -121,14 +104,7 @@ class VehiclePwaController extends Controller
      */
     public function route()
     {
-        $query = WasteRequest::where(function ($q) {
-            $q->whereIn('status', ['assigned', 'picked_up'])
-              ->orWhere(function ($sub) {
-                  $sub->where('status', 'not_available')
-                      ->whereNotNull('next_pickup_date')
-                      ->whereDate('next_pickup_date', '<=', now()->toDateString());
-              });
-        });
+        $query = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available']);
         if ($vehicleId = $this->getDriverVehicleId()) {
             $query->where('vehicle_id', $vehicleId);
         }
@@ -144,7 +120,7 @@ class VehiclePwaController extends Controller
     public function stopDetails(Request $request, $id = null)
     {
         $reqId = $id ?? $request->query('id') ?? $request->query('request_id');
-        $wasteRequest = $reqId ? WasteRequest::find($reqId) : WasteRequest::whereIn('status', ['assigned', 'picked_up'])->first();
+        $wasteRequest = $reqId ? WasteRequest::find($reqId) : WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available'])->first();
 
         return view('vehiclepwa.stop_details', compact('wasteRequest'));
     }
@@ -203,35 +179,26 @@ class VehiclePwaController extends Controller
             'before_photos.*' => 'image|max:10240',
         ]);
 
-        $beforeImages = $wasteRequest->before_pickup_images ?? [];
+        try {
+            $this->wasteRequestService->recordBeforePickup(
+                $wasteRequest,
+                $request->only(['approx_weight_kg', 'latitude', 'longitude']),
+                $request->file('before_photos', [])
+            );
 
-        if ($request->hasFile('before_photos')) {
-            foreach ($request->file('before_photos') as $file) {
-                $path = $file->store('requests/before', 'public');
-                $beforeImages[] = $path;
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Before pickup details saved successfully.',
+                    'next_url' => route('vehicle.after_pickup', ['id' => $wasteRequest->id]),
+                ]);
             }
-        }
 
-        $wasteRequest->before_pickup_images = $beforeImages;
-        $wasteRequest->approx_weight_kg = $request->approx_weight_kg;
-        if ($request->filled('latitude')) {
-            $wasteRequest->before_pickup_latitude = $request->latitude;
+            return redirect()->route('vehicle.after_pickup', ['id' => $wasteRequest->id])
+                ->with('success', 'Before pickup details saved successfully.');
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
-        if ($request->filled('longitude')) {
-            $wasteRequest->before_pickup_longitude = $request->longitude;
-        }
-        $wasteRequest->save();
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Before pickup details saved successfully.',
-                'next_url' => route('vehicle.after_pickup', ['id' => $wasteRequest->id]),
-            ]);
-        }
-
-        return redirect()->route('vehicle.after_pickup', ['id' => $wasteRequest->id])
-            ->with('success', 'Before pickup details saved successfully.');
     }
 
     /**
@@ -249,38 +216,33 @@ class VehiclePwaController extends Controller
 
         $nextDate = $request->input('next_date') ?? $request->input('next_pickup_date');
 
-        if ($nextDate) {
-            $parsedDate = \Carbon\Carbon::parse($nextDate);
-            if (!$parsedDate->isSunday()) {
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'The next pickup date must be a Sunday. Please select an upcoming Sunday.',
-                        'errors' => [
-                            'next_date' => ['The next pickup date must be a Sunday. Please select an upcoming Sunday.']
-                        ]
-                    ], 422);
-                }
-                return back()->withErrors(['next_date' => 'The next pickup date must be a Sunday. Please select an upcoming Sunday.']);
+        try {
+            $this->wasteRequestService->reschedule(
+                $wasteRequest,
+                $request->reason,
+                $nextDate
+            );
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Status updated: Waste Not Available.',
+                    'redirect_url' => route('vehicle.trip_progress'),
+                ]);
             }
-            $wasteRequest->next_pickup_date = $parsedDate->toDateString();
+
+            return redirect()->route('vehicle.trip_progress')
+                ->with('info', 'Status updated: Waste Not Available.');
+        } catch (\InvalidArgumentException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => ['next_date' => [$e->getMessage()]]
+                ], 422);
+            }
+            return back()->withErrors(['next_date' => $e->getMessage()]);
         }
-
-        $wasteRequest->status = 'not_available';
-        $wasteRequest->not_available_reason = $request->reason;
-        $wasteRequest->not_available_at = now();
-        $wasteRequest->save();
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Status updated: Waste Not Available.',
-                'redirect_url' => route('vehicle.trip_progress'),
-            ]);
-        }
-
-        return redirect()->route('vehicle.trip_progress')
-            ->with('info', 'Status updated: Waste Not Available.');
     }
 
     /**
@@ -317,46 +279,25 @@ class VehiclePwaController extends Controller
             'after_photos.*' => 'image|max:10240',
         ]);
 
-        $afterImages = $wasteRequest->picked_up_images ?? [];
-
-        if ($request->hasFile('after_photos')) {
-            foreach ($request->file('after_photos') as $file) {
-                $path = $file->store('requests/after', 'public');
-                $afterImages[] = $path;
-            }
-        }
-
-        $wasteRequest->picked_up_images = $afterImages;
-        if ($request->filled('latitude')) {
-            $wasteRequest->after_pickup_latitude = $request->latitude;
-        }
-        if ($request->filled('longitude')) {
-            $wasteRequest->after_pickup_longitude = $request->longitude;
-        }
-        $wasteRequest->picked_up_at = now();
-        $wasteRequest->status = 'picked_up';
-        $wasteRequest->save();
-
-        // Trigger WhatsApp Collection Completed Notification to Citizen User
         try {
-            app(\App\Services\WhatsAppService::class)->sendCollectionCompletedToUser(
-                $wasteRequest->mobile_number,
-                $wasteRequest->applicant_name,
-                $wasteRequest->request_number
+            $this->wasteRequestService->markPickedUp(
+                $wasteRequest,
+                $request->only(['latitude', 'longitude']),
+                $request->file('after_photos', [])
             );
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('WhatsApp Pickup Completion Notification Exception: ' . $e->getMessage());
-        }
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Pickup completed successfully.',
-            ]);
-        }
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pickup completed successfully.',
+                ]);
+            }
 
-        return redirect()->route('vehicle.trip_summary')
-            ->with('success', 'Pickup completed successfully.');
+            return redirect()->route('vehicle.trip_summary')
+                ->with('success', 'Pickup completed successfully.');
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
     }
 
     /**
@@ -369,14 +310,14 @@ class VehiclePwaController extends Controller
         // Get list of distinct dates where driver/vehicle worked
         $workingDates = WasteRequest::selectRaw('DATE(COALESCE(assigned_at, created_at)) as work_date')
             ->when($vehicleId, fn($q) => $q->where('vehicle_id', $vehicleId))
-            ->whereIn('status', ['assigned', 'picked_up'])
+            ->whereIn('status', ['assigned', 'picked_up', 'not_available'])
             ->groupBy('work_date')
             ->orderByDesc('work_date')
             ->pluck('work_date');
 
         $selectedDate = $request->query('date', $workingDates->first() ?? now()->toDateString());
 
-        $query = WasteRequest::whereIn('status', ['assigned', 'picked_up'])
+        $query = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available'])
             ->whereDate('assigned_at', $selectedDate);
 
         if ($vehicleId) {
@@ -385,7 +326,7 @@ class VehiclePwaController extends Controller
 
         $assignedRequests = $query->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->get();
         $completedCount = (clone $query)->where('status', 'picked_up')->count();
-        $pendingCount = (clone $query)->where('status', 'assigned')->count();
+        $pendingCount = (clone $query)->whereIn('status', ['assigned', 'not_available'])->count();
 
         return view('vehiclepwa.trip_progress', compact('assignedRequests', 'completedCount', 'pendingCount', 'workingDates', 'selectedDate'));
     }
