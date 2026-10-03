@@ -19,7 +19,7 @@
         rgba(255, 255, 255, 0.88) 40%, 
         rgba(255, 255, 255, 0.4) 70%, 
         rgba(255, 255, 255, 0.1) 100%),
-        url('{{ asset("frontendwebsite/img/candd_new_image.png") }}') center right / cover no-repeat;
+        url('{{ asset("frontendwebsite/img/hero-truck-new.png") }}') center right / cover no-repeat;
     overflow: hidden;
     padding: 45px 32px;
     border-radius: 12px;

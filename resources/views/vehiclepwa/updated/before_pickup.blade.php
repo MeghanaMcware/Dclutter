@@ -60,7 +60,7 @@
                 <form id="beforeStatusForm">
                     <div class="form-group">
                         <label>Before Photo<span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="beforePhoto"  capture="environment" multiple required>
+                        <input type="file" class="form-control" id="beforePhoto"  accept="image/*" capture="environment" multiple required>
                         <div class="invalid-feedback">Please capture or upload at least one before photo.</div>
                         <div id="beforePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                     </div>
@@ -94,6 +94,73 @@
 
 @section('script')
 <script>
+
+    let currentAddress = 'Location not available';
+    
+    // Add watermark processing function
+    function processImageWithWatermark(file, lat, lng, address) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    const MAX_WIDTH = 1000;
+                    const MAX_HEIGHT = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = Math.round(height * (MAX_WIDTH / width));
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = Math.round(width * (MAX_HEIGHT / height));
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const barHeight = 110;
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.fillRect(0, height - barHeight, width, barHeight);
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 15px Arial';
+                    ctx.textAlign = 'left';
+                    
+                    let textY = height - barHeight + 30;
+                    let truncatedAddress = address.length > 80 ? address.substring(0, 77) + '...' : address;
+                    ctx.fillText(`Location: ${truncatedAddress}`, 15, textY);
+                    
+                    ctx.font = '14px Arial';
+                    ctx.fillText(`Lat: ${lat ? lat : 'N/A'}, Lng: ${lng ? lng : 'N/A'}`, 15, textY + 30);
+                    
+                    ctx.fillStyle = '#FFD700';
+                    const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+                    ctx.fillText(`Time: ${dateStr}`, 15, textY + 60);
+
+                    canvas.toBlob((blob) => {
+                        const newFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+                        resolve({ file: newFile, dataUrl: canvas.toDataURL('image/jpeg', 0.8) });
+                    }, 'image/jpeg', 0.8);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     const selectedFilesArray = {
         'before': []
     };
@@ -106,9 +173,17 @@
                     const latInput = document.getElementById('currentLat');
                     const lngInput = document.getElementById('currentLng');
                     if (latInput && lngInput) {
-                        latInput.value = position.coords.latitude.toFixed(6);
-                        lngInput.value = position.coords.longitude.toFixed(6);
-                    }
+                            latInput.value = position.coords.latitude.toFixed(6);
+                            lngInput.value = position.coords.longitude.toFixed(6);
+                            
+                            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&zoom=18&addressdetails=1`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data && data.display_name) {
+                                        currentAddress = data.display_name;
+                                    }
+                                }).catch(e => console.error(e));
+                        }
                 },
                 function(error) {
                     console.error("Error getting location: ", error);
@@ -121,63 +196,79 @@
         const previewContainer = document.getElementById('beforePreview');
 
         if (fileInput) {
-            fileInput.addEventListener('change', function(e) {
+            fileInput.addEventListener('change', async function(e) {
                 const files = Array.from(e.target.files);
-                files.forEach(file => {
+                const latInput = document.getElementById('currentLat');
+                const lngInput = document.getElementById('currentLng');
+                const lat = latInput ? latInput.value : '';
+                const lng = lngInput ? lngInput.value : '';
+
+                if (files.length > 0) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+
+                for (let file of files) {
                     if (selectedFilesArray['before'].length >= 3) {
                         Swal.fire('Limit Reached', 'You can upload a maximum of 3 before photos.', 'warning');
-                        return;
+                        break;
                     }
-                    selectedFilesArray['before'].push(file);
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const imgContainer = document.createElement('div');
-                        imgContainer.style.position = 'relative';
-                        imgContainer.style.width = '70px';
-                        imgContainer.style.height = '70px';
-                        imgContainer.style.borderRadius = '8px';
-                        imgContainer.style.overflow = 'hidden';
-                        imgContainer.style.border = '1px solid #cbd5e1';
 
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.objectFit = 'cover';
+                    if(typeof showPageLoader === 'function') showPageLoader();
+                    const processed = await processImageWithWatermark(file, lat, lng, currentAddress);
+                    if(typeof hidePageLoader === 'function') hidePageLoader();
 
-                        const removeBtn = document.createElement('button');
-                        removeBtn.innerHTML = '&times;';
-                        removeBtn.style.position = 'absolute';
-                        removeBtn.style.top = '2px';
-                        removeBtn.style.right = '2px';
-                        removeBtn.style.background = 'rgba(0,0,0,0.6)';
-                        removeBtn.style.color = '#fff';
-                        removeBtn.style.border = 'none';
-                        removeBtn.style.borderRadius = '50%';
-                        removeBtn.style.width = '20px';
-                        removeBtn.style.height = '20px';
-                        removeBtn.style.fontSize = '14px';
-                        removeBtn.style.lineHeight = '1';
-                        removeBtn.style.cursor = 'pointer';
-                        removeBtn.style.display = 'flex';
-                        removeBtn.style.alignItems = 'center';
-                        removeBtn.style.justifyContent = 'center';
+                    selectedFilesArray['before'].push(processed.file);
 
-                        removeBtn.onclick = function(ev) {
-                            ev.preventDefault();
-                            const index = selectedFilesArray['before'].indexOf(file);
-                            if (index > -1) {
-                                selectedFilesArray['before'].splice(index, 1);
-                            }
-                            imgContainer.remove();
-                        };
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.position = 'relative';
+                    imgContainer.style.width = '70px';
+                    imgContainer.style.height = '70px';
+                    imgContainer.style.borderRadius = '8px';
+                    imgContainer.style.overflow = 'hidden';
+                    imgContainer.style.border = '1px solid #cbd5e1';
 
-                        imgContainer.appendChild(img);
-                        imgContainer.appendChild(removeBtn);
-                        previewContainer.appendChild(imgContainer);
-                    }
-                    reader.readAsDataURL(file);
-                });
+                    const img = document.createElement('img');
+                    img.src = processed.dataUrl;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '2px';
+                    removeBtn.style.right = '2px';
+                    removeBtn.style.background = 'rgba(0,0,0,0.6)';
+                    removeBtn.style.color = '#fff';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.borderRadius = '50%';
+                    removeBtn.style.width = '20px';
+                    removeBtn.style.height = '20px';
+                    removeBtn.style.fontSize = '14px';
+                    removeBtn.style.lineHeight = '1';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.style.display = 'flex';
+                    removeBtn.style.alignItems = 'center';
+                    removeBtn.style.justifyContent = 'center';
+
+                    removeBtn.onclick = function(ev) {
+                        ev.preventDefault();
+                        const index = selectedFilesArray['before'].indexOf(processed.file);
+                        if (index > -1) {
+                            selectedFilesArray['before'].splice(index, 1);
+                        }
+                        imgContainer.remove();
+                        if (selectedFilesArray['before'].length === 0) {
+                            fileInput.classList.remove('is-valid');
+                            fileInput.classList.add('is-invalid');
+                        }
+                    };
+
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(removeBtn);
+                    previewContainer.appendChild(imgContainer);
+                }
                 this.value = '';
             });
         }
@@ -242,7 +333,17 @@
             .then(async res => {
                 const data = await res.json();
                 if (res.ok && data.success) {
-                    window.location.href = data.next_url || ("{{ url('/vehicle/after-pickup') }}/" + reqId);
+                    if (typeof hidePageLoader === 'function') hidePageLoader();
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Before Pickup details saved successfully.',
+                        icon: 'success',
+                        confirmButtonColor: '#0e7a43',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = data.next_url || ("{{ url('/vehicle/after-pickup') }}/" + reqId);
+                    });
                 } else {
                     if (typeof hidePageLoader === 'function') hidePageLoader();
                     saveBeforeBtn.disabled = false;

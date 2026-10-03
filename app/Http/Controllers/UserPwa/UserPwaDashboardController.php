@@ -45,7 +45,7 @@ class UserPwaDashboardController extends Controller
         $platformInProgress = WasteRequest::whereIn('status', ['assigned', 'before_pickup'])->count();
         $platformPending = WasteRequest::where('status', 'pending')->count();
 
-        $recentRequests = $requests->take(3);
+        $recentRequests = $query->latest()->paginate(10);
 
         return view('userpwa.dashboard', compact(
             'requests',

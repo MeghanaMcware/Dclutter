@@ -1,6 +1,8 @@
 <div class="app-header">
     <h1>
+        @if(Route::currentRouteName() !== 'vehicle.dashboard')
         <a href="javascript:history.back()"><i class="fa-solid fa-arrow-left"></i></a>
+        @endif
         @yield('heading', 'DCLUTTER Driver')
     </h1>
     <a href="{{ route('vehicle.notifications') }}" style="color: #fff;"><i class="fa-solid fa-bell font-16"></i></a>

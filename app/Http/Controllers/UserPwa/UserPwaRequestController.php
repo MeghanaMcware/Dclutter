@@ -337,7 +337,7 @@ class UserPwaRequestController extends Controller
             });
         }
 
-        $requests = $query->latest()->paginate(10);
+        $requests = $query->latest()->get();
 
         return view('userpwa.history.index', compact('requests'));
     }

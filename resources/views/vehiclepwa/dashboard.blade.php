@@ -84,7 +84,7 @@
         </div>
 
         <div class="text-center mb-3">
-            <a href="{{ route('vehicle.requests') }}" class="btn btn-success btn-sm w-100 py-2 fw-bold" style="background-color: var(--primary-green); border: none; border-radius: 10px;">
+            <a href="{{ route('vehicle.requests') }}" class="btn-end-trip mt-3" style="background-color: var(--primary-green); border: none; border-radius: 10px;">
                 <i class="fas fa-route me-1"></i> View Route & Requests
             </a>
         </div>

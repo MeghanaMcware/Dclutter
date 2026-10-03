@@ -230,6 +230,74 @@
     </div>
     @endif
     
+    @if(in_array($status, ['picked_up', 'in_transit', 'completed', 'dumped']))
+    <div class="card-ui">
+        <h6 class="fw-bold" style="font-size: 15px; color: #1e293b; margin-bottom: 4px;">Pickup Details</h6>
+        <div class="info-grid mt-3">
+            <div class="info-group">
+                <label>Picked Up At</label>
+                <div class="info-value">{{ $wasteRequest->picked_up_at ? \Carbon\Carbon::parse($wasteRequest->picked_up_at)->format('d M Y, h:i A') : 'N/A' }}</div>
+            </div>
+            <div class="info-group">
+                <label>Approx Weight (Kg)</label>
+                <div class="info-value">{{ $wasteRequest->approx_weight_kg ?? 'N/A' }}</div>
+            </div>
+        </div>
+        @php
+            $pickedUpImages = is_string($wasteRequest->picked_up_images) ? json_decode($wasteRequest->picked_up_images, true) : $wasteRequest->picked_up_images;
+        @endphp
+        @if(is_array($pickedUpImages) && count($pickedUpImages) > 0)
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; margin-top: 15px;">Evidence photos taken during pickup:</p>
+            <div class="photos-gallery">
+                @foreach($pickedUpImages as $img)
+                    <a href="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" target="_blank">
+                        <img src="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" alt="Pickup Photo" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'bg-light p-3 text-center text-muted\'>Image unavailable</div>';">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
+    @endif
+
+    @if(in_array($status, ['completed', 'dumped']) && $wasteRequest->dump)
+    <div class="card-ui">
+        <h6 class="fw-bold" style="font-size: 15px; color: #1e293b; margin-bottom: 4px;">Disposal Details</h6>
+        <div class="info-grid mt-3">
+            <div class="info-group">
+                <label>Disposed At</label>
+                <div class="info-value">{{ $wasteRequest->dump->dumped_at ? \Carbon\Carbon::parse($wasteRequest->dump->dumped_at)->format('d M Y, h:i A') : 'N/A' }}</div>
+            </div>
+            <div class="info-group">
+                <label>Disposal Plant</label>
+                <div class="info-value">{{ $wasteRequest->dump->plant_name ?? 'N/A' }}</div>
+            </div>
+            <div class="info-group">
+                <label>Dump Weight (Kg)</label>
+                <div class="info-value">{{ $wasteRequest->dump->dump_weight ?? 'N/A' }}</div>
+            </div>
+            @if($wasteRequest->dump->remarks)
+            <div class="info-group" style="grid-column: 1 / -1;">
+                <label>Remarks</label>
+                <div class="info-value">{{ $wasteRequest->dump->remarks }}</div>
+            </div>
+            @endif
+        </div>
+        @php
+            $dumpImages = is_string($wasteRequest->dump->dump_images) ? json_decode($wasteRequest->dump->dump_images, true) : $wasteRequest->dump->dump_images;
+        @endphp
+        @if(is_array($dumpImages) && count($dumpImages) > 0)
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; margin-top: 15px;">Evidence photos at disposal site:</p>
+            <div class="photos-gallery">
+                @foreach($dumpImages as $img)
+                    <a href="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" target="_blank">
+                        <img src="{{ Str::startsWith($img, 'http') ? $img : asset('storage/' . $img) }}" alt="Dump Photo" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'bg-light p-3 text-center text-muted\'>Image unavailable</div>';">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
+    @endif
+    
     <a href="{{ route('user.track') }}" class="btn-back">
         <i class="fa fa-arrow-left"></i> Back to Tracking List
     </a>

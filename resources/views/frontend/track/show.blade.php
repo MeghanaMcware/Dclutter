@@ -365,6 +365,80 @@
                     </div>
                 @endif
                 
+                @if(in_array($status, ['picked_up', 'dumped']))
+                <div class="card-ui" style="margin-top: 15px;">
+                    <div class="section-label" style="margin-top: 0;">Pickup Details</div>
+                    <div class="facts mt-3">
+                        <div>
+                            <b>Picked Up At</b>
+                            <small>{{ $wasteRequest->picked_up_at ? \Carbon\Carbon::parse($wasteRequest->picked_up_at)->format('d M Y, h:i A') : 'N/A' }}</small>
+                        </div>
+                        <div>
+                            <b>Approx Weight (Kg)</b>
+                            <small>{{ $wasteRequest->approx_weight_kg ?? 'N/A' }}</small>
+                        </div>
+                    </div>
+                    @php
+                        $pickedUpImages = is_string($wasteRequest->picked_up_images) ? json_decode($wasteRequest->picked_up_images, true) : $wasteRequest->picked_up_images;
+                    @endphp
+                    @if(is_array($pickedUpImages) && count($pickedUpImages) > 0)
+                        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px; margin-top: 15px;">
+                            Evidence photos taken during pickup:
+                        </p>
+                        <div class="photos-gallery">
+                            @foreach($pickedUpImages as $index => $imgPath)
+                                <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                     alt="Pickup Photo {{ $index + 1 }}" 
+                                     onclick="window.open(this.src, '_blank')"
+                                     onerror="this.src='https://placehold.co/400x300?text=Pickup+Image'">
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                @endif
+                
+                @if($status === 'dumped' && $wasteRequest->dump)
+                <div class="card-ui" style="margin-top: 15px;">
+                    <div class="section-label" style="margin-top: 0;">Disposal Details</div>
+                    <div class="facts mt-3">
+                        <div>
+                            <b>Disposed At</b>
+                            <small>{{ $wasteRequest->dump->dumped_at ? \Carbon\Carbon::parse($wasteRequest->dump->dumped_at)->format('d M Y, h:i A') : 'N/A' }}</small>
+                        </div>
+                        <div>
+                            <b>Disposal Plant / Location</b>
+                            <small>{{ $wasteRequest->dump->plant_name ?? 'N/A' }}</small>
+                        </div>
+                        <div>
+                            <b>Dump Weight (Kg)</b>
+                            <small>{{ $wasteRequest->dump->dump_weight ?? 'N/A' }}</small>
+                        </div>
+                        @if($wasteRequest->dump->remarks)
+                        <div style="grid-column: 1 / -1;">
+                            <b>Remarks</b>
+                            <small>{{ $wasteRequest->dump->remarks }}</small>
+                        </div>
+                        @endif
+                    </div>
+                    @php
+                        $dumpImages = is_string($wasteRequest->dump->dump_images) ? json_decode($wasteRequest->dump->dump_images, true) : $wasteRequest->dump->dump_images;
+                    @endphp
+                    @if(is_array($dumpImages) && count($dumpImages) > 0)
+                        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px; margin-top: 15px;">
+                            Evidence photos taken at disposal site:
+                        </p>
+                        <div class="photos-gallery">
+                            @foreach($dumpImages as $index => $imgPath)
+                                <img src="{{ Str::startsWith($imgPath, 'http') ? $imgPath : asset('storage/' . $imgPath) }}" 
+                                     alt="Dump Photo {{ $index + 1 }}" 
+                                     onclick="window.open(this.src, '_blank')"
+                                     onerror="this.src='https://placehold.co/400x300?text=Dump+Image'">
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                @endif
+                
                 <div class="mt-4 pt-3 border-top">
                     <a href="{{ route('citizen.track', ['id' => $wasteRequest->request_number]) }}" class="btn-ui w-100 text-center">
                         <i class="fa fa-arrow-left me-1"></i> Back to Track Request

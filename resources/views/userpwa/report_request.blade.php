@@ -395,7 +395,7 @@
             padding: 0 16px;
             font-weight: 500;
             color: var(--ink);
-            border-right: 1px solid var(--line);
+            /* border-right: 1px solid var(--line); */
             border-radius: 16px 0px 0px 16px;
             height: 100%;
             display: flex;
@@ -979,9 +979,9 @@
                                     <input type="file" id="wasteImagesInput" name="waste_images[]"
                                         capture="environment" multiple style="display:none;"
                                         onchange="handleImageSelection(event)">
-                                    <div class="file-upload-box" id="fileUploadBox">
+                                    <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
                                         <button type="button" class="file-upload-btn"
-                                            onclick="document.getElementById('wasteImagesInput').click()">
+                                            >
                                             <i class="bi bi-folder2-open me-1"></i> Choose Files
                                         </button>
                                         <div class="file-upload-text" id="fileUploadText">No files selected</div>
@@ -1049,9 +1049,9 @@
 
                             <!-- Floor No -->
                             <div>
-                                <label>Floor No </label>
-                                <input type="text" id="floorNoInput" name="floor_no" placeholder="e.g. 1st" required
-                                    oninput="validateSingleField(this)">
+                                <label>Floor No <span class="req">*</span></label>
+                                <input type="number" id="floorNoInput" name="floor_no" placeholder="e.g. 1" min="0" required
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, ''); validateSingleField(this)">
                                 <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor
                                     number.
                                 </div>
@@ -1249,7 +1249,7 @@
                             </label>
                         </div>
                         <div class="invalid-feedback" id="agreeError" style="color: #dc3545 !important; margin-top:6px;">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Please checked.
+                            <i class="bi bi-exclamation-triangle-fill"></i> Please accept the agreement before submitting your request.
                         </div>
 
 
@@ -1715,7 +1715,7 @@
                     div.innerHTML = `
                 <img src="${blobUrl}" alt="Preview">
                 <div class="image-preview-remove" onclick="removeImage(${i})">
-                    <i class="bi bi-x"></i>
+                    <i class="fa-solid fa-xmark"></i>
                 </div>
             `;
                     container.appendChild(div);
@@ -1987,6 +1987,7 @@
                 const applicantName = document.getElementById('applicantNameInput');
                 const address = document.getElementById('addressInput');
                 const houseNo = document.getElementById('houseNoInput');
+                const floorNo = document.getElementById('floorNoInput');
                 const landmark = document.getElementById('landmarkInput');
                 const wardDisplay = document.getElementById('wardDisplayInput');
                 const wardId = document.getElementById('wardIdInput');
@@ -2007,7 +2008,7 @@
                     if (imageError) imageError.style.display = 'none';
                 }
 
-                [applicantName, address, houseNo, landmark, wardDisplay, pincode, mobile].forEach(el => {
+                [applicantName, address, houseNo, floorNo, landmark, wardDisplay, pincode, mobile].forEach(el => {
                     if (!el || !el.value || el.value.trim() === '' || !el.checkValidity()) {
                         if (el) {
                             el.classList.remove('is-valid');
@@ -2185,7 +2186,7 @@
                 if (searchButton) setButtonLoading(searchButton, true, 'Searching...');
 
                 fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bengaluru')}`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bengaluru')}&email=test@example.com`
                         )
                     .then(res => res.json())
                     .then(data => {
@@ -2242,9 +2243,9 @@
 
                 // 2. Reverse geocode address & pincode
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`, {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&email=test@example.com`, {
                         signal: controller.signal,
                         headers: {
                             'Accept-Language': 'en'
@@ -2271,7 +2272,7 @@
                     .catch(err => {
                         clearTimeout(timeoutId);
                         const addrEl = document.getElementById('addressInput');
-                        if (addrEl && !addrEl.value) {
+                        if (addrEl ) {
                             addrEl.value =
                                 `Site Location near ${parseFloat(lat).toFixed(4)}° N, ${parseFloat(lng).toFixed(4)}° E, Bengaluru`;
                             validateSingleField(addrEl);
@@ -2326,14 +2327,14 @@
                             `Location selected: ${demoLat.toFixed(4)}° N, ${demoLng.toFixed(4)}° E`;
                     }
                     const addrEl = document.getElementById('addressInput');
-                    if (addrEl && !addrEl.value) {
+                    if (addrEl ) {
                         addrEl.value =
                             "Millers Tank Bund Road, Kaverappa Layout, Vasanth Nagar, Bengaluru, Karnataka 560052";
                         validateSingleField(addrEl);
                     }
 
                     const pinEl = document.getElementById('pincodeInput');
-                    if (pinEl && !pinEl.value) {
+                    if (pinEl ) {
                         pinEl.value = "560052";
                         validateSingleField(pinEl);
                     }

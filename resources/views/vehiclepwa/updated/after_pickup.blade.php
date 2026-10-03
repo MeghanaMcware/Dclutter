@@ -58,7 +58,7 @@
                 <form id="statusUpdateForm">
                     <div class="form-group">
                         <label>After Photo<span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="afterPhoto" accept="image/*" multiple required>
+                        <input type="file" class="form-control" id="afterPhoto" accept="image/*" capture="environment" multiple required>
                         <div class="invalid-feedback">Please capture or upload at least one after photo.</div>
                         <div id="afterPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                     </div>
@@ -111,6 +111,73 @@
 
 @section('script')
 <script>
+
+    let currentAddress = 'Location not available';
+    
+    // Add watermark processing function
+    function processImageWithWatermark(file, lat, lng, address) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    const MAX_WIDTH = 1000;
+                    const MAX_HEIGHT = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = Math.round(height * (MAX_WIDTH / width));
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = Math.round(width * (MAX_HEIGHT / height));
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const barHeight = 110;
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.fillRect(0, height - barHeight, width, barHeight);
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 15px Arial';
+                    ctx.textAlign = 'left';
+                    
+                    let textY = height - barHeight + 30;
+                    let truncatedAddress = address.length > 80 ? address.substring(0, 77) + '...' : address;
+                    ctx.fillText(`Location: ${truncatedAddress}`, 15, textY);
+                    
+                    ctx.font = '14px Arial';
+                    ctx.fillText(`Lat: ${lat ? lat : 'N/A'}, Lng: ${lng ? lng : 'N/A'}`, 15, textY + 30);
+                    
+                    ctx.fillStyle = '#FFD700';
+                    const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+                    ctx.fillText(`Time: ${dateStr}`, 15, textY + 60);
+
+                    canvas.toBlob((blob) => {
+                        const newFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+                        resolve({ file: newFile, dataUrl: canvas.toDataURL('image/jpeg', 0.8) });
+                    }, 'image/jpeg', 0.8);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     const selectedFilesArray = { 'after': [] };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -168,23 +235,30 @@
         const fileInput = document.getElementById('afterPhoto');
         const previewContainer = document.getElementById('afterPreview');
 
-        fileInput.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            
-            if (files.length > 0) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            }
+        fileInput.addEventListener('change', async function(e) {
+                const files = Array.from(e.target.files);
+                const latInput = document.getElementById('currentLat');
+                const lngInput = document.getElementById('currentLng');
+                const lat = latInput ? latInput.value : '';
+                const lng = lngInput ? lngInput.value : '';
 
-            files.forEach(file => {
-                if (selectedFilesArray['after'].length >= 3) {
-                    Swal.fire('Limit Reached', 'You can upload a maximum of 3 after photos.', 'warning');
-                    return;
+                if (files.length > 0) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
                 }
-                
-                selectedFilesArray['after'].push(file);
-                const reader = new FileReader();
-                reader.onload = function(e) {
+
+                for (let file of files) {
+                    if (selectedFilesArray['after'].length >= 3) {
+                        Swal.fire('Limit Reached', 'You can upload a maximum of 3 after photos.', 'warning');
+                        break;
+                    }
+
+                    if(typeof showPageLoader === 'function') showPageLoader();
+                    const processed = await processImageWithWatermark(file, lat, lng, currentAddress);
+                    if(typeof hidePageLoader === 'function') hidePageLoader();
+
+                    selectedFilesArray['after'].push(processed.file);
+
                     const imgContainer = document.createElement('div');
                     imgContainer.style.position = 'relative';
                     imgContainer.style.width = '70px';
@@ -194,7 +268,7 @@
                     imgContainer.style.border = '1px solid #cbd5e1';
 
                     const img = document.createElement('img');
-                    img.src = e.target.result;
+                    img.src = processed.dataUrl;
                     img.style.width = '100%';
                     img.style.height = '100%';
                     img.style.objectFit = 'cover';
@@ -219,7 +293,7 @@
 
                     removeBtn.onclick = function(ev) {
                         ev.preventDefault();
-                        const index = selectedFilesArray['after'].indexOf(file);
+                        const index = selectedFilesArray['after'].indexOf(processed.file);
                         if (index > -1) {
                             selectedFilesArray['after'].splice(index, 1);
                         }
@@ -234,12 +308,8 @@
                     imgContainer.appendChild(removeBtn);
                     previewContainer.appendChild(imgContainer);
                 }
-                reader.readAsDataURL(file);
+                this.value = '';
             });
-            
-            // Clear input so same file can be selected again if needed
-            this.value = '';
-        });
     });
 
     function submitStatusUpdate() {
