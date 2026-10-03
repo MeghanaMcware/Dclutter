@@ -70,13 +70,13 @@
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('admin.masters.users.show', $user->id) }}" class="btn btn-info btn-sm text-white" title="View"><i class="fa fa-eye"></i></a>
                                                     <a href="{{ route('admin.masters.users.edit', $user->id) }}" class="btn btn-warning btn-sm text-white" title="Edit"><i class="fa fa-pencil"></i></a>
-                                                    <form action="{{ route('admin.masters.users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                    <!-- <form action="{{ route('admin.masters.users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm text-white" title="Delete">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
-                                                    </form>
+                                                    </form> -->
                                                 </div>
                                             </td>
                                         </tr>

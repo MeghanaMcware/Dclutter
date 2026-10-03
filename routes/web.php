@@ -132,6 +132,7 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
         Route::get('/trip-progress', [VehiclePwaController::class, 'tripProgress'])->name('trip_progress');
         Route::get('/trip-summary', [VehiclePwaController::class, 'tripSummary'])->name('trip_summary');
         Route::get('/history', [VehiclePwaController::class, 'history'])->name('history');
+        Route::get('/history/{id}', [VehiclePwaController::class, 'historyShow'])->name('history.show');
         Route::get('/profile', [VehiclePwaController::class, 'profile'])->name('profile_settings');
         Route::get('/notifications', [VehiclePwaController::class, 'notifications'])->name('notifications');
 
@@ -206,3 +207,4 @@ Route::prefix('user')->name('user.')->group(function () {
         Route::post('/profile/update', [UserPwaProfileController::class, 'update']);
     });
 });
+

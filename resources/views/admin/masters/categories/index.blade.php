@@ -104,13 +104,13 @@
                                                     <a href="{{ route('admin.masters.categories.edit', $category->id) }}" class="btn btn-sm btn-primary" title="Edit">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('admin.masters.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?');" class="d-inline">
+                                                    <!-- <form action="{{ route('admin.masters.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?');" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
-                                                    </form>
+                                                    </form> -->
                                                 </div>
                                             </td>
                                         </tr>

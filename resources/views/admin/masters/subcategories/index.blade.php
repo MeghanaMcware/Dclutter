@@ -106,13 +106,13 @@
                                                     <a href="{{ route('admin.masters.subcategories.edit', $subcategory->id) }}" class="btn btn-sm btn-primary" title="Edit">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('admin.masters.subcategories.destroy', $subcategory->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this subcategory?');" class="d-inline">
+                                                    <!-- <form action="{{ route('admin.masters.subcategories.destroy', $subcategory->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this subcategory?');" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
-                                                    </form>
+                                                    </form> -->
                                                 </div>
                                             </td>
                                         </tr>

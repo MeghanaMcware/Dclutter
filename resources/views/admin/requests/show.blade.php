@@ -70,9 +70,7 @@
                     
                 </div>
                 <div class="col-12 col-sm-6 d-flex align-items-center justify-content-sm-end gap-2 mt-2 mt-sm-0">
-                    <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVehicleModal">
-                        <i class="fa fa-truck me-1"></i> {{ $wasteRequest->vehicle ? 'Change Vehicle' : 'Assign Vehicle' }}
-                    </button>
+                    
                     <ol class="breadcrumb d-inline-flex mb-0 bg-transparent p-0">
                         <li class="breadcrumb-item">
                             <a href="{{ url('admin/dashboard') }}">
@@ -158,7 +156,7 @@
                                     </div>
                                 </div>
                             @endif
-                            <div class="col-sm-6">
+                            <!-- <div class="col-sm-6">
                                 <div class="detail-label">Assigned Vehicle</div>
                                 <div class="detail-value d-flex align-items-center gap-2 flex-wrap">
                                     @if($wasteRequest->vehicle)
@@ -177,7 +175,7 @@
                                         </button>
                                     @endif
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="col-sm-6">
                                 <div class="detail-label">Request Source</div>
                                 <div class="detail-value text-capitalize">{{ $wasteRequest->source }}</div>

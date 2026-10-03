@@ -111,7 +111,7 @@ class VehiclePwaController extends Controller
             $query->where('vehicle_id', $vehicleId);
         }
 
-        $assignedRequests = $query->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->get();
+        $assignedRequests = $query->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->paginate(10);
 
         return view('vehiclepwa.requests.index', compact('assignedRequests'));
     }
@@ -383,7 +383,7 @@ class VehiclePwaController extends Controller
             $query->where('vehicle_id', $vehicleId);
         }
 
-        $assignedRequests = $query->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->get();
+        $assignedRequests = $query->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->paginate(10);
         $completedCount = (clone $query)->where('status', 'picked_up')->count();
         $pendingCount = (clone $query)->where('status', 'assigned')->count();
 
@@ -464,9 +464,7 @@ class VehiclePwaController extends Controller
             $query->where('vehicle_id', $vehicleId);
         }
 
-        $dumpRequests = $query->latest('picked_up_at')->get()->sortBy(function ($req) {
-            return in_array(strtolower($req->status), ['completed', 'dumped']) ? 1 : 0;
-        });
+        $dumpRequests = $query->orderByRaw("FIELD(status, 'picked_up', 'dumped', 'completed')")->orderBy('picked_up_at', 'desc')->paginate(10);
 
         return view('vehiclepwa.dump_list', compact('dumpRequests'));
     }
@@ -571,4 +569,49 @@ class VehiclePwaController extends Controller
 
         return redirect()->route('vehicle.dump')->with('success', 'Dump submitted successfully.');
     }
+
+
+    public function history(Request $request)
+    {
+        $vehicleId = $this->getDriverVehicleId();
+        
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
+            ->whereIn('status', ['dumped', 'completed', 'picked_up']);
+            
+        if ($vehicleId) {
+            $query->where('vehicle_id', $vehicleId);
+        }
+        
+        
+        if ($request->filled('search')) {
+            $term = trim($request->search);
+            $query->where(function($q) use ($term) {
+                $q->where('request_number', 'like', "%{$term}%")
+                  ->orWhere('applicant_name', 'like', "%{$term}%")
+                  ->orWhere('mobile_number', 'like', "%{$term}%");
+            });
+        }
+        
+        $requests = $query->orderBy('updated_at', 'desc')->paginate(10);
+
+        
+        return view('vehiclepwa.history.index', compact('requests'));
+    }
+
+    public function historyShow($id)
+    {
+        $vehicleId = $this->getDriverVehicleId();
+        
+        $wasteRequest = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle', 'dumpRecord'])
+            ->where('id', $id);
+            
+        if ($vehicleId) {
+            $wasteRequest->where('vehicle_id', $vehicleId);
+        }
+        
+        $wasteRequest = $wasteRequest->firstOrFail();
+        
+        return view('vehiclepwa.history.show', compact('wasteRequest'));
+    }
+
 }
