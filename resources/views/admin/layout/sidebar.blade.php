@@ -42,6 +42,13 @@
           </li>
 
           <li class="sidebar-list">
+            <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('admin.dump.*') ? 'active' : '' }}" href="{{ route('admin.dump.index') }}">
+              <i data-feather="archive"></i>
+              <span>Pickup & Dump</span>
+            </a>
+          </li>
+
+          <li class="sidebar-list">
             <a class="sidebar-link sidebar-title link-nav" href="{{ url('/gis') }}">
               <i data-feather="map-pin"></i>
               <span>GIS Overview Map</span>
