@@ -180,6 +180,19 @@
             <p class="small text-muted">Items marked as "Picked Up" will appear here for dump disposal.</p>
         </div>
     @endforelse
+    
+    @if($dumpRequests->total() > 0)
+    <div class="mt-4 mb-4 pb-4">
+        <div class="d-flex flex-column align-items-center justify-content-center text-center">
+            <div class="text-muted small mb-2 fw-bold w-100">
+                Showing {{ $dumpRequests->firstItem() ?? 0 }} to {{ $dumpRequests->lastItem() ?? 0 }} of {{ $dumpRequests->total() }} entries
+            </div>
+            <div class="w-100 d-flex justify-content-center" style="overflow-x: auto;">
+                {{ $dumpRequests->appends(request()->query())->links('vendor.pagination.circle') }}
+            </div>
+        </div>
+    </div>
+    @endif
 
 </div>
 

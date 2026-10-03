@@ -431,6 +431,19 @@
             <i class="fa-solid fa-folder-open fs-2 mb-2 text-secondary"></i>
             <h6 class="fw-bold">No requests match your filter</h6>
         </div>
+        
+        @if($assignedRequests->total() > 0)
+        <div class="mt-4 mb-4 pb-4">
+            <div class="d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="text-muted small mb-2 fw-bold w-100">
+                    Showing {{ $assignedRequests->firstItem() ?? 0 }} to {{ $assignedRequests->lastItem() ?? 0 }} of {{ $assignedRequests->total() }} entries
+                </div>
+                <div class="w-100 d-flex justify-content-center" style="overflow-x: auto;">
+                    {{ $assignedRequests->appends(request()->query())->links('vendor.pagination.circle') }}
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     {{-- ================= MAP VIEW ================= --}}

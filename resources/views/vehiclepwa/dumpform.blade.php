@@ -4,6 +4,7 @@
 @section('heading') Dump Waste @endsection
 
 @section('style')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />\n<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     :root {
         --primary-brand: #0e7a43;
@@ -44,6 +45,26 @@
     }
 
     .form-control,
+    .select2-container--default .select2-selection--single {
+        border-radius: 9px;
+        border: 1px solid #cbd5e1;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+        top: 1px;
+    }
+    .select2-dropdown {
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--primary-brand);
+    }
+
     .form-select {
         min-height: 33px;
         border-radius: 9px;
@@ -207,7 +228,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+    $(document).ready(function() {
+        $('#dumpLocation').select2({
+            placeholder: 'Select Dump Location',
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+<script>\n    \.ready(function() {\n        \#plant_id.select2({\n            placeholder: 'Select Dump Location',\n            allowClear: true,\n            width: '100%'\n        });\n    });\n</script>\n<script>
 
     const params = new URLSearchParams(window.location.search);
     const pickupId = params.get('pickup_id') || 'REQ-00001';

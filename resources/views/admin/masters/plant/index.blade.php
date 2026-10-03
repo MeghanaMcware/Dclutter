@@ -370,13 +370,13 @@
                                                     </a>
 
                                                     {{-- DELETE --}}
-                                                    <form action="{{ route('admin.masters.plants.destroy', $plant->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this plant location?');">
+                                                    <!-- <form action="{{ route('admin.masters.plants.destroy', $plant->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this plant location?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm text-white action-btn" title="Delete">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
-                                                    </form>
+                                                    </form> -->
 
                                                 </div>
                                             </td>

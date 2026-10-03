@@ -157,13 +157,13 @@
                                                 <a href="{{ route('admin.vehicles.edit', $vehicle->id) }}" class="btn btn-warning text-white" title="Edit" style="background: #fff3e0; color: #ff9800;">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
-                                                <form action="{{ route('admin.vehicles.destroy', $vehicle->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                                <!-- <form action="{{ route('admin.vehicles.destroy', $vehicle->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger text-white" title="Delete" style="background: #ffebee; color: #f44336; border: none;">
                                                         <i class="fa fa-trash"></i>
                                                     </button>
-                                                </form>
+                                                </form> -->
                                             </div>
                                         </td>
                                     </tr>

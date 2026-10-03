@@ -11,6 +11,9 @@
     <a href="{{ route('vehicle.dump') }}" class="{{ request()->routeIs('vehicle.dump*') || request()->routeIs('vehicle.dumpform*') ? 'active' : '' }}">
         <i class="fa-solid fa-dumpster"></i>Dump
     </a>
+    <a href="{{ route('vehicle.history') }}" class="{{ request()->routeIs('vehicle.history*') ? 'active' : '' }}">
+        <i class="fa-solid fa-clock-rotate-left"></i>History
+    </a>
     <a href="{{ route('vehicle.profile_settings') }}" class="{{ request()->routeIs('vehicle.profile_settings*') ? 'active' : '' }}">
         <i class="fa-solid fa-user"></i>Profile
     </a>
@@ -50,3 +53,4 @@
         color: #1d4073;
     }
 </style>
+

@@ -3,8 +3,25 @@
 @section('title', 'Reports')
 
 @section('style')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-.status-badge {
+.select2-container .select2-selection--single {
+        height: 38px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 4px !important;
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+        top: 1px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        height: 36px !important;
+        margin-right: 15px;
+    }
+
+    .status-badge {
     padding: 5px 12px;
     border-radius: 4px;
     font-size: 11px;
@@ -294,6 +311,13 @@ table.dataTable tbody td {
 
 <script>
 $(document).ready(function() {
+    // Initialize Select2 for Request ID
+    $('#requestIdFilter').select2({
+        width: '100%',
+        placeholder: 'All Request IDs',
+        allowClear: true
+    });
+
     // Initialize DataTables
     var table = $('#admin-reports-table').DataTable({
         responsive: true,
