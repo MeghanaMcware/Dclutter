@@ -10,6 +10,7 @@
     <meta name="keywords" content="D-Cultter">
     <meta name="author" content="pixelstrap">
     <link rel="icon" href="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}">
+    @include('partials.pwa-head')
     <title>@yield('title') - Dclutter</title>
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com">

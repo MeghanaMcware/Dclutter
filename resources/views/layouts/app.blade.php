@@ -11,6 +11,7 @@
   <!-- Favicons -->
   <link href="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}" rel="icon">
   <link href="{{asset('frontendwebsite/img/GBA-removebg-preview.png')}}" rel="apple-touch-icon">
+  @include('partials.pwa-head')
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">

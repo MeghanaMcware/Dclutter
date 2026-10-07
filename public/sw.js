@@ -26,14 +26,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Only handle GET requests
     if (event.request.method !== 'GET') {
         return;
     }
 
+    // Skip non-http/https schemes (like chrome-extension://)
     if (!event.request.url.startsWith('http')) {
         return;
     }
 
+    // Network-first strategy with cache fallback
     event.respondWith(
         fetch(event.request)
             .then((networkResponse) => {
