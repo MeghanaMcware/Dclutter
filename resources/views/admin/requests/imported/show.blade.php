@@ -2,7 +2,42 @@
 
 @section('title', 'Imported Request Details #' . $requestData->id)
 
+@section('style')
+<style>
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+        min-width: 85px;
+        text-align: center;
+    }
+    .status-pending { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .status-assigned { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .status-rescheduled { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .status-picked_up { background-color: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+    .status-dumped, .status-completed { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-rejected { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .status-closed { background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+</style>
+@endsection
+
 @section('content')
+@php
+    $st = strtolower($requestData->status ?? 'pending');
+    $badgeClass = match($st) {
+        'pending', 'requested' => 'status-pending',
+        'assigned', 'scheduled' => 'status-assigned',
+        'rescheduled', 'not_available' => 'status-rescheduled',
+        'picked_up' => 'status-picked_up',
+        'dumped', 'completed' => 'status-dumped',
+        'rejected' => 'status-rejected',
+        'closed', 'door_closed', 'call_not_attended', 'not_ready_today', 'cancelled' => 'status-closed',
+        default => 'status-pending'
+    };
+@endphp
 <div class="container-fluid">
     <div class="page-title">
         <div class="row">
@@ -22,10 +57,15 @@
 
 <div class="content-body">
     <div class="container-fluid pt-3">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fa fa-check-circle me-1"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <div class="row">
             <div class="col-sm-12 col-lg-12">
-
-                
 
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
@@ -35,7 +75,9 @@
                                 <span class="badge bg-secondary font-12">Excel Row ID: {{ $requestData->excel_id }}</span>
                             @endif
                         </div>
-                        <span class="badge bg-light text-dark fw-bold text-capitalize" style="font-size:12px;">Status: {{ $requestData->status }}</span>
+                        <div>
+                            <span class="status-badge {{ $badgeClass }}" id="showStatusBadge">{{ $requestData->status_label }}</span>
+                        </div>
                     </div>
 
                     <div class="card-body">

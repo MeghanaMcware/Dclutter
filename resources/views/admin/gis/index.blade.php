@@ -75,10 +75,12 @@
         border-radius: 3px;
         display: inline-block;
     }
-    .swatch.requested { background:#2563eb; }
-    .swatch.scheduled { background:#ea580c; }
-    .swatch.completed { background:#16a34a; }
-    .swatch.cancelled { background:#dc2626; }
+    .swatch.pending { background:#f59e0b; }
+    .swatch.scheduled { background:#3b82f6; }
+    .swatch.picked { background:#06b6d4; }
+    .swatch.dumped { background:#10b981; }
+    .swatch.closed { background:#64748b; }
+    .swatch.rescheduled { background:#8b5cf6; }
 
     /* Custom pin marker */
     .pin-marker {
@@ -92,10 +94,12 @@
         box-shadow: 0 1px 4px rgba(0,0,0,.5);
         border: 1px solid rgba(0,0,0,.15);
     }
-    .pin-marker.requested { background: #2563eb; }
-    .pin-marker.scheduled { background: #ea580c; }
-    .pin-marker.completed { background: #16a34a; }
-    .pin-marker.cancelled { background: #dc2626; }
+    .pin-marker.pending { background: #f59e0b; }
+    .pin-marker.scheduled { background: #3b82f6; }
+    .pin-marker.picked { background: #06b6d4; }
+    .pin-marker.dumped { background: #10b981; }
+    .pin-marker.closed { background: #64748b; }
+    .pin-marker.rescheduled { background: #8b5cf6; }
     .pin-marker .pin-dot {
         width: 9px;
         height: 9px;
@@ -239,17 +243,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const icons = {
-        requested: pinIcon('requested'),
+        pending: pinIcon('pending'),
         scheduled: pinIcon('scheduled'),
-        completed: pinIcon('completed'),
-        cancelled: pinIcon('cancelled'),
+        picked: pinIcon('picked'),
+        dumped: pinIcon('dumped'),
+        closed: pinIcon('closed'),
+        rescheduled: pinIcon('rescheduled'),
     };
 
     const statusLayers = {
-        requested: L.layerGroup(),
+        pending: L.layerGroup(),
         scheduled: L.layerGroup(),
-        completed: L.layerGroup(),
-        cancelled: L.layerGroup(),
+        picked: L.layerGroup(),
+        dumped: L.layerGroup(),
+        closed: L.layerGroup(),
+        rescheduled: L.layerGroup(),
     };
 
     Object.values(statusLayers).forEach(layer => layer.addTo(map));
@@ -270,20 +278,28 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="status-panel">
                 <div class="legend-row">
-                    <input type="checkbox" data-status="requested" checked>
-                    <span class="swatch requested"></span> Requested (<span id="count-requested">0</span>)
+                    <input type="checkbox" data-status="pending" checked>
+                    <span class="swatch pending"></span> Pending (<span id="count-pending">0</span>)
                 </div>
                 <div class="legend-row">
                     <input type="checkbox" data-status="scheduled" checked>
                     <span class="swatch scheduled"></span> Scheduled (<span id="count-scheduled">0</span>)
                 </div>
                 <div class="legend-row">
-                    <input type="checkbox" data-status="completed" checked>
-                    <span class="swatch completed"></span> Completed (<span id="count-completed">0</span>)
+                    <input type="checkbox" data-status="picked" checked>
+                    <span class="swatch picked"></span> Picked (<span id="count-picked">0</span>)
                 </div>
                 <div class="legend-row">
-                    <input type="checkbox" data-status="cancelled" checked>
-                    <span class="swatch cancelled"></span> Cancelled (<span id="count-cancelled">0</span>)
+                    <input type="checkbox" data-status="dumped" checked>
+                    <span class="swatch dumped"></span> Dumped (<span id="count-dumped">0</span>)
+                </div>
+                <div class="legend-row">
+                    <input type="checkbox" data-status="closed" checked>
+                    <span class="swatch closed"></span> Closed (<span id="count-closed">0</span>)
+                </div>
+                <div class="legend-row">
+                    <input type="checkbox" data-status="rescheduled" checked>
+                    <span class="swatch rescheduled"></span> Rescheduled (<span id="count-rescheduled">0</span>)
                 </div>
             </div>
         `;
@@ -320,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
         Object.values(statusLayers).forEach(layer => layer.clearLayers());
 
         // 4A. Fetch and render Ward Boundaries
-        const wardsUrl = new URL("{{ route('gis.api.wards') }}", window.location.origin);
+        const wardsUrl = new URL("{{ route('admin.gis.api.wards') }}", window.location.origin);
         if (corpId && corpId !== 'all') wardsUrl.searchParams.set('corporation_id', corpId);
         if (constId && constId !== 'all') wardsUrl.searchParams.set('constituency_id', constId);
 
@@ -394,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(err => console.error("Error loading ward boundaries:", err));
 
         // 4B. Fetch and render Live Request Pins
-        const reqUrl = new URL("{{ route('gis.api.requests') }}", window.location.origin);
+        const reqUrl = new URL("{{ route('admin.gis.api.requests') }}", window.location.origin);
         if (corpId && corpId !== 'all') reqUrl.searchParams.set('corporation_id', corpId);
         if (constId && constId !== 'all') reqUrl.searchParams.set('constituency_id', constId);
 
@@ -405,20 +421,29 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             if (!data.success || !Array.isArray(data.points)) return;
 
-            const counts = { requested: 0, scheduled: 0, completed: 0, cancelled: 0 };
+            const counts = { pending: 0, scheduled: 0, picked: 0, dumped: 0, closed: 0, rescheduled: 0 };
+            const statusColorMap = {
+                pending: '#f59e0b',
+                scheduled: '#3b82f6',
+                picked: '#06b6d4',
+                dumped: '#10b981',
+                closed: '#64748b',
+                rescheduled: '#8b5cf6'
+            };
 
             data.points.forEach(p => {
-                const statusKey = p.status || 'requested';
+                const statusKey = p.status || 'pending';
                 if (counts[statusKey] !== undefined) counts[statusKey]++;
 
-                const icon = icons[statusKey] || icons.requested;
-                const targetLayer = statusLayers[statusKey] || statusLayers.requested;
+                const icon = icons[statusKey] || icons.pending;
+                const targetLayer = statusLayers[statusKey] || statusLayers.pending;
+                const badgeColor = statusColorMap[statusKey] || '#f59e0b';
 
                 const popupContent = `
                     <div class="gis-popup p-1" style="min-width: 200px;">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="text-primary fs-6">${p.request_number}</strong>
-                            <span class="badge" style="background:${statusKey === 'completed' ? '#16a34a' : (statusKey === 'scheduled' ? '#ea580c' : (statusKey === 'cancelled' ? '#dc2626' : '#2563eb'))}">
+                            <span class="badge" style="background:${badgeColor}">
                                 ${p.status_label}
                             </span>
                         </div>
@@ -440,7 +465,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Update counts in legend panel
-            ['requested', 'scheduled', 'completed', 'cancelled'].forEach(k => {
+            ['pending', 'scheduled', 'picked', 'dumped', 'closed', 'rescheduled'].forEach(k => {
                 const el = document.getElementById(`count-${k}`);
                 if (el) el.innerText = counts[k];
             });

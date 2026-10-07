@@ -29,8 +29,10 @@ class AdminRequestController extends Controller
                 $query->whereIn('status', ['assigned', 'scheduled']);
             } elseif ($statusVal === 'dumped' || $statusVal === 'completed') {
                 $query->whereIn('status', ['dumped', 'completed']);
-            } elseif ($statusVal === 'cancelled' || $statusVal === 'rejected') {
-                $query->whereIn('status', ['cancelled', 'rejected']);
+            } elseif ($statusVal === 'rejected') {
+                $query->where('status', 'rejected');
+            } elseif ($statusVal === 'closed') {
+                $query->where('status', 'closed');
             } else {
                 $query->where('status', $statusVal);
             }
@@ -120,6 +122,9 @@ class AdminRequestController extends Controller
             });
         }
         $vehicles = $vehicleQuery->get();
+        if ($vehicles->isEmpty()) {
+            $vehicles = Vehicle::with(['owner'])->where('status', 1)->get();
+        }
 
         return view('admin.requests.show', compact('wasteRequest', 'vehicles'));
     }
@@ -141,8 +146,10 @@ class AdminRequestController extends Controller
                 $query->whereIn('status', ['assigned', 'scheduled']);
             } elseif ($statusVal === 'dumped' || $statusVal === 'completed') {
                 $query->whereIn('status', ['dumped', 'completed']);
-            } elseif ($statusVal === 'cancelled' || $statusVal === 'rejected') {
-                $query->whereIn('status', ['cancelled', 'rejected']);
+            } elseif ($statusVal === 'rejected') {
+                $query->where('status', 'rejected');
+            } elseif ($statusVal === 'closed') {
+                $query->where('status', 'closed');
             } else {
                 $query->where('status', $statusVal);
             }

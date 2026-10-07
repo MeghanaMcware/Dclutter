@@ -43,7 +43,8 @@ class AdminDashboardController extends Controller
         $rescheduledRequests = $statusStats['rescheduled'];
         $pickedUpRequests = $statusStats['picked_up'];
         $dumpedRequests = $statusStats['dumped'];
-        $cancelledRequests = $statusStats['cancelled'];
+        $rejectedRequests = $statusStats['rejected'] ?? 0;
+        $closedRequests = $statusStats['closed'] ?? 0;
         
         $totalUsers = User::role('citizen')->count();
         if ($totalUsers === 0) {
@@ -115,15 +116,16 @@ class AdminDashboardController extends Controller
             $categorySeries = array_values($activeCatCounts);
         }
 
-        // 4. Request Status Breakdown Donut: Pending, Assigned, Rescheduled, Picked Up, Dumped, Cancelled
-        $statusLabels = ['Pending', 'Assigned', 'Rescheduled', 'Picked Up', 'Dumped', 'Cancelled'];
+        // 4. Request Status Breakdown Donut
+        $statusLabels = ['Pending', 'Assigned', 'Rescheduled', 'Picked Up', 'Dumped', 'Rejected', 'Closed'];
         $statusSeries = [
             $statusStats['pending'],
             $statusStats['assigned'],
             $statusStats['rescheduled'],
             $statusStats['picked_up'],
             $statusStats['dumped'],
-            $statusStats['cancelled'],
+            $statusStats['rejected'] ?? 0,
+            $statusStats['closed'] ?? 0,
         ];
 
         // 5. Recent 10 Requests
@@ -149,7 +151,8 @@ class AdminDashboardController extends Controller
                     'rescheduledRequests' => number_format($rescheduledRequests),
                     'pickedUpRequests' => number_format($pickedUpRequests),
                     'dumpedRequests' => number_format($dumpedRequests),
-                    'cancelledRequests' => number_format($cancelledRequests),
+                    'rejectedRequests' => number_format($rejectedRequests),
+                    'closedRequests' => number_format($closedRequests),
                     'totalUsers' => number_format($totalUsers),
                 ],
                 'trend' => [
@@ -177,7 +180,8 @@ class AdminDashboardController extends Controller
             'rescheduledRequests',
             'pickedUpRequests',
             'dumpedRequests',
-            'cancelledRequests',
+            'rejectedRequests',
+            'closedRequests',
             'totalUsers',
             'trendDates',
             'receivedCounts',

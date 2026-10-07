@@ -134,8 +134,6 @@
         'picked_up' => 'status-picked_up',
         'dumped' => 'status-dumped',
         'completed' => 'status-dumped',
-        'rejected' => 'status-rejected',
-        'cancelled' => 'status-rejected',
     ];
 @endphp
 

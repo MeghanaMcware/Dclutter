@@ -96,21 +96,24 @@
             
             $statusClass = match($wasteRequest->status) {
                 'pending' => 'status-pending',
-                'assigned' => 'status-assigned',
+                'assigned', 'scheduled' => 'status-assigned',
+                'rescheduled', 'not_available' => 'status-in-progress',
                 'picked_up' => 'status-in-progress',
-                'dumped' => 'status-completed',
-                'rejected' => 'status-rejected',
-                'not_available' => 'status-in-progress',
+                'dumped', 'completed' => 'status-completed',
+                'rejected', 'closed' => 'status-rejected',
                 default => 'status-pending'
             };
 
             $statusLabels = [
                 'pending' => 'Pending',
                 'assigned' => 'Assigned',
-                'picked_up' => 'In Progress / Picked Up',
-                'dumped' => 'Completed / Dumped',
-                'rejected' => 'Rejected',
+                'rescheduled' => 'Rescheduled',
                 'not_available' => 'Rescheduled',
+                'picked_up' => 'Picked Up',
+                'dumped' => 'Dumped',
+                'completed' => 'Dumped',
+                'rejected' => 'Rejected',
+                'closed' => 'Closed',
             ];
             $statusLabel = $statusLabels[$wasteRequest->status] ?? ucfirst(str_replace('_', ' ', $wasteRequest->status));
         @endphp

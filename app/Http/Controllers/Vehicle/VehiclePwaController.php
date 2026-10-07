@@ -105,12 +105,12 @@ class VehiclePwaController extends Controller
     }
 
     /**
-     * Assigned Waste Requests list & map.
+     * Assigned Waste Requests list & map (Only Assigned and Rescheduled).
      */
     public function requests(Request $request)
     {
         $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle'])
-            ->whereIn('status', ['assigned', 'picked_up', 'not_available']);
+            ->whereIn('status', ['assigned', 'not_available', 'rescheduled']);
 
         if ($vehicleId = $this->getDriverVehicleId()) {
             $query->where('vehicle_id', $vehicleId);
@@ -122,11 +122,11 @@ class VehiclePwaController extends Controller
     }
 
     /**
-     * Route navigation map.
+     * Route navigation map (Only Assigned and Rescheduled).
      */
     public function route()
     {
-        $query = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available']);
+        $query = WasteRequest::whereIn('status', ['assigned', 'not_available', 'rescheduled']);
         if ($vehicleId = $this->getDriverVehicleId()) {
             $query->where('vehicle_id', $vehicleId);
         }
@@ -224,7 +224,7 @@ class VehiclePwaController extends Controller
     }
 
     /**
-     * Store Not Available status for a pickup request (Reason & Next Sunday Date).
+     * Store Not Available status for a pickup request (Reason & Next Sunday Date or Closure).
      */
     public function storeNotAvailable(Request $request, $id)
     {
@@ -236,6 +236,43 @@ class VehiclePwaController extends Controller
             'next_pickup_date' => 'nullable|date',
         ]);
 
+        $reasonInput = trim($request->reason);
+        $closingReasons = ['door_closed', 'call_not_attended', 'not_ready_today', 'door_locked', 'door closed', 'call not attended', 'not ready today'];
+
+        // If driver selected closure reasons (Door closed, Call not attended, Not ready today), close request
+        if (in_array(strtolower($reasonInput), $closingReasons, true)) {
+            try {
+                $updatedRequest = $this->wasteRequestService->closeByDriver($wasteRequest, $reasonInput);
+                $reasonLabels = [
+                    'door_closed' => 'Door Closed',
+                    'call_not_attended' => 'Call Not Attended',
+                    'not_ready_today' => 'Not Ready Today',
+                    'door closed' => 'Door Closed',
+                    'call not attended' => 'Call Not Attended',
+                    'not ready today' => 'Not Ready Today',
+                ];
+                $reasonText = $reasonLabels[strtolower($reasonInput)] ?? ucfirst(str_replace('_', ' ', $reasonInput));
+                $msg = "Request #{$updatedRequest->request_number} has been closed ({$reasonText}).";
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'status' => 'closed',
+                        'message' => $msg,
+                        'redirect_url' => route('vehicle.requests'),
+                    ]);
+                }
+
+                return redirect()->route('vehicle.requests')->with('info', $msg);
+            } catch (\InvalidArgumentException $e) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+                }
+                return back()->withErrors(['reason' => $e->getMessage()]);
+            }
+        }
+
+        // Reschedule for next Sunday
         $nextDate = $request->input('next_date') ?? $request->input('next_pickup_date');
 
         try {
@@ -253,12 +290,11 @@ class VehiclePwaController extends Controller
                     'success' => true,
                     'status' => $updatedRequest->status,
                     'message' => $msg,
-                    'redirect_url' => route('vehicle.trip_progress'),
+                    'redirect_url' => route('vehicle.requests'),
                 ]);
             }
 
-            return redirect()->route('vehicle.trip_progress')
-                ->with('info', $msg);
+            return redirect()->route('vehicle.requests')->with('info', $msg);
         } catch (\InvalidArgumentException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -415,20 +451,20 @@ class VehiclePwaController extends Controller
     }
 
     /**
-     * Dump List Index for Driver PWA.
+     * Dump List Index for Driver PWA (Only picked_up items ready for dumping).
      */
     public function dumpList(Request $request)
     {
         $vehicleId = $this->getDriverVehicleId();
 
         $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle', 'dumpRecord'])
-            ->whereIn('status', ['picked_up', 'completed', 'dumped']);
+            ->where('status', 'picked_up');
 
         if ($vehicleId) {
             $query->where('vehicle_id', $vehicleId);
         }
 
-        $dumpRequests = $query->orderByRaw("FIELD(status, 'picked_up', 'dumped', 'completed')")->orderBy('picked_up_at', 'desc')->paginate(10);
+        $dumpRequests = $query->orderBy('picked_up_at', 'desc')->paginate(10);
 
         return view('vehiclepwa.dump_list', compact('dumpRequests'));
     }
@@ -589,27 +625,17 @@ class VehiclePwaController extends Controller
 
 
     /**
-     * Vehicle Request History List.
+     * Vehicle Request History List (Strictly Dumped Requests).
      */
     public function history(Request $request)
     {
         $vehicleId = $this->getDriverVehicleId();
         
-        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dumpRecord', 'dump']);
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dumpRecord', 'dump'])
+            ->whereIn('status', ['dumped', 'completed']);
             
         if ($vehicleId) {
             $query->where('vehicle_id', $vehicleId);
-        }
-
-        // Status Filter
-        if ($request->filled('status') && $request->status !== 'all') {
-            if ($request->status === 'dumped') {
-                $query->whereIn('status', ['dumped', 'completed']);
-            } else {
-                $query->where('status', $request->status);
-            }
-        } else {
-            $query->whereIn('status', ['dumped', 'completed', 'picked_up', 'not_available', 'assigned']);
         }
         
         // Search Term Filter

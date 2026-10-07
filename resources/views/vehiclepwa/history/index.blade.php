@@ -1,7 +1,7 @@
 @extends('vehiclepwa.layout.app')
 
-@section('title') Request History @endsection
-@section('heading') Request History @endsection
+@section('title') Dumped History @endsection
+@section('heading') Dumped History @endsection
 
 @section('style')
 <style>
@@ -196,38 +196,6 @@
         border-color: #94a3b8;
     }
 
-    /* Filter Pill tabs */
-    .filter-pills {
-        display: flex;
-        gap: 6px;
-        overflow-x: auto;
-        padding-bottom: 8px;
-        margin-bottom: 12px;
-        scrollbar-width: none;
-    }
-    .filter-pills::-webkit-scrollbar {
-        display: none;
-    }
-
-    .filter-pill {
-        white-space: nowrap;
-        padding: 7px 14px;
-        font-size: 12.5px;
-        font-weight: 700;
-        border-radius: 20px;
-        text-decoration: none;
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: #475569;
-        transition: all 0.2s ease;
-    }
-
-    .filter-pill.active {
-        background: var(--primary-green);
-        color: #ffffff;
-        border-color: var(--primary-green);
-        box-shadow: 0 2px 6px rgba(14, 122, 67, 0.25);
-    }
 </style>
 @endsection
 
@@ -235,43 +203,20 @@
 <div class="container py-2" style="max-width: 460px; margin: 0 auto;">
 
     <!-- Search Form -->
-    <div class="mb-2">
+    <div class="mb-3">
         <form method="GET" action="{{ route('vehicle.history') }}">
-            @if(request('status'))
-                <input type="hidden" name="status" value="{{ request('status') }}">
-            @endif
             <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Search ID, Name, Mobile or Area" value="{{ request('search') }}" style="border-radius: 10px 0 0 10px; border-color: #cbd5e1; font-size: 13.5px;">
                 <button class="btn btn-primary" type="submit" style="background: var(--primary-green); border-color: var(--primary-green); border-radius: 0 10px 10px 0; padding: 0 16px;">
                     <i class="fa-solid fa-search text-white"></i>
                 </button>
                 @if(request('search'))
-                    <a href="{{ route('vehicle.history', ['status' => request('status')]) }}" class="btn btn-outline-secondary" style="border-color: #cbd5e1;">
+                    <a href="{{ route('vehicle.history') }}" class="btn btn-outline-secondary" style="border-color: #cbd5e1;">
                         <i class="fa-solid fa-times"></i>
                     </a>
                 @endif
             </div>
         </form>
-    </div>
-
-    <!-- Filter Pills -->
-    @php
-        $currentStatus = request('status', 'all');
-        $searchQuery = request('search') ? ['search' => request('search')] : [];
-    @endphp
-    <div class="filter-pills">
-        <a href="{{ route('vehicle.history', array_merge(['status' => 'all'], $searchQuery)) }}" class="filter-pill {{ $currentStatus === 'all' ? 'active' : '' }}">
-            All
-        </a>
-        <a href="{{ route('vehicle.history', array_merge(['status' => 'picked_up'], $searchQuery)) }}" class="filter-pill {{ $currentStatus === 'picked_up' ? 'active' : '' }}">
-            <i class="fa-solid fa-circle-check me-1"></i> Picked Up
-        </a>
-        <a href="{{ route('vehicle.history', array_merge(['status' => 'dumped'], $searchQuery)) }}" class="filter-pill {{ in_array($currentStatus, ['dumped', 'completed']) ? 'active' : '' }}">
-            <i class="fa-solid fa-dumpster me-1"></i> Dumped
-        </a>
-        <a href="{{ route('vehicle.history', array_merge(['status' => 'not_available'], $searchQuery)) }}" class="filter-pill {{ $currentStatus === 'not_available' ? 'active' : '' }}">
-            <i class="fa-solid fa-calendar-days me-1"></i> Rescheduled
-        </a>
     </div>
 
     <!-- Requests Listing -->
@@ -463,18 +408,18 @@
     @empty
         <div class="text-center py-5 card border-0 rounded-4 shadow-sm bg-white p-4">
             <i class="fa-solid fa-clock-rotate-left fa-3x text-muted mb-3"></i>
-            <h5 class="fw-bold">No History Found</h5>
+            <h5 class="fw-bold">No Dumped History Found</h5>
             <p class="text-muted small mb-0">
-                @if(request('search') || request('status'))
-                    No requests match your selected filters. Try clearing your search.
+                @if(request('search'))
+                    No dumped requests match your search criteria. Try clearing your search.
                 @else
-                    You have no completed or recorded pickups in your history yet.
+                    You have no completed dump records in your history yet.
                 @endif
             </p>
-            @if(request('search') || (request('status') && request('status') !== 'all'))
+            @if(request('search'))
                 <div class="mt-3">
                     <a href="{{ route('vehicle.history') }}" class="btn btn-sm btn-outline-success">
-                        <i class="fa-solid fa-rotate-left me-1"></i> Clear Filters
+                        <i class="fa-solid fa-rotate-left me-1"></i> Clear Search
                     </a>
                 </div>
             @endif

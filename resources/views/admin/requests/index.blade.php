@@ -234,7 +234,8 @@
                                 <option value="Rescheduled">Rescheduled</option>
                                 <option value="Picked Up">Picked Up</option>
                                 <option value="Dumped">Dumped</option>
-                                <option value="Cancelled">Cancelled</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Closed">Closed</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -343,7 +344,7 @@
                                                     'dumped' => 'status-completed',
                                                     'completed' => 'status-completed',
                                                     'rejected' => 'status-rejected',
-                                                    'cancelled' => 'status-rejected',
+                                                    'closed' => 'status-rejected',
                                                 ];
                                             @endphp
                                             <span class="status-badge {{ $statusClasses[$req->status] ?? 'status-pending' }}">
@@ -655,7 +656,7 @@
                         'dumped': 'status-completed',
                         'completed': 'status-completed',
                         'rejected': 'status-rejected',
-                        'cancelled': 'status-rejected',
+                        'closed': 'status-rejected',
                         'not_available': 'status-in-progress',
                         'rescheduled': 'status-in-progress'
                     };
@@ -741,8 +742,8 @@ const vehicles = [
         type: '{{ addslashes($vehicle->vehicle_type ?? "Garbage Truck") }}',
         driver: '{{ addslashes($vehicle->driver_name ?? $vehicle->owner?->name ?? "N/A") }}',
         driver_phone: '{{ addslashes($vehicle->driver_phone ?? $vehicle->owner?->mobile_number ?? "N/A") }}',
-        constituency_id: {{ $vehicle->constituency_id ? $vehicle->constituency_id : 'null' }},
-        constituency_name: '{{ addslashes($vehicle->constituency?->name ?? "") }}'
+        constituency_ids: @json($vehicle->constituency_ids ?? []),
+        constituency_names: '{{ addslashes($vehicle->constituency_names ?? "") }}'
     },
     @endforeach
 ];
@@ -768,27 +769,35 @@ function loadVehicleDropdown(constituencyId, constituencyName) {
 
     $select.empty();
 
-    // Only vehicles from that constituency should be displayed in assigning vehicle to requests
+    // Vehicles operating in this constituency
     const filteredVehicles = constituencyId 
-        ? vehicles.filter(v => v.constituency_id == constituencyId)
+        ? vehicles.filter(v => {
+            if (!v.constituency_ids) return false;
+            const ids = Array.isArray(v.constituency_ids) ? v.constituency_ids : [];
+            return ids.includes(Number(constituencyId)) || ids.includes(String(constituencyId));
+        })
         : vehicles;
 
-    if (filteredVehicles.length === 0) {
-        const label = constituencyName 
-            ? 'No active vehicles registered for ' + constituencyName 
-            : 'No vehicles available for this constituency';
-        $select.append(new Option(label, '', true, true));
+    // Fallback: If no vehicle specifically mapped to this constituency, show all active vehicles
+    const vehiclesToShow = filteredVehicles.length > 0 ? filteredVehicles : vehicles;
+
+    if (vehiclesToShow.length === 0) {
+        $select.append(new Option('No active vehicles registered in the system', '', true, true));
     } else {
+        const headerText = filteredVehicles.length > 0 
+            ? 'Search and select vehicle' + (constituencyName ? ' (' + constituencyName + ')' : '')
+            : 'Search and select vehicle (All Available Vehicles)';
+
         $select.append(
             new Option(
-                'Search and select vehicle' + (constituencyName ? ' (' + constituencyName + ')' : ''),
+                headerText,
                 '',
                 false,
                 false
             )
         );
 
-        filteredVehicles.forEach(function(vehicle) {
+        vehiclesToShow.forEach(function(vehicle) {
             const option = new Option(
                 vehicle.number + ' - ' + vehicle.type + ' (Driver: ' + vehicle.driver + ')',
                 vehicle.id,

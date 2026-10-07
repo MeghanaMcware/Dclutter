@@ -257,11 +257,11 @@ table.dataTable tbody td {
                                         
                                         $statusClass = match($req->status) {
                                             'pending' => 'status-pending',
-                                            'assigned' => 'status-assigned',
+                                            'assigned', 'scheduled' => 'status-assigned',
+                                            'rescheduled', 'not_available' => 'status-in-progress',
                                             'picked_up' => 'status-in-progress',
-                                            'dumped' => 'status-completed',
-                                            'rejected' => 'status-rejected',
-                                            'not_available' => 'status-in-progress',
+                                            'dumped', 'completed' => 'status-completed',
+                                            'rejected', 'closed' => 'status-rejected',
                                             default => 'status-pending'
                                         };
 

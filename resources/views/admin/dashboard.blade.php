@@ -319,8 +319,16 @@ body {
         <div class="col-sm-6 col-md-4 col-xl-3">
             <div class="dash-card">
                 <div class="stat-box">
-                    <div class="stat-title">Cancelled <i class="fa fa-ban text-danger" style="font-size: 15px;"></i></div>
-                    <div class="stat-value val-red" id="statCancelledRequests">{{ number_format($cancelledRequests) }}</div>
+                    <div class="stat-title">Rejected <i class="fa fa-times-circle text-danger" style="font-size: 15px;"></i></div>
+                    <div class="stat-value val-red" id="statRejectedRequests">{{ number_format($rejectedRequests) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="dash-card">
+                <div class="stat-box">
+                    <div class="stat-title">Closed <i class="fa fa-ban text-secondary" style="font-size: 15px;"></i></div>
+                    <div class="stat-value" style="color: #64748b;" id="statClosedRequests">{{ number_format($closedRequests) }}</div>
                 </div>
             </div>
         </div>
@@ -550,12 +558,12 @@ body {
             catChart.render();
         }
 
-        // 4. Donut Chart: Request status breakdown (Pending, Assigned, Rescheduled, Picked Up, Dumped, Cancelled)
+        // 4. Donut Chart: Request status breakdown (Pending, Assigned, Rescheduled, Picked Up, Dumped, Rejected, Closed)
         var donutEl = document.querySelector("#donutchart");
         var donutChart = null;
         if (donutEl) {
             donutEl.innerHTML = '';
-            var statS = statusSeries.length > 0 && Math.max.apply(Math, statusSeries) > 0 ? statusSeries : [1, 0, 0, 0, 0, 0];
+            var statS = statusSeries.length > 0 && Math.max.apply(Math, statusSeries) > 0 ? statusSeries : [1, 0, 0, 0, 0, 0, 0];
             var donutchartOptions = {
                 chart: {
                     width: 380,
@@ -574,7 +582,7 @@ body {
                         }
                     }
                 }],
-                colors: ['#f59e0b', '#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#ef4444']
+                colors: ['#f59e0b', '#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#ef4444', '#64748b']
             };
             donutChart = new ApexCharts(donutEl, donutchartOptions);
             donutChart.render();
@@ -623,8 +631,11 @@ body {
                     var elDumped = document.getElementById('statDumpedRequests');
                     if (elDumped) elDumped.innerText = data.stats.dumpedRequests;
 
-                    var elCanc = document.getElementById('statCancelledRequests');
-                    if (elCanc) elCanc.innerText = data.stats.cancelledRequests;
+                    var elRejected = document.getElementById('statRejectedRequests');
+                    if (elRejected) elRejected.innerText = data.stats.rejectedRequests;
+
+                    var elClosed = document.getElementById('statClosedRequests');
+                    if (elClosed) elClosed.innerText = data.stats.closedRequests;
 
                     var elUsers = document.getElementById('statTotalUsers');
                     if (elUsers) elUsers.innerText = data.stats.totalUsers;

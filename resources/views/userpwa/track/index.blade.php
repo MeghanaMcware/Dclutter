@@ -399,9 +399,10 @@
 <div class="track-container">
     @php
         $allCount = $requests->count();
-        $inprogressCount = $requests->filter(fn($r) => in_array(strtolower($r->status), ['pending', 'assigned', 'picked_up', 'in_transit']))->count();
+        $inprogressCount = $requests->filter(fn($r) => in_array(strtolower($r->status), ['pending', 'assigned', 'scheduled', 'rescheduled', 'not_available', 'picked_up', 'in_transit']))->count();
         $completedCount = $requests->filter(fn($r) => in_array(strtolower($r->status), ['completed', 'dumped']))->count();
-        $closedCount = $requests->filter(fn($r) => in_array(strtolower($r->status), ['rejected', 'cancelled', 'closed']))->count();
+        $rejectedCount = $requests->filter(fn($r) => strtolower($r->status) === 'rejected')->count();
+        $closedCount = $requests->filter(fn($r) => strtolower($r->status) === 'closed')->count();
     @endphp
 
     <div class="search-wrapper">
@@ -420,6 +421,9 @@
         </a>
         <a href="javascript:void(0)" class="tab-item" data-filter="completed" onclick="setTabFilter(this, 'completed')">
             Completed <span class="tab-badge">{{ $completedCount }}</span>
+        </a>
+        <a href="javascript:void(0)" class="tab-item" data-filter="rejected" onclick="setTabFilter(this, 'rejected')">
+            Rejected <span class="tab-badge">{{ $rejectedCount }}</span>
         </a>
         <a href="javascript:void(0)" class="tab-item" data-filter="closed" onclick="setTabFilter(this, 'closed')">
             Closed <span class="tab-badge">{{ $closedCount }}</span>
@@ -454,12 +458,22 @@
                     $statusLabel = 'Completed';
                     $badgeStyle = 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;';
                     $icon = 'fa-check-circle';
-                } elseif (in_array($status, ['rejected', 'cancelled', 'closed'])) {
-                    $filterGroup = 'closed';
-                    $statusLabel = 'Closed';
+                } elseif ($status === 'rejected') {
+                    $filterGroup = 'rejected';
+                    $statusLabel = 'Rejected';
                     $badgeStyle = 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;';
                     $icon = 'fa-times-circle';
-                } elseif ($status === 'assigned') {
+                } elseif ($status === 'closed') {
+                    $filterGroup = 'closed';
+                    $statusLabel = 'Closed';
+                    $badgeStyle = 'background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;';
+                    $icon = 'fa-ban';
+                } elseif (in_array($status, ['rescheduled', 'not_available'])) {
+                    $filterGroup = 'inprogress';
+                    $statusLabel = 'Rescheduled';
+                    $badgeStyle = 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;';
+                    $icon = 'fa-calendar-alt';
+                } elseif (in_array($status, ['assigned', 'scheduled'])) {
                     $filterGroup = 'inprogress';
                     $statusLabel = 'Vehicle Assigned';
                     $badgeStyle = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;';
@@ -467,7 +481,7 @@
                 } elseif (in_array($status, ['picked_up', 'in_transit'])) {
                     $filterGroup = 'inprogress';
                     $statusLabel = 'Picked Up';
-                    $badgeStyle = 'background: #fef3c7; color: #d97706; border: 1px solid #fde68a;';
+                    $badgeStyle = 'background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc;';
                     $icon = 'fa-box';
                 } else {
                     $filterGroup = 'inprogress';

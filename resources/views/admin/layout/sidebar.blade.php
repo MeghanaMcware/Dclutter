@@ -49,7 +49,7 @@
           </li>
 
           <li class="sidebar-list">
-            <a class="sidebar-link sidebar-title link-nav" href="{{ url('/gis') }}">
+            <a class="sidebar-link sidebar-title link-nav {{ request()->routeIs('admin.gis*') ? 'active' : '' }}" href="{{ route('admin.gis') }}">
               <i data-feather="map-pin"></i>
               <span>GIS Overview Map</span>
             </a>

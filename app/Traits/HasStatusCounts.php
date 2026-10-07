@@ -38,7 +38,8 @@ trait HasStatusCounts
             COUNT(CASE WHEN {$statusCol} IN ('not_available', 'rescheduled') THEN 1 END) as rescheduled,
             COUNT(CASE WHEN {$statusCol} = 'picked_up' THEN 1 END) as picked_up,
             COUNT(CASE WHEN {$statusCol} IN ('dumped', 'completed') THEN 1 END) as dumped,
-            COUNT(CASE WHEN {$statusCol} IN ('rejected', 'cancelled') THEN 1 END) as cancelled
+            COUNT(CASE WHEN {$statusCol} = 'rejected' THEN 1 END) as rejected,
+            COUNT(CASE WHEN {$statusCol} = 'closed' THEN 1 END) as closed
         ")->first();
 
         return [
@@ -48,7 +49,8 @@ trait HasStatusCounts
             'rescheduled' => (int) ($row->rescheduled ?? 0),
             'picked_up' => (int) ($row->picked_up ?? 0),
             'dumped' => (int) ($row->dumped ?? 0),
-            'cancelled' => (int) ($row->cancelled ?? 0),
+            'rejected' => (int) ($row->rejected ?? 0),
+            'closed' => (int) ($row->closed ?? 0),
             // Legacy aliases for backward compatibility
             'scheduled' => (int) ($row->assigned ?? 0),
             'completed' => (int) ($row->dumped ?? 0),
@@ -76,7 +78,8 @@ trait HasStatusCounts
                 COUNT(CASE WHEN {$table}.status IN ('not_available', 'rescheduled') THEN 1 END) as rescheduled,
                 COUNT(CASE WHEN {$table}.status = 'picked_up' THEN 1 END) as picked_up,
                 COUNT(CASE WHEN {$table}.status IN ('dumped', 'completed') THEN 1 END) as dumped,
-                COUNT(CASE WHEN {$table}.status IN ('rejected', 'cancelled') THEN 1 END) as cancelled
+                COUNT(CASE WHEN {$table}.status = 'rejected' THEN 1 END) as rejected,
+                COUNT(CASE WHEN {$table}.status = 'closed' THEN 1 END) as closed
             ")
             ->groupBy('corporations.id', 'corporations.name')
             ->orderBy('corporations.name')
@@ -109,7 +112,8 @@ trait HasStatusCounts
                 COUNT(CASE WHEN {$table}.status IN ('not_available', 'rescheduled') THEN 1 END) as rescheduled,
                 COUNT(CASE WHEN {$table}.status = 'picked_up' THEN 1 END) as picked_up,
                 COUNT(CASE WHEN {$table}.status IN ('dumped', 'completed') THEN 1 END) as dumped,
-                COUNT(CASE WHEN {$table}.status IN ('rejected', 'cancelled') THEN 1 END) as cancelled
+                COUNT(CASE WHEN {$table}.status = 'rejected' THEN 1 END) as rejected,
+                COUNT(CASE WHEN {$table}.status = 'closed' THEN 1 END) as closed
             ")
             ->groupBy('constituencies.id', 'constituencies.name', 'constituencies.corporation_id')
             ->orderBy('constituencies.name')
@@ -143,7 +147,8 @@ trait HasStatusCounts
                 COUNT(CASE WHEN {$table}.status IN ('not_available', 'rescheduled') THEN 1 END) as rescheduled,
                 COUNT(CASE WHEN {$table}.status = 'picked_up' THEN 1 END) as picked_up,
                 COUNT(CASE WHEN {$table}.status IN ('dumped', 'completed') THEN 1 END) as dumped,
-                COUNT(CASE WHEN {$table}.status IN ('rejected', 'cancelled') THEN 1 END) as cancelled
+                COUNT(CASE WHEN {$table}.status = 'rejected' THEN 1 END) as rejected,
+                COUNT(CASE WHEN {$table}.status = 'closed' THEN 1 END) as closed
             ")
             ->groupBy('wards.id', 'wards.name', 'wards.ward_number', 'wards.constituency_id')
             ->orderBy('wards.ward_number')

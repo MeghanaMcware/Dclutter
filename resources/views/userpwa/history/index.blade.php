@@ -46,6 +46,8 @@
     
     .status-pending { background-color: #fff7ed; color: #ea580c; border: 1px solid #ffedd5; }
     .status-completed { background-color: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+    .status-rejected { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .status-closed { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
     .history-title {
         font-size: 16px;
@@ -164,23 +166,27 @@
                 $status = strtolower($req->status ?? 'pending');
                 $statusClass = match($status) {
                     'picked_up', 'dumped', 'completed' => 'status-completed',
+                    'rejected' => 'status-rejected',
+                    'closed' => 'status-closed',
                     default => 'status-pending'
                 };
                 $statusIcon = match($status) {
-                    'picked_up', 'dumped', 'completed' => 'fa fa-check-circle',
+                    'dumped', 'completed' => 'fa fa-check-circle',
+                    'picked_up' => 'fa fa-box',
                     'assigned', 'scheduled' => 'fa fa-truck',
                     'not_available', 'rescheduled' => 'fa fa-calendar-alt',
-                    'rejected', 'cancelled' => 'fa fa-times-circle',
+                    'rejected' => 'fa fa-times-circle',
+                    'closed' => 'fa fa-ban',
                     default => 'fa fa-clock'
                 };
                 $statusLabel = match($status) {
                     'pending' => 'Pending',
                     'assigned', 'scheduled' => 'Assigned',
-                    'picked_up' => 'In Progress',
-                    'dumped', 'completed' => 'Completed',
-                    'not_available', 'rescheduled' => 'Rescheduled',
+                    'rescheduled', 'not_available' => 'Rescheduled',
+                    'picked_up' => 'Picked Up',
+                    'dumped', 'completed' => 'Dumped',
                     'rejected' => 'Rejected',
-                    'cancelled' => 'Cancelled',
+                    'closed' => 'Closed',
                     default => ucfirst(str_replace('_', ' ', $status))
                 };
                 $categories = is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?: 'Waste Request');

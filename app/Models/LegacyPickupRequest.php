@@ -37,6 +37,21 @@ class LegacyPickupRequest extends Model
         'preferred_pickup_date' => 'datetime',
     ];
 
+    public function getStatusLabelAttribute(): string
+    {
+        $st = strtolower($this->status ?? 'pending');
+        return match($st) {
+            'pending', 'requested' => 'Pending',
+            'assigned', 'scheduled' => 'Assigned',
+            'rescheduled', 'not_available' => 'Rescheduled',
+            'picked_up' => 'Picked Up',
+            'dumped', 'completed' => 'Dumped',
+            'rejected' => 'Rejected',
+            'closed', 'door_closed', 'call_not_attended', 'not_ready_today', 'cancelled' => 'Closed',
+            default => ucfirst(str_replace('_', ' ', $st)),
+        };
+    }
+
     public function corporation(): BelongsTo
     {
         return $this->belongsTo(Corporation::class);

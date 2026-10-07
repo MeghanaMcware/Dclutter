@@ -17,10 +17,11 @@ class AdminReportController extends Controller
     public const STATUS_OPTIONS = [
         'pending' => 'Pending',
         'assigned' => 'Assigned',
-        'picked_up' => 'In Progress / Picked Up',
-        'dumped' => 'Completed / Dumped',
+        'rescheduled' => 'Rescheduled',
+        'picked_up' => 'Picked Up',
+        'dumped' => 'Dumped',
         'rejected' => 'Rejected',
-        'not_available' => 'Rescheduled',
+        'closed' => 'Closed',
     ];
 
     /**
