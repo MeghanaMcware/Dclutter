@@ -1,9 +1,10 @@
 {
+  "id": "./",
   "name": "D-Clutter BSWML",
   "short_name": "D-Clutter",
   "description": "Bengaluru Solid Waste Management Limited - Waste & Debris Collection",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

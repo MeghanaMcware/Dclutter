@@ -82,31 +82,32 @@ class VehicleAuthController extends Controller
             ]);
         }
 
-        // 3. Strict Check: User MUST have the 'vehicle' role
-        if (!$matchedUser->hasRole('vehicle')) {
-            return back()->withInput()->withErrors([
-                'mobile' => 'Access denied. Your account does not have the vehicle role.',
-            ]);
-        }
-
-        // 4. Strict Check: Vehicle MUST exist and be active
+        // 3. Vehicle Existence and Dual-Role Verification
         $vehicle = Vehicle::where('user_id', $matchedUser->id)
             ->orWhere('driver_phone', $matchedUser->mobile_number)
             ->first();
 
-        if (!$vehicle) {
+        if (!$vehicle && !$matchedUser->hasRole('vehicle')) {
             return back()->withInput()->withErrors([
-                'mobile' => 'No vehicle registration found for this account. Please contact the administrator.',
+                'mobile' => 'Access denied. No vehicle registration found for this account.',
             ]);
         }
 
-        if (!$vehicle->status) {
+        if ($vehicle && !$vehicle->status) {
             return back()->withInput()->withErrors([
                 'mobile' => "This vehicle ({$vehicle->vehicle_number}) is currently inactive. Inactive vehicles are not permitted to log in.",
             ]);
         }
 
-        // 5. Log in and redirect to dashboard
+        // Seamless Multi-Role Support: If user is associated with a vehicle, ensure 'vehicle' role is attached
+        if ($vehicle && !$matchedUser->hasRole('vehicle')) {
+            if (class_exists(\Spatie\Permission\Models\Role::class)) {
+                $vehicleRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'vehicle', 'guard_name' => 'web']);
+                $matchedUser->assignRole($vehicleRole);
+            }
+        }
+
+        // 4. Log in and redirect to dashboard
         Auth::login($matchedUser);
         $request->session()->regenerate();
         return redirect()->route('vehicle.dashboard');

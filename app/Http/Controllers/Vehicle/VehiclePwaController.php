@@ -52,16 +52,19 @@ class VehiclePwaController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        if (!$user || !$user->hasRole('vehicle')) {
+        $vehicle = $this->getDriverVehicle();
+
+        if (!$user || (!$user->hasRole('vehicle') && !$vehicle)) {
             return redirect()->route('vehicle.login')->withErrors([
                 'mobile' => 'Access denied. Vehicle role is required.',
             ]);
         }
 
-        $vehicle = Vehicle::with('owner')
-            ->where('user_id', $user->id)
-            ->orWhere('driver_phone', $user->mobile_number)
-            ->first();
+        if (!$vehicle) {
+            return redirect()->route('vehicle.login')->withErrors([
+                'mobile' => 'No active vehicle registration found for your account.',
+            ]);
+        }
 
         if (!$vehicle) {
             Auth::logout();
@@ -388,17 +391,14 @@ class VehiclePwaController extends Controller
     public function profile()
     {
         $user = Auth::user();
+        $vehicle = $this->getDriverVehicle();
 
-        if (!$user || !$user->hasRole('vehicle')) {
+        if (!$user || (!$user->hasRole('vehicle') && !$vehicle)) {
             return redirect()->route('vehicle.login')->withErrors([
                 'mobile' => 'Access denied. Vehicle role is required.',
             ]);
         }
 
-        $vehicle = Vehicle::with('owner')
-            ->where('user_id', $user->id)
-            ->orWhere('driver_phone', $user->mobile_number)
-            ->first();
         if ($vehicle && $vehicle->owner) {
             $user = $vehicle->owner;
         }

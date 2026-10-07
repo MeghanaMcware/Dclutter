@@ -1,14 +1,14 @@
 {
-  "id": "./",
-  "name": "D-Clutter BSWML",
-  "short_name": "D-Clutter",
-  "description": "Bengaluru Solid Waste Management Limited - Waste & Debris Collection",
-  "start_url": "./",
+  "id": "vehicle-login",
+  "name": "DCLUTTER - Driver Portal",
+  "short_name": "Driver Portal",
+  "description": "DCLUTTER Vehicle Driver & Pickup Portal - BSWML",
+  "start_url": "vehicle/login",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#0e7a43",
+  "background_color": "#f8fafc",
+  "theme_color": "#1f4e79",
   "icons": [
     {
       "src": "icons/icon-72x72.png",

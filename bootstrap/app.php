@@ -50,6 +50,74 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->expectsJson() || $request->ajax() || $request->is('api/*') || $request->is('user/*') || $request->is('citizen/*'),
+            fn (Request $request) => $request->expectsJson() || $request->ajax() || $request->is('api/*'),
         );
+
+        // Handle 419 Page Expired (CSRF TokenMismatchException)
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, Request $request) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your session has expired. Please refresh and try again.',
+                    'code' => 'PAGE_EXPIRED',
+                ], 419);
+            }
+
+            if ($request->is('vehicle*')) {
+                return redirect()->route('vehicle.login')->withErrors([
+                    'mobile' => 'Your session has expired. Please log in again.',
+                ]);
+            }
+
+            if ($request->is('admin*')) {
+                return redirect()->route('admin.login')->withErrors([
+                    'email' => 'Your session has expired. Please log in again.',
+                ]);
+            }
+
+            if ($request->is('user*')) {
+                return redirect()->route('user.login')->withErrors([
+                    'mobile_number' => 'Your session has expired. Please log in again.',
+                ]);
+            }
+
+            return redirect()->route('vehicle.login')->withErrors([
+                'mobile' => 'Your session has expired. Please try again.',
+            ]);
+        });
+
+        // Handle generic 419 HTTP status exceptions
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, Request $request) {
+            if ($e->getStatusCode() === 419) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Your session has expired. Please refresh and try again.',
+                        'code' => 'PAGE_EXPIRED',
+                    ], 419);
+                }
+
+                if ($request->is('vehicle*')) {
+                    return redirect()->route('vehicle.login')->withErrors([
+                        'mobile' => 'Your session has expired. Please log in again.',
+                    ]);
+                }
+
+                if ($request->is('admin*')) {
+                    return redirect()->route('admin.login')->withErrors([
+                        'email' => 'Your session has expired. Please log in again.',
+                    ]);
+                }
+
+                if ($request->is('user*')) {
+                    return redirect()->route('user.login')->withErrors([
+                        'mobile_number' => 'Your session has expired. Please log in again.',
+                    ]);
+                }
+
+                return redirect()->route('vehicle.login')->withErrors([
+                    'mobile' => 'Your session has expired. Please try again.',
+                ]);
+            }
+        });
     })->create();
