@@ -4,82 +4,7 @@
 @section('heading', 'Request Details')
 
 @section('style')
-<style>
-    .details-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; padding-bottom: 30px; }
-    
-    .card-ui {
-        background: #fff; border-radius: 16px; padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;
-    }
-    
-    .ref-header {
-        display: flex; justify-content: space-between; align-items: flex-start;
-        border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; margin-bottom: 16px;
-    }
-    .ref-id { font-size: 16px; font-weight: 800; color: #0e7a43; margin-bottom: 4px; }
-    .ref-date { font-size: 12px; color: #64748b; }
-    
-    .badge-status {
-        padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;
-        display: inline-flex; align-items: center; gap: 4px;
-    }
-    
-    .facts-list { display: flex; flex-direction: column; gap: 14px; }
-    .fact-item small { display: block; color: #64748b; font-size: 11px; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; }
-    .fact-item b { font-size: 14px; color: #1e293b; font-weight: 600; line-height: 1.4; display: block; }
-    
-    .timeline { position: relative; padding-left: 24px; margin-top: 10px; }
-    .timeline::before {
-        content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
-        width: 2px; background: #e2e8f0;
-    }
-    .timeline-item { position: relative; margin-bottom: 18px; }
-    .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-item::before {
-        content: ''; position: absolute; left: -24px; top: 3px;
-        width: 16px; height: 16px; border-radius: 50%;
-        background: #cbd5e1; border: 3px solid #fff;
-    }
-    .timeline-item.active::before { background: #0e7a43; box-shadow: 0 0 0 3px rgba(14,122,67,0.2); }
-    .timeline-item p { margin: 0; font-size: 13px; font-weight: 700; color: #1e293b; }
-    .timeline-item small { color: #64748b; font-size: 11px; }
 
-    .photos-gallery {
-        display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px;
-    }
-    .photos-gallery img {
-        width: 100%; height: 120px; object-fit: cover; border-radius: 12px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .driver-card {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 12px;
-        padding: 14px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-top: 12px;
-    }
-    .driver-avatar {
-        width: 44px; height: 44px;
-        background: #0e7a43; color: #fff;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px;
-    }
-    
-    .btn-back {
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        background: #ffffff; color: #0e7a43; border-radius: 12px;
-        padding: 14px; font-weight: 700; text-decoration: none; width: 100%;
-        border: 1.5px solid #0e7a43;
-    }
-    .btn-back:hover {
-        background: #0e7a43; color: #ffffff !important;
-    }
-</style>
 @endsection
 
 @section('content')
@@ -303,3 +228,4 @@
     </a>
 </div>
 @endsection
+

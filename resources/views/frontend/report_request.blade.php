@@ -1175,6 +1175,7 @@ let fpInstance = null;
 let updateLocationDebounceTimer = null;
 let selectedWasteFiles = [];
 let isProgrammaticSync = false;
+let isProcessingImages = false;
 const previouslySelectedSubitems = [];
 
 // Dynamic Categories & Subcategories from Backend Database
@@ -1222,61 +1223,66 @@ function focusInvalidField(el) {
 }
 
 async function handleImageSelection(event) {
-    if (isProgrammaticSync) return;
+    if (isProgrammaticSync || isProcessingImages) return;
+    isProcessingImages = true;
 
-    const newFiles = event.target.files;
-    if (!newFiles || newFiles.length === 0) return;
+    try {
+        const newFiles = event.target.files;
+        if (!newFiles || newFiles.length === 0) return;
 
-    if (typeof fetchCurrentLocation === 'function') {
-        fetchCurrentLocation({ silent: true });
-    }
-
-    if (typeof showLoader === 'function') showLoader('Processing images...');
-
-    const processedFiles = [];
-    
-    // Quick helper to fetch precise GPS for the watermark
-    const getGps = () => new Promise(resolve => {
-        if (!navigator.geolocation) return resolve(null);
-        navigator.geolocation.getCurrentPosition(
-            pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-            err => resolve(null),
-            { enableHighAccuracy: true, timeout: 3000 }
-        );
-    });
-    
-    const gps = await getGps();
-
-    for (let i = 0; i < newFiles.length; i++) {
-        const file = newFiles[i];
-        
-        // Prevent duplicates by checking original file size (since we resized/watermarked it)
-        const isDuplicate = selectedWasteFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size)) ||
-                            processedFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size));
-        if (isDuplicate) continue;
-
-        try {
-            const watermarked = await watermarkImage(file, gps);
-            processedFiles.push(watermarked);
-        } catch(e) {
-            processedFiles.push(file); // fallback
+        if (typeof fetchCurrentLocation === 'function') {
+            fetchCurrentLocation({ silent: true });
         }
-    }
 
-    if (processedFiles.length > 0) {
-        selectedWasteFiles = [...selectedWasteFiles, ...processedFiles];
-        
-        isProgrammaticSync = true;
-        const dt = new DataTransfer();
-        selectedWasteFiles.forEach(f => dt.items.add(f));
-        const input = document.getElementById('wasteImagesInput');
-        if (input) input.files = dt.files;
-        isProgrammaticSync = false;
-        
-        updateImagePreview();
-    }
+        if (typeof showLoader === 'function') showLoader('Processing images...');
 
-    if (typeof hideLoader === 'function') hideLoader();
+        const processedFiles = [];
+        
+        // Quick helper to fetch precise GPS for the watermark
+        const getGps = () => new Promise(resolve => {
+            if (!navigator.geolocation) return resolve(null);
+            navigator.geolocation.getCurrentPosition(
+                pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                err => resolve(null),
+                { enableHighAccuracy: true, timeout: 3000 }
+            );
+        });
+        
+        const gps = await getGps();
+
+        for (let i = 0; i < newFiles.length; i++) {
+            const file = newFiles[i];
+            
+            // Prevent duplicates by checking original file size (since we resized/watermarked it)
+            const isDuplicate = selectedWasteFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size)) ||
+                                processedFiles.some(existing => existing.name === file.name && (existing.size === file.size || existing.originalSize === file.size));
+            if (isDuplicate) continue;
+
+            try {
+                const watermarked = await watermarkImage(file, gps);
+                processedFiles.push(watermarked);
+            } catch(e) {
+                processedFiles.push(file); // fallback
+            }
+        }
+
+        if (processedFiles.length > 0) {
+            selectedWasteFiles = [...selectedWasteFiles, ...processedFiles];
+            
+            isProgrammaticSync = true;
+            const dt = new DataTransfer();
+            selectedWasteFiles.forEach(f => dt.items.add(f));
+            const input = document.getElementById('wasteImagesInput');
+            if (input) input.files = dt.files;
+            isProgrammaticSync = false;
+            
+            updateImagePreview();
+        }
+
+        if (typeof hideLoader === 'function') hideLoader();
+    } finally {
+        isProcessingImages = false;
+    }
 }
 
 function watermarkImage(file, gps) {
