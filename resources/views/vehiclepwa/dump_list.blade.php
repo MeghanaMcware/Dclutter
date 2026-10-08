@@ -120,9 +120,6 @@
     </div>
 
     @forelse($dumpRequests as $req)
-        @php
-            $isDumped = in_array(strtolower($req->status), ['completed', 'dumped']);
-        @endphp
         <div class="dump-card">
             <div class="req-header">
                 <span class="req-badge">
@@ -130,15 +127,9 @@
                     {{ $req->request_number ?? ('REQ-' . str_pad($req->id, 5, '0', STR_PAD_LEFT)) }}
                 </span>
 
-                @if($isDumped)
-                    <span class="status-badge-dumped">
-                        <i class="fa-solid fa-check-double me-1 text-secondary"></i> DUMPED
-                    </span>
-                @else
-                    <span class="status-badge-picked">
-                        <i class="fa-solid fa-circle-check me-1"></i> Picked Up
-                    </span>
-                @endif
+                <span class="status-badge-picked">
+                    <i class="fa-solid fa-circle-check me-1"></i> Picked Up
+                </span>
             </div>
 
             <div class="info-row">
@@ -161,23 +152,19 @@
                 </div>
             @endif
 
-            @if($isDumped)
-                <button type="button" class="btn-dump-action btn-dump-disabled" disabled>
-                    <i class="fa-solid fa-circle-check"></i>
-                    Already Dumped
-                </button>
-            @else
-                <a href="{{ route('vehicle.dumpform', ['pickup_id' => ($req->request_number ?? ('REQ-' . str_pad($req->id, 5, '0', STR_PAD_LEFT))), 'id' => $req->id]) }}" class="btn-dump-action">
-                    <i class="fa-solid fa-truck-ramp-box"></i>
-                    Dump
-                </a>
-            @endif
+            <a href="{{ route('vehicle.dumpform', ['pickup_id' => ($req->request_number ?? ('REQ-' . str_pad($req->id, 5, '0', STR_PAD_LEFT))), 'id' => $req->id]) }}" class="btn-dump-action">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                Proceed to Dump
+            </a>
         </div>
     @empty
         <div class="text-center py-5">
             <i class="fa-solid fa-truck-ramp-box fa-3x text-muted mb-3"></i>
             <h6 class="fw-bold text-secondary">No Picked Up Items Found</h6>
-            <p class="small text-muted">Items marked as "Picked Up" will appear here for dump disposal.</p>
+            <p class="small text-muted mb-3">Items marked as "Picked Up" will appear here for dump disposal.</p>
+            <a href="{{ route('vehicle.history', ['status' => 'dumped']) }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                <i class="fa-solid fa-clock-rotate-left me-1"></i> View Dumped History
+            </a>
         </div>
     @endforelse
     

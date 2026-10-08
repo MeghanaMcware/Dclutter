@@ -41,9 +41,10 @@ Route::get('/lookup-ward', [CitizenRequestController::class, 'lookupWardByCoords
 Route::get('/track-request', [CitizenRequestController::class, 'trackRequest'])->name('citizen.track');
 Route::get('/request-details', [CitizenRequestController::class, 'requestDetails'])->name('citizen.details');
 
-Route::get('/gis', [GisController::class, 'index'])->name('gis');
-Route::get('/gis/api/wards', [GisController::class, 'getWardsGeoJson'])->name('gis.api.wards');
-Route::get('/gis/api/requests', [GisController::class, 'getRequestsGeoJson'])->name('gis.api.requests');
+// Redirect legacy public GIS URL to admin GIS
+Route::get('/gis', fn () => redirect()->route('admin.gis'));
+Route::get('/gis/api/wards', fn () => redirect()->route('admin.gis.api.wards'));
+Route::get('/gis/api/requests', fn () => redirect()->route('admin.gis.api.requests'));
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminImportedRequestController::class, 'index'])->name('index');
         Route::get('/{id}', [AdminImportedRequestController::class, 'show'])->name('show');
         Route::post('/{id}/assign-vehicle', [AdminImportedRequestController::class, 'assignVehicle'])->name('assign-vehicle');
+        Route::post('/{id}/update-status', [AdminImportedRequestController::class, 'updateStatus'])->name('update-status');
     });
 
 

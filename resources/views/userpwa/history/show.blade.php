@@ -79,25 +79,31 @@
     $isCompleted = in_array($status, ['dumped', 'completed']);
 
     $badgeClass = match($status) {
-        'picked_up', 'dumped', 'completed' => 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;',
+        'dumped', 'completed' => 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;',
+        'picked_up' => 'background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc;',
         'assigned', 'scheduled' => 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;',
-        'rejected', 'cancelled' => 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;',
+        'not_available', 'rescheduled' => 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;',
+        'rejected' => 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;',
+        'closed' => 'background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;',
         default => 'background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5;'
     };
     $badgeIcon = match($status) {
-        'picked_up', 'dumped', 'completed' => 'fa-solid fa-check-circle',
+        'dumped', 'completed' => 'fa-solid fa-check-circle',
+        'picked_up' => 'fa-solid fa-box',
         'assigned', 'scheduled' => 'fa-solid fa-truck',
-        'rejected', 'cancelled' => 'fa-solid fa-times-circle',
+        'not_available', 'rescheduled' => 'fa-solid fa-calendar-alt',
+        'rejected' => 'fa-solid fa-times-circle',
+        'closed' => 'fa-solid fa-ban',
         default => 'fa-solid fa-clock'
     };
     $badgeLabel = match($status) {
         'pending' => 'Pending',
         'assigned', 'scheduled' => 'Assigned',
-        'picked_up' => 'In Progress',
-        'dumped', 'completed' => 'Completed',
-        'not_available', 'rescheduled' => 'Rescheduled',
+        'rescheduled', 'not_available' => 'Rescheduled',
+        'picked_up' => 'Picked Up',
+        'dumped', 'completed' => 'Dumped',
         'rejected' => 'Rejected',
-        'cancelled' => 'Cancelled',
+        'closed' => 'Closed',
         default => ucfirst(str_replace('_', ' ', $status))
     };
     $categories = is_array($wasteRequest->category_ids) ? implode(', ', $wasteRequest->category_ids) : ($wasteRequest->category_ids ?: 'N/A');

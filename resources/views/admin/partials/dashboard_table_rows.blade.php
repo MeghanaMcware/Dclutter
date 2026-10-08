@@ -21,10 +21,10 @@
             $st = strtolower($req->status ?? 'pending');
             $badgeClass = match($st) {
                 'assigned', 'scheduled' => 'status-assigned',
-                'picked_up', 'completed' => 'status-completed',
-                'dumped' => 'status-completed',
-                'not_available', 'rescheduled' => 'status-in-progress',
-                'rejected', 'cancelled' => 'status-rejected',
+                'rescheduled', 'not_available' => 'status-in-progress',
+                'picked_up' => 'status-in-progress',
+                'dumped', 'completed' => 'status-completed',
+                'rejected', 'closed' => 'status-rejected',
                 default => 'status-pending',
             };
             $statusLabel = match($st) {
@@ -33,7 +33,8 @@
                 'rescheduled', 'not_available' => 'Rescheduled',
                 'picked_up' => 'Picked Up',
                 'dumped', 'completed' => 'Dumped',
-                'cancelled', 'rejected' => 'Cancelled',
+                'rejected' => 'Rejected',
+                'closed' => 'Closed',
                 default => ucfirst(str_replace('_', ' ', $st)),
             };
         @endphp

@@ -15,17 +15,21 @@
         $statusLabel = 'Completed';
         $badgeStyle = 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;';
         $icon = 'fa-check-circle';
-    } elseif (in_array($status, ['rejected', 'cancelled', 'closed'])) {
-        $statusLabel = 'Closed';
+    } elseif (in_array($status, ['rejected', 'closed'])) {
+        $statusLabel = $status === 'rejected' ? 'Rejected' : 'Closed';
         $badgeStyle = 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;';
         $icon = 'fa-times-circle';
-    } elseif ($status === 'assigned') {
+    } elseif (in_array($status, ['rescheduled', 'not_available'])) {
+        $statusLabel = 'Rescheduled';
+        $badgeStyle = 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;';
+        $icon = 'fa-calendar-alt';
+    } elseif (in_array($status, ['assigned', 'scheduled'])) {
         $statusLabel = 'Vehicle Assigned';
         $badgeStyle = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;';
         $icon = 'fa-truck';
     } elseif (in_array($status, ['picked_up', 'in_transit'])) {
         $statusLabel = 'Picked Up';
-        $badgeStyle = 'background: #fef3c7; color: #d97706; border: 1px solid #fde68a;';
+        $badgeStyle = 'background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc;';
         $icon = 'fa-box';
     } else {
         $statusLabel = 'Pending Pickup';

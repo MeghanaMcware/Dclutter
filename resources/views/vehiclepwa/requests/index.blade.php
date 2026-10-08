@@ -417,7 +417,6 @@
         <select id="unified-filter" class="filter-select">
             <option value="all" selected>All Statuses</option>
             <option value="assigned">Assigned</option>
-            <option value="picked_up">Picked Up</option>
             <option value="not_available">Rescheduled</option>
         </select>
     </div>

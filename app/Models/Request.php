@@ -118,13 +118,13 @@ class Request extends Model
 
     public function getNotAvailableReasonAttribute(): ?string
     {
-        $update = $this->updates->firstWhere('action', 'rescheduled');
+        $update = $this->updates->whereIn('action', ['rescheduled', 'closed'])->first();
         return $update?->not_available_reason ?? null;
     }
 
     public function getNotAvailableAtAttribute(): ?\Carbon\Carbon
     {
-        $update = $this->updates->firstWhere('action', 'rescheduled');
+        $update = $this->updates->whereIn('action', ['rescheduled', 'closed'])->first();
         return $update?->created_at ?? null;
     }
 
@@ -137,7 +137,8 @@ class Request extends Model
             'rescheduled', 'not_available' => 'Rescheduled',
             'picked_up' => 'Picked Up',
             'dumped', 'completed' => 'Dumped',
-            'cancelled', 'rejected' => 'Cancelled',
+            'rejected' => 'Rejected',
+            'closed' => 'Closed',
             default => ucfirst(str_replace('_', ' ', $st)),
         };
     }
@@ -205,6 +206,11 @@ class Request extends Model
         return $query->where('status', 'assigned');
     }
 
+    public function scopeRescheduled($query)
+    {
+        return $query->whereIn('status', ['rescheduled', 'not_available']);
+    }
+
     public function scopePickedUp($query)
     {
         return $query->where('status', 'picked_up');
@@ -218,6 +224,11 @@ class Request extends Model
     public function scopeRejected($query)
     {
         return $query->where('status', 'rejected');
+    }
+
+    public function scopeClosed($query)
+    {
+        return $query->where('status', 'closed');
     }
 
     public function dumpRecord(): \Illuminate\Database\Eloquent\Relations\HasOne

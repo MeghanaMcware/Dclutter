@@ -22,7 +22,6 @@ class WasteRequestService
     public const STATUS_NOT_AVAILABLE = 'not_available';
     public const STATUS_PICKED_UP     = 'picked_up';
     public const STATUS_DUMPED        = 'dumped';
-    public const STATUS_CANCELLED     = 'cancelled';
     public const STATUS_REJECTED      = 'rejected';
     public const STATUS_CLOSED        = 'closed';
 
@@ -38,8 +37,8 @@ class WasteRequestService
             self::STATUS_NOT_AVAILABLE => 'Rescheduled',
             self::STATUS_PICKED_UP     => 'Picked Up',
             self::STATUS_DUMPED        => 'Dumped',
-            self::STATUS_CANCELLED     => 'Cancelled',
-            self::STATUS_REJECTED      => 'Cancelled',
+            self::STATUS_REJECTED      => 'Rejected',
+            self::STATUS_CLOSED        => 'Closed',
         ];
     }
 
@@ -402,6 +401,48 @@ class WasteRequestService
             'not_available_reason' => $reason,
             'next_pickup_date' => $sundayDate,
             'remarks' => 'Pickup rescheduled: ' . $reason,
+        ]);
+
+        return $request;
+    }
+
+    /**
+     * Close a request when driver reports citizen unavailable (Door closed, Call not attended, Not ready today).
+     */
+    public function closeByDriver(WasteRequest|int $wasteRequest, string $reason): WasteRequest
+    {
+        $request = $wasteRequest instanceof WasteRequest ? $wasteRequest : WasteRequest::findOrFail($wasteRequest);
+
+        if (in_array($request->status, [self::STATUS_DUMPED, 'completed'], true)) {
+            throw new InvalidArgumentException("Cannot close. Request #{$request->request_number} is already dumped and completed.");
+        }
+
+        if ($request->status === self::STATUS_PICKED_UP) {
+            throw new InvalidArgumentException("Cannot close. Request #{$request->request_number} is already picked up and in transit.");
+        }
+
+        $reasonLabels = [
+            'door_closed' => 'Door Closed',
+            'call_not_attended' => 'Call Not Attended',
+            'not_ready_today' => 'Not Ready Today',
+            'door_locked' => 'Door Closed',
+        ];
+
+        $normalized = strtolower(trim($reason));
+        $reasonText = $reasonLabels[$normalized] ?? ucfirst(str_replace('_', ' ', $reason));
+
+        $request->status = self::STATUS_CLOSED;
+        $request->remarks = 'Closed by Driver: ' . $reasonText;
+        $request->save();
+
+        RequestUpdate::create([
+            'request_id' => $request->id,
+            'user_id' => auth()->id(),
+            'vehicle_id' => $request->vehicle_id,
+            'action' => 'closed',
+            'status' => self::STATUS_CLOSED,
+            'not_available_reason' => $reasonText,
+            'remarks' => 'Request closed by driver: ' . $reasonText,
         ]);
 
         return $request;

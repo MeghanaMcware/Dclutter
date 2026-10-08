@@ -51,8 +51,21 @@ class AdminImportedRequestController extends Controller
         }
 
         // Filter by Status
-        if ($request->filled('status')) {
-            $query->where('status', strtolower($request->status));
+        if ($request->filled('status') && $request->status !== 'all') {
+            $st = strtolower($request->status);
+            if ($st === 'closed') {
+                $query->whereIn('status', ['closed', 'door_closed', 'call_not_attended', 'not_ready_today', 'cancelled']);
+            } elseif ($st === 'pending') {
+                $query->whereIn('status', ['pending', 'requested']);
+            } elseif ($st === 'assigned') {
+                $query->whereIn('status', ['assigned', 'scheduled']);
+            } elseif ($st === 'dumped') {
+                $query->whereIn('status', ['dumped', 'completed']);
+            } elseif ($st === 'rescheduled') {
+                $query->whereIn('status', ['rescheduled', 'not_available']);
+            } else {
+                $query->where('status', $st);
+            }
         }
 
         $totalCount = (clone $query)->count();
@@ -168,6 +181,60 @@ class AdminImportedRequestController extends Controller
     }
 
     /**
+     * Update the status of an imported legacy request.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:pending,assigned,rescheduled,picked_up,dumped,rejected,closed',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $legacy = LegacyPickupRequest::forUserJurisdiction()->findOrFail($id);
+        $newStatus = strtolower($request->status);
+        $oldStatus = $legacy->status;
+
+        $legacy->status = $newStatus;
+        $legacy->save();
+
+        // If there's an associated unified request, update it too
+        $unified = WasteRequest::where(function($q) use ($legacy) {
+            $q->where('remarks', 'like', '%legacy import #' . $legacy->id . '%')
+              ->orWhere('remarks', 'like', '%Excel import #' . ($legacy->excel_id ?? $legacy->id) . '%');
+        })->first();
+
+        if ($unified) {
+            $unified->status = $newStatus;
+            if ($request->filled('remarks')) {
+                $unified->remarks = $request->remarks;
+            }
+            $unified->save();
+
+            RequestUpdate::create([
+                'request_id' => $unified->id,
+                'user_id' => auth()->id(),
+                'vehicle_id' => $unified->vehicle_id,
+                'action' => $newStatus,
+                'status' => $newStatus,
+                'remarks' => $request->input('remarks') ?: ("Status updated from {$oldStatus} to {$newStatus} by admin"),
+            ]);
+        }
+
+        $statusLabel = $legacy->status_label;
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Imported request #{$legacy->id} status updated to {$statusLabel}.",
+                'status' => $newStatus,
+                'status_label' => $statusLabel,
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Imported request #{$legacy->id} status updated to {$statusLabel}.");
+    }
+
+    /**
      * Display details of a single imported legacy request.
      */
     public function show($id)
@@ -210,8 +277,21 @@ class AdminImportedRequestController extends Controller
         }
 
         // Filter by Status
-        if ($request->filled('status')) {
-            $query->where('status', strtolower($request->status));
+        if ($request->filled('status') && $request->status !== 'all') {
+            $st = strtolower($request->status);
+            if ($st === 'closed') {
+                $query->whereIn('status', ['closed', 'door_closed', 'call_not_attended', 'not_ready_today', 'cancelled']);
+            } elseif ($st === 'pending') {
+                $query->whereIn('status', ['pending', 'requested']);
+            } elseif ($st === 'assigned') {
+                $query->whereIn('status', ['assigned', 'scheduled']);
+            } elseif ($st === 'dumped') {
+                $query->whereIn('status', ['dumped', 'completed']);
+            } elseif ($st === 'rescheduled') {
+                $query->whereIn('status', ['rescheduled', 'not_available']);
+            } else {
+                $query->where('status', $st);
+            }
         }
 
         $filename = 'imported_requests_' . date('Y-m-d_His') . '.csv';

@@ -101,20 +101,24 @@ class GisController extends Controller
         foreach ($requests as $r) {
             $status = strtolower($r->status ?? 'pending');
             $statusGroup = match ($status) {
-                'pending' => 'requested',
+                'pending', 'requested' => 'pending',
                 'assigned', 'scheduled' => 'scheduled',
-                'picked_up', 'dumped', 'completed' => 'completed',
-                'rejected', 'cancelled', 'not_available' => 'cancelled',
-                default => 'requested',
+                'rescheduled', 'not_available' => 'rescheduled',
+                'picked_up', 'picked' => 'picked',
+                'dumped', 'completed' => 'dumped',
+                'closed', 'door_closed', 'call_not_attended', 'not_ready_today', 'cancelled', 'rejected' => 'closed',
+                default => 'pending',
             };
 
             $category = is_array($r->category_ids) ? implode(', ', $r->category_ids) : ($r->category_ids ?: 'General Waste');
-            $statusLabel = match ($status) {
-                'pending' => 'Requested',
-                'assigned', 'scheduled' => 'Scheduled',
-                'picked_up', 'dumped', 'completed' => 'Completed',
-                'rejected', 'cancelled', 'not_available' => 'Cancelled',
-                default => ucfirst(str_replace('_', ' ', $status)),
+            $statusLabel = match ($statusGroup) {
+                'pending' => 'Pending',
+                'scheduled' => 'Scheduled',
+                'rescheduled' => 'Rescheduled',
+                'picked' => 'Picked',
+                'dumped' => 'Dumped',
+                'closed' => 'Closed',
+                default => ucfirst($statusGroup),
             };
 
             $points[] = [

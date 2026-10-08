@@ -108,11 +108,13 @@ body {
     align-items: center;
     gap: 6px;
 }
-.pill-pending { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-.pill-assigned { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
-.pill-picked_up { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
-.pill-dumped { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-.pill-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.pill-pending { background: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
+.pill-assigned { background: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
+.pill-rescheduled { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+.pill-picked_up { background: #fff4e5; color: #ff9800; border: 1px solid #ffcc80; }
+.pill-dumped { background: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
+.pill-rejected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.pill-closed { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
 .details-grid {
     display: grid;
@@ -368,10 +370,12 @@ body {
             $pillMap = [
                 'pending' => 'pill-pending',
                 'assigned' => 'pill-assigned',
+                'rescheduled' => 'pill-pending',
                 'not_available' => 'pill-pending',
                 'picked_up' => 'pill-picked_up',
                 'dumped' => 'pill-dumped',
                 'rejected' => 'pill-rejected',
+                'closed' => 'pill-rejected',
             ];
 
             // Normalize image arrays

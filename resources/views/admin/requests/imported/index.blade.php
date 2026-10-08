@@ -8,17 +8,19 @@
         padding: 5px 12px;
         border-radius: 4px;
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
         display: inline-block;
-        min-width: 80px;
+        min-width: 85px;
         text-align: center;
     }
-    .status-in-progress { background-color: #fff4e5; color: #ff9800; border: 1px solid #ffcc80; }
-    .status-assigned { background-color: #e3f2fd; color: #2196f3; border: 1px solid #90caf9; }
-    .status-pending { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
-    .status-completed { background-color: #e8f5e9; color: #4caf50; border: 1px solid #a5d6a7; }
-    .status-rejected { background-color: #ffebee; color: #f44336; border: 1px solid #ef9a9a; }
+    .status-pending { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .status-assigned { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .status-rescheduled { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .status-picked_up { background-color: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+    .status-dumped, .status-completed { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-rejected { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .status-closed { background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
 
     .filter-input {
         font-size: 13px;
@@ -117,8 +119,8 @@
         color: #94a3b8;
     }
     .text-start1{
-    color: black !important;
-}
+        color: black !important;
+    }
 </style>
 @endsection
 
@@ -139,13 +141,13 @@
                     <form method="GET" action="{{ route('admin.imported-requests.index') }}" id="importedFilterForm">
                         <div class="row g-3 mb-4">
                             <!-- Row 1: Dropdown Selection Filters -->
-                            <div class="col-md-4">
-                                <label class="form-label mb-0" ><b>Search</b></label>
+                            <div class="col-md-3">
+                                <label class="form-label mb-0"><b>Search</b></label>
                                 <input type="text" name="search" class="form-control filter-input" placeholder="Search applicant, mobile, address..." value="{{ request('search') }}">
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label mb-0" ><b>Corporation</b></label>
+                            <div class="col-md-3">
+                                <label class="form-label mb-0"><b>Corporation</b></label>
                                 <select name="corporation_id" class="form-select filter-input">
                                     <option value="">All Corporations</option>
                                     @foreach($corporations as $corp)
@@ -154,13 +156,27 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label mb-0" ><b>Constituency</b></label>
+                            <div class="col-md-3">
+                                <label class="form-label mb-0"><b>Constituency</b></label>
                                 <select name="constituency_id" class="form-select filter-input">
                                     <option value="">All Constituencies</option>
                                     @foreach($constituencies as $constituency)
                                         <option value="{{ $constituency->id }}" {{ request('constituency_id') == $constituency->id ? 'selected' : '' }}>{{ $constituency->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label mb-0"><b>Status</b></label>
+                                <select name="status" class="form-select filter-input">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="assigned" {{ request('status') == 'assigned' ? 'selected' : '' }}>Assigned</option>
+                                    <option value="rescheduled" {{ request('status') == 'rescheduled' ? 'selected' : '' }}>Rescheduled</option>
+                                    <option value="picked_up" {{ request('status') == 'picked_up' ? 'selected' : '' }}>Picked Up</option>
+                                    <option value="dumped" {{ request('status') == 'dumped' ? 'selected' : '' }}>Dumped</option>
+                                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                    <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>Closed</option>
                                 </select>
                             </div>
 
@@ -190,42 +206,45 @@
                                     <th class="text-start text-start1">Ward</th>
                                     <th class="text-start text-start1">Address</th>
                                     <th class="text-start text-start1">Status</th>
-                                    <th class="text-center text-start1">Actions</th>
+                                    <th class="text-center text-start1" style="min-width: 140px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($importedRequests as $req)
+                                    @php
+                                        $st = strtolower($req->status ?? 'pending');
+                                        $badgeClass = match($st) {
+                                            'pending', 'requested' => 'status-pending',
+                                            'assigned', 'scheduled' => 'status-assigned',
+                                            'rescheduled', 'not_available' => 'status-rescheduled',
+                                            'picked_up' => 'status-picked_up',
+                                            'dumped', 'completed' => 'status-dumped',
+                                            'rejected' => 'status-rejected',
+                                            'closed', 'door_closed', 'call_not_attended', 'not_ready_today', 'cancelled' => 'status-closed',
+                                            default => 'status-pending'
+                                        };
+                                    @endphp
                                     <tr>
-                                        <td class="text-start ">#{{ $req->id }}</td>
-                                        <td class="text-start ">{{ $req->applicant_name ?? 'N/A' }}</td>
+                                        <td class="text-start">#{{ $req->id }}</td>
+                                        <td class="text-start">{{ $req->applicant_name ?? 'N/A' }}</td>
                                         <td class="text-start">{{ $req->mobile_number ?? 'N/A' }}</td>
                                         <td class="text-start">{{ $req->corporation?->name ?? ($req->corporation_name ?? 'N/A') }}</td>
                                         <td class="text-start">{{ $req->constituency?->name ?? ($req->division_name ?? 'N/A') }}</td>
                                         <td class="text-start">{{ $req->ward?->name ?? ($req->ward_name_no ?? 'N/A') }}</td>
                                         <td class="text-start">{{ Str::limit($req->address ?? 'N/A', 35) }}</td>
                                         <td>
-                                            @php
-                                                $statusClasses = [
-                                                    'requested' => 'status-pending',
-                                                    'pending' => 'status-pending',
-                                                    'assigned' => 'status-assigned',
-                                                    'picked_up' => 'status-in-progress',
-                                                    'completed' => 'status-completed',
-                                                    'rejected' => 'status-rejected',
-                                                ];
-                                            @endphp
-                                            <span class="status-badge {{ $statusClasses[$req->status] ?? 'status-pending' }}">
-                                                {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                                            <span class="status-badge {{ $badgeClass }}">
+                                                {{ $req->status_label }}
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <a href="{{ route('admin.imported-requests.show', $req->id) }}" class="btn btn-primary" title="View">
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="{{ route('admin.imported-requests.show', $req->id) }}" class="btn btn-sm btn-primary" title="View Details">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                @if(!in_array($req->status, ['dumped', 'completed']))
+                                                @if(!in_array($st, ['dumped', 'completed']))
                                                     <button type="button" 
-                                                            class="btn btn-success edit-legacy-request" 
+                                                            class="btn btn-sm btn-success edit-legacy-request" 
                                                             data-bs-toggle="modal" 
                                                             data-bs-target="#assignLegacyVehicleModal" 
                                                             data-db-id="{{ $req->id }}" 
@@ -233,7 +252,7 @@
                                                             data-applicant="{{ $req->applicant_name ?? 'Citizen' }}"
                                                             data-constituency-id="{{ $req->constituency_id }}" 
                                                             data-constituency-name="{{ $req->constituency?->name ?? ($req->division_name ?? 'N/A') }}" 
-                                                            title="Assign Vehicle & Promote to Active">
+                                                            title="Assign Vehicle & Promote">
                                                         <i class="fa fa-truck"></i>
                                                     </button>
                                                 @endif
