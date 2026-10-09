@@ -5,6 +5,7 @@
 
 @section('style')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
 :root {
@@ -361,14 +362,128 @@
     cursor: not-allowed;
 }
 
-
-.fw-500 {
-    font-weight: 500 !important;
-    color: black !important;
+/* Flatpickr Styling for Sunday Picker inside Modal */
+.flatpickr-calendar {
+    z-index: 999999 !important;
+    font-family: inherit !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #e2e8f0 !important;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.selected:hover {
+    background: #0e7a43 !important;
+    border-color: #0e7a43 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+.flatpickr-day:hover {
+    background: #e8f5e9 !important;
+}
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: #cbd5e1 !important;
+    background: transparent !important;
+    cursor: not-allowed !important;
+    opacity: 0.35 !important;
+}
+input.modal-reason-select {
+    padding: 6px 32px 6px 10px !important;
+    cursor: pointer;
+}
+.flatpickr-input[readonly] {
+    background-color: #ffffff !important;
+    cursor: pointer !important;
 }
 
-.fw-400 {
-    font-weight: 400 !important;
+/* Modern Sleek Request Detail Modal */
+#requestDetailModal .modal-content {
+    border-radius: 16px;
+    border: none;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+#requestDetailModal .modal-header {
+    background: var(--primary-brand);
+    color: #ffffff;
+    padding: 10px 16px;
+    border: none;
+}
+
+#requestDetailModal .modal-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+}
+
+#requestDetailModal .modal-body {
+    padding: 14px 16px;
+}
+
+.modal-section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.modal-section-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.modal-badge-tag {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.modal-category-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    height: 100%;
+}
+
+.modal-category-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.modal-category-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0f172a;
+    display: block;
+    line-height: 1.3;
+}
+
+.modal-rescheduled-card {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11.5px;
 }
 
 
@@ -454,189 +569,173 @@
 
 {{-- Request Detail Modal --}}
 <div class="modal fade" id="requestDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 410px; margin: 1.25rem auto;">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-0 pb-0"
+            <div class="modal-header border-0 py-2 px-3 align-items-center"
                 style="background: var(--primary-brand); color: #fff; border-radius: 16px 16px 0 0;">
-                <div>
-
-                    <h5 class="modal-title fw-extrabold text-white" id="modalRefTitle">DCL-2025-000123</h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                <h6 class="modal-title fw-bold text-white mb-0" id="modalRefTitle" style="font-size: 13.5px; letter-spacing: 0.3px;">#DCL-2025-000123</h6>
+                <button type="button" class="btn-close btn-close-white" style="font-size: 10px;" data-bs-dismiss="modal"
                     aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
-                <div class="d-flex justify-content-end mb-3">
-                    <div class="d-flex align-items-center px-2 py-1 rounded-3 bg-light border" style="gap: 12px;">
-                        <span class="small text-muted font-weight-bold"
-                            style="margin-bottom: 0; font-size: 12px;">Status:</span>
-                        <span class="badge-status-pending" id="modalStatusBadge"><i class="fa-regular fa-clock"></i>
-                            PENDING</span>
+            <div class="modal-body p-3">
+                <!-- Status Row -->
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="d-inline-flex align-items-center px-2 py-1 rounded-2 bg-light border" style="gap: 6px;">
+                        <span class="text-muted fw-bold" style="font-size: 10.5px;">Status:</span>
+                        <span class="badge-status-pending" id="modalStatusBadge" style="font-size: 10.5px; padding: 2px 7px;">
+                            <i class="fa-regular fa-clock"></i> PENDING
+                        </span>
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <!-- Applicant & Mobile Row -->
+                <div class="row g-2 mb-2 pb-1">
                     <div class="col-6">
-                        <label class=" text-uppercase d-block fs-6 mb-0 fw-500">Applicant Name</label>
-                        <strong class="fw-400" id="modalApplicantName">Ramesh Kumar</strong>
-                    </div>
-                    <div class="col-6">
-                        <label class="small  text-uppercase d-block mb-1 fw-500">Mobile No</label>
-                        <strong class="fs-6 text-dark fw-600">
-                            <a href="#" id="modalMobileLink" class="text-decoration-none fw-400"
-                                style="border-bottom: 1px dashed;">
-                                <i class="fa-solid fa-phone text-success me-1"></i> <span
-                                    id="modalMobile">9876543210</span>
-                            </a>
-                        </strong>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="fw-500 text-uppercase d-block mb-1">Pickup Address</label>
-                    <p class="small fw-400 mb-0">
-                        <strong id="modalHouseNo">#123</strong>, <span id="modalAddress">BTM Layout 2nd Stage,
-                            Bengaluru</span>
-                    </p>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-secondary text-white fw-normal" id="modalWard">Ward 150</span>
-                        <span class="badge bg-secondary text-white fw-normal" id="modalConstituency">Bommanahalli</span>
-                        <span class="badge bg-secondary text-white fw-normal" id="modalPincode">560102</span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="fw-500 text-uppercase d-block mb-1">Assigned / Requested Date</label>
-                    <strong class="fs-6 fw-400"><i class="fa-regular fa-calendar text-primary me-1"></i> <span
-                            id="modalDate">09-Aug-2026</span></strong>
-                </div>
-
-                <div class="mb-3" id="modalRescheduledBox" style="display: none;">
-                    <div class="p-2 rounded-3"
-                        style="background: #fff8e1; border: 1px solid #ffe082; color: #856404; font-size: 13px;">
-                        <div class="d-flex align-items-center gap-1">
-                            <i class="fa-solid fa-calendar-check text-warning"></i>
-                            <span><strong class="fw-500">Rescheduled Date:</strong> <span id="modalRescheduledDate"
-                                    class="fw-400"></span></span>
-                        </div>
-                        <div class="text-muted small mt-1" id="modalRescheduledReasonWrap">Reason: <span
-                                id="modalRescheduledReason"></span></div>
-                    </div>
-                </div>
-
-                <div class="row g-2 mb-3">
-
-                    <div class="col-6">
-                        <div class="p-2 border rounded-3 bg-light h-100">
-                            <span class="fw-500 d-block">Pickup Category</span>
-                            <strong class="fw-400" id="modalCategory">Furniture</strong>
-                        </div>
+                        <span class="modal-section-label">Applicant Name</span>
+                        <span class="modal-section-value d-block" id="modalApplicantName">Ramesh Kumar</span>
                     </div>
                     <div class="col-6">
-                        <div class="p-2 border rounded-3 bg-light h-100">
-                            <span class="fw-500 d-block">Sub Category</span>
-                            <strong class="fw-400" id="modalSubCategory">Cots, Sofas</strong>
-                        </div>
-                    </div>
-                    <!-- Before / After Pickup Photos Section -->
-                    <div id="modalImagesContainer" class="mt-3 pt-3 border-top" style="display: none;">
-                        <label class="small text-muted font-weight-bold text-uppercase d-block mb-2">Pickup
-                            Photos</label>
-                        <div id="modalBeforePhotosWrapper" class="mb-2" style="display: none;">
-                            <span class="badge bg-primary mb-1">Before Pickup Photos</span>
-                            <div id="modalBeforePhotosList" class="d-flex gap-2 overflow-auto py-1"></div>
-                        </div>
-                        <div id="modalAfterPhotosWrapper" style="display: none;">
-                            <span class="badge bg-success mb-1">After Pickup Photos</span>
-                            <div id="modalAfterPhotosList" class="d-flex gap-2 overflow-auto py-1"></div>
-                        </div>
-                    </div>
-
-                    <!-- <div class="d-flex gap-2 mt-4" id="modalActionButtons">
-                        <a id="modalDirectionsBtn" href="#" target="_blank" class="btn btn-get-directions w-50 d-flex align-items-center justify-content-center py-2">
-                            <i class="fa-solid fa-diamond-turn-right me-1"></i> Directions
+                        <span class="modal-section-label">Mobile No</span>
+                        <a href="#" id="modalMobileLink" class="text-decoration-none modal-section-value d-inline-flex align-items-center gap-1" style="color: #0e7a43;">
+                            <i class="fa-solid fa-phone" style="font-size: 11px;"></i>
+                            <span id="modalMobile">9876543210</span>
                         </a>
-                        <a id="modalPickupActionBtn" href="#" class="btn btn-view-card w-50 d-flex align-items-center justify-content-center py-2">
+                    </div>
+                </div>
+
+                <!-- Pickup Address -->
+                <div class="mb-2 pb-1">
+                    <span class="modal-section-label">Pickup Address</span>
+                    <p class="mb-1 text-secondary" style="font-size: 12px; line-height: 1.45;">
+                        <strong id="modalHouseNo" class="text-dark">#123</strong>, <span id="modalAddress">BTM Layout 2nd Stage, Bengaluru</span>
+                    </p>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="modal-badge-tag" id="modalWard">Ward 150</span>
+                        <span class="modal-badge-tag" id="modalConstituency">Bommanahalli</span>
+                        <span class="modal-badge-tag" id="modalPincode">560102</span>
+                    </div>
+                </div>
+
+                <!-- Assigned / Requested Date -->
+                <div class="mb-2 pb-1">
+                    <span class="modal-section-label">Assigned / Requested Date</span>
+                    <div class="d-flex align-items-center gap-1 text-dark" style="font-size: 12.5px; font-weight: 600;">
+                        <i class="fa-regular fa-calendar text-primary" style="font-size: 11.5px;"></i>
+                        <span id="modalDate">09-Aug-2026</span>
+                    </div>
+                </div>
+
+                <!-- Rescheduled Box -->
+                <div class="mb-2" id="modalRescheduledBox" style="display: none;">
+                    <div class="modal-rescheduled-card">
+                        <div class="d-flex align-items-center gap-1 fw-bold" style="font-size: 11.5px; color: #92400e;">
+                            <i class="fa-solid fa-calendar-check text-warning"></i>
+                            <span>Rescheduled Date: <span id="modalRescheduledDate" class="fw-bold"></span></span>
+                        </div>
+                        <div class="mt-1 text-muted" style="font-size: 11px;" id="modalRescheduledReasonWrap">Reason: <span id="modalRescheduledReason" class="text-dark fw-semibold"></span></div>
+                    </div>
+                </div>
+
+                <!-- Category & Sub Category Cards -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="modal-category-card">
+                            <span class="modal-category-title">Pickup Category</span>
+                            <strong class="modal-category-val" id="modalCategory">Furniture</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="modal-category-card">
+                            <span class="modal-category-title">Sub Category</span>
+                            <strong class="modal-category-val" id="modalSubCategory">Cots, Sofas</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Before / After Pickup Photos Section -->
+                <div id="modalImagesContainer" class="mt-2 pt-2 border-top" style="display: none;">
+                    <span class="modal-section-label mb-2">Pickup Photos</span>
+                    <div id="modalBeforePhotosWrapper" class="mb-2" style="display: none;">
+                        <span class="badge bg-primary mb-1" style="font-size: 10px;">Before Pickup Photos</span>
+                        <div id="modalBeforePhotosList" class="d-flex gap-2 overflow-auto py-1"></div>
+                    </div>
+                    <div id="modalAfterPhotosWrapper" style="display: none;">
+                        <span class="badge bg-success mb-1" style="font-size: 10px;">After Pickup Photos</span>
+                        <div id="modalAfterPhotosList" class="d-flex gap-2 overflow-auto py-1"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Action Buttons -->
+                <div class="mt-3" id="modalActionButtons">
+                    <!-- Directions + Availability -->
+                    <div class="d-flex gap-2 align-items-center">
+                        <a id="modalDirectionsBtn" href="#" target="_blank"
+                            class="btn btn-outline-success w-50 d-flex align-items-center justify-content-center"
+                            style="font-size: 12px; font-weight: 700; height: 38px; border-radius: 8px;">
+                            <i class="fa-solid fa-diamond-turn-right me-1"></i> Get Directions
+                        </a>
+
+                        <div class="w-50" id="pickupAvailabilityContainer">
+                            <select id="pickupAvailability" class="modal-availability-select"
+                                style="font-size: 12px; height: 38px; border-radius: 8px;">
+                                <option value="">Select Availability</option>
+                                <option value="available">Available</option>
+                                <option value="not_available">Not Available</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Not Available Reason -->
+                    <div id="notAvailableSection" class="mt-2" style="display: none;">
+                        <label class="modal-reason-label d-block mb-1" style="font-size: 10.5px;">Reason</label>
+                        <select id="notAvailableReason" class="modal-reason-select"
+                            style="font-size: 12px; height: 36px; border-radius: 8px;">
+                            <option value="">Select Reason</option>
+                            <option value="door_closed">Door Closed</option>
+                            <option value="call_not_attended">Call Not Attended</option>
+                            <option value="not_ready_today">Not Ready Today</option>
+                            <option value="asking_next_date">Asking for Next Date</option>
+                        </select>
+
+                        <div id="nextDateSection" class="modal-reason-section mt-2" style="display: none;">
+                            <label class="modal-reason-label d-block mb-1" for="nextPickupDate" style="font-size: 10.5px;">
+                                Next Pickup Date (Sundays Only)
+                            </label>
+                            <div class="position-relative">
+                                <input type="text" id="nextPickupDate" class="modal-reason-select"
+                                    placeholder="Select upcoming Sunday"
+                                    readonly
+                                    style="font-size: 12px; height: 36px; border-radius: 8px; background-color: #ffffff; cursor: pointer; padding-right: 32px;">
+                                <i class="fa-regular fa-calendar position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #0e7a43; font-size: 13px;"></i>
+                            </div>
+                            <small class="text-muted d-block mt-1" style="font-size: 10px;">
+                                * Only upcoming Sundays can be selected for collection.
+                            </small>
+                        </div>
+                        <button type="button" id="notAvailableSubmitBtn" class="modal-submit-btn mt-2"
+                            style="font-size: 12px; height: 36px; border-radius: 8px;" disabled>
+                            <i class="fa-solid fa-paper-plane"></i> Submit
+                        </button>
+                    </div>
+
+                    <!-- Available / Existing Before Pickup Action -->
+                    <div id="availablePickupSection" class="mt-2" style="display: none;">
+                        <a id="modalPickupActionBtn" href="#"
+                            class="btn btn-success w-100 d-flex align-items-center justify-content-center"
+                            style="font-size: 12.5px; font-weight: 700; height: 38px; border-radius: 8px;">
                             <i class="fa-solid fa-camera me-1"></i> <span id="modalPickupActionText">Before Pickup</span>
                         </a>
-                    </div> -->
-                    <div class="mt-4" id="modalActionButtons">
-
-                        <!-- Directions + Availability -->
-                        <div class="d-flex gap-2">
-
-                            <a id="modalDirectionsBtn" href="#" target="_blank"
-                                class="btn btn-get-directions w-50 d-flex align-items-center justify-content-center py-2">
-                                <i class="fa-solid fa-diamond-turn-right me-1"></i>
-                                Directions
-                            </a>
-
-                            <div class="w-50" id="pickupAvailabilityContainer" style="margin-top:8px;">
-                                <select id="pickupAvailability" class="modal-availability-select">
-                                    <option value="">Select Availability</option>
-                                    <option value="available">Available</option>
-                                    <option value="not_available">Not Available</option>
-                                </select>
-                            </div>
-
-                        </div>
-
-                        <!-- Not Available Reason -->
-                        <div id="notAvailableSection" class="mt-3" style="display: none;">
-
-                            <label class="modal-reason-label d-block">
-                                Reason
-                            </label>
-
-                            <select id="notAvailableReason" class="modal-reason-select">
-
-                                <option value="">Select Reason</option>
-                                <option value="door_closed">Door Closed</option>
-                                <option value="call_not_attended">Call Not Attended</option>
-                                <option value="not_ready_today">Not Ready Today</option>
-                                <option value="asking_next_date">Asking for Next Date</option>
-
-                            </select>
-
-                            <div id="nextDateSection" class="modal-reason-section" style="display: none;">
-                                <label class="modal-reason-label d-block" for="nextPickupDate">Next Pickup Date (Sundays
-                                    Only)</label>
-                                <input type="date" id="nextPickupDate" class="modal-reason-select"
-                                    min="{{ now()->format('Y-m-d') }}">
-                                <small class="text-muted d-block mt-1" style="font-size: 11px;">* Please select an
-                                    upcoming Sunday for collection.</small>
-                            </div>
-                            <button type="button" id="notAvailableSubmitBtn" class="modal-submit-btn" disabled>
-                                <i class="fa-solid fa-paper-plane"></i>
-                                Submit
-                            </button>
-
-                        </div>
-
-                        <!-- Available / Existing Before Pickup Action -->
-                        <div id="availablePickupSection" class="mt-3" style="display: none;">
-
-                            <a id="modalPickupActionBtn" href="#"
-                                class="btn btn-success w-100 d-flex align-items-center justify-content-center py-2">
-
-                                <i class="fa-solid fa-camera me-1"></i>
-                                <span id="modalPickupActionText">Before Pickup</span>
-
-                            </a>
-
-                        </div>
-
                     </div>
-
-
                 </div>
             </div>
         </div>
     </div>
+</div>
     @endsection
 
     @section('script')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
     const allRequestData = [
         @foreach($assignedRequests as $req)
@@ -803,20 +902,20 @@
         const statusBadgeElem = document.getElementById('modalStatusBadge');
         if (statusBadgeElem) {
             if (item.status === 'PICKED_UP') {
-                statusBadgeElem.className = 'badge bg-success text-white py-1 px-2 font-12';
+                statusBadgeElem.className = 'badge bg-success text-white py-1 px-2 font-11 rounded-2';
                 statusBadgeElem.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> PICKED UP';
             } else if (item.status === 'ASSIGNED') {
-                statusBadgeElem.className = 'badge bg-primary text-white py-1 px-2 font-12';
+                statusBadgeElem.className = 'badge bg-primary text-white py-1 px-2 font-11 rounded-2';
                 statusBadgeElem.innerHTML = '<i class="fa-solid fa-truck-fast me-1"></i> ASSIGNED';
             } else if (item.status === 'NOT_AVAILABLE') {
-                statusBadgeElem.className = 'badge bg-warning text-dark py-1 px-2 font-12';
+                statusBadgeElem.className = 'badge bg-warning text-dark py-1 px-2 font-11 rounded-2';
                 statusBadgeElem.innerHTML = '<i class="fa-solid fa-calendar-days me-1"></i> RESCHEDULED: ' + (item
                     .nextPickupDate || 'SUNDAY');
             } else if (item.status === 'CLOSED') {
-                statusBadgeElem.className = 'badge bg-secondary text-white py-1 px-2 font-12';
+                statusBadgeElem.className = 'badge bg-secondary text-white py-1 px-2 font-11 rounded-2';
                 statusBadgeElem.innerHTML = '<i class="fa-solid fa-ban me-1"></i> CLOSED' + (item.notAvailableReason ? ': ' + item.notAvailableReason : '');
             } else {
-                statusBadgeElem.className = 'badge-status-pending font-12';
+                statusBadgeElem.className = 'badge-status-pending font-11 rounded-2';
                 statusBadgeElem.innerHTML = '<i class="fa-regular fa-clock me-1"></i> ' + item.status;
             }
         }
@@ -894,6 +993,70 @@
 
 
 
+    let nextDateFlatpickrInstance = null;
+
+    function getNextSundayDate() {
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0 is Sunday
+        const daysUntilSunday = (7 - dayOfWeek) % 7 || 7;
+        const nextSunday = new Date(today);
+        nextSunday.setDate(today.getDate() + daysUntilSunday);
+        return nextSunday;
+    }
+
+    function initSundayFlatpickr() {
+        const nextPickupDateEl = document.getElementById('nextPickupDate');
+        const notAvailableSubmitBtn = document.getElementById('notAvailableSubmitBtn');
+        if (!nextPickupDateEl) return;
+
+        if (nextDateFlatpickrInstance) {
+            nextDateFlatpickrInstance.destroy();
+            nextDateFlatpickrInstance = null;
+        }
+
+        const nextSunday = getNextSundayDate();
+
+        nextDateFlatpickrInstance = flatpickr(nextPickupDateEl, {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d-M-Y (l)",
+            altInputClass: "modal-reason-select",
+            minDate: "today",
+            defaultDate: nextSunday,
+            disableMobile: true,
+            appendTo: document.getElementById('nextDateSection'),
+            enable: [
+                function(date) {
+                    return (date.getDay() === 0); // ONLY Sundays allowed
+                }
+            ],
+            onChange: function(selectedDates, dateStr) {
+                const notAvailableReason = document.getElementById('notAvailableReason');
+                const asksForNextDate = notAvailableReason && notAvailableReason.value === 'asking_next_date';
+                if (asksForNextDate) {
+                    const validSunday = selectedDates.length > 0 && selectedDates[0].getDay() === 0;
+                    notAvailableSubmitBtn.disabled = !validSunday;
+                }
+            }
+        });
+
+        if (notAvailableSubmitBtn) {
+            notAvailableSubmitBtn.disabled = false;
+        }
+    }
+
+    // Attach cleanup when modal closes
+    const detailModalElement = document.getElementById('requestDetailModal');
+    if (detailModalElement && !detailModalElement.dataset.flatpickrCleanupAttached) {
+        detailModalElement.dataset.flatpickrCleanupAttached = 'true';
+        detailModalElement.addEventListener('hidden.bs.modal', function() {
+            if (nextDateFlatpickrInstance) {
+                nextDateFlatpickrInstance.destroy();
+                nextDateFlatpickrInstance = null;
+            }
+        });
+    }
+
     function setupAvailabilityControls(item) {
 
         const availabilitySelect = document.getElementById('pickupAvailability');
@@ -911,8 +1074,11 @@
         // Reset every time modal opens
         availabilitySelect.value = '';
         notAvailableReason.value = '';
+        if (nextDateFlatpickrInstance) {
+            nextDateFlatpickrInstance.destroy();
+            nextDateFlatpickrInstance = null;
+        }
         nextPickupDate.value = '';
-        nextPickupDate.min = new Date().toISOString().split('T')[0];
         nextDateSection.style.display = 'none';
         notAvailableSection.style.display = 'none';
         availablePickupSection.style.display = 'none';
@@ -928,6 +1094,13 @@
                 directionsBtn.classList.remove('w-50');
                 directionsBtn.classList.add('w-100');
             }
+        } else if (item.beforePickupDone) {
+            if (availabilityContainer) availabilityContainer.style.display = 'none';
+            if (directionsBtn) {
+                directionsBtn.classList.remove('w-50');
+                directionsBtn.classList.add('w-100');
+            }
+            if (availablePickupSection) availablePickupSection.style.display = 'block';
         } else {
             if (availabilityContainer) availabilityContainer.style.display = 'block';
             if (directionsBtn) {
@@ -966,35 +1139,55 @@
         notAvailableReason.onchange = function() {
             const asksForNextDate = this.value === 'asking_next_date';
             nextDateSection.style.display = asksForNextDate ? 'block' : 'none';
-            nextPickupDate.required = asksForNextDate;
-            notAvailableSubmitBtn.disabled = this.value === '' || (asksForNextDate && !nextPickupDate.value);
-        };
-
-        nextPickupDate.onchange = function() {
-            const asksForNextDate = notAvailableReason.value === 'asking_next_date';
-            if (this.value) {
-                const parts = this.value.split('-');
-                const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
-                if (selectedDate.getDay() !== 0) { // 0 is Sunday
-                    Swal.fire({
-                        title: 'Sundays Only',
-                        text: 'Rescheduled pickup date must be a Sunday. Please select an upcoming Sunday.',
-                        icon: 'warning',
-                        confirmButtonColor: '#0e7a43'
-                    });
-                    this.value = '';
-                    notAvailableSubmitBtn.disabled = true;
-                    return;
+            if (asksForNextDate) {
+                initSundayFlatpickr();
+            } else {
+                if (nextDateFlatpickrInstance) {
+                    nextDateFlatpickrInstance.destroy();
+                    nextDateFlatpickrInstance = null;
                 }
+                nextPickupDate.value = '';
+                notAvailableSubmitBtn.disabled = this.value === '';
             }
-            notAvailableSubmitBtn.disabled = notAvailableReason.value === '' || (asksForNextDate && !this.value);
         };
 
         // Not Available Submit
         notAvailableSubmitBtn.onclick = function() {
             const reason = notAvailableReason.value;
             if (!reason) return;
-            if (reason === 'asking_next_date' && !nextPickupDate.value) return;
+
+            const asksForNextDate = (reason === 'asking_next_date');
+            let selectedDateVal = null;
+
+            if (asksForNextDate) {
+                if (nextDateFlatpickrInstance && nextDateFlatpickrInstance.selectedDates.length > 0) {
+                    selectedDateVal = nextDateFlatpickrInstance.formatDate(nextDateFlatpickrInstance.selectedDates[0], "Y-m-d");
+                } else if (nextPickupDate.value) {
+                    selectedDateVal = nextPickupDate.value;
+                }
+
+                if (!selectedDateVal) {
+                    Swal.fire({
+                        title: 'Date Required',
+                        text: 'Please select an upcoming Sunday for collection.',
+                        icon: 'warning',
+                        confirmButtonColor: '#0e7a43'
+                    });
+                    return;
+                }
+
+                const parts = selectedDateVal.split('-');
+                const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                if (selectedDate.getDay() !== 0) {
+                    Swal.fire({
+                        title: 'Sundays Only',
+                        text: 'Rescheduled pickup date must be a Sunday. Please select an upcoming Sunday.',
+                        icon: 'warning',
+                        confirmButtonColor: '#0e7a43'
+                    });
+                    return;
+                }
+            }
 
             const reasonText = notAvailableReason.options[notAvailableReason.selectedIndex].text;
 
@@ -1010,7 +1203,7 @@
                     },
                     body: JSON.stringify({
                         reason: reasonText,
-                        next_date: reason === 'asking_next_date' ? nextPickupDate.value : null
+                        next_date: asksForNextDate ? selectedDateVal : null
                     })
                 })
                 .then(async res => {
@@ -1096,18 +1289,19 @@
                         </div>
                         <hr class="card-divider">
                           
-                          <div class="d-flex gap-2 mb-2">
-                             ${ item.status === 'PICKED_UP' ? 
-                                `<button class="btn btn-secondary w-100 py-1 font-13" disabled><i class="fa-solid fa-check"></i> Picked Up</button>` : 
-                                (item.beforePickupDone ? 
-                                `<a href="{{ url('/vehicle/after-pickup') }}/${item.id}" class="btn w-100 py-1 font-13 fw-bold" style="background:#1f4e79; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> After Pickup</a>` : 
-                                `<a href="{{ url('/vehicle/before-pickup') }}/${item.id}" class="btn w-100 py-1 font-13 fw-bold" style="background:#0e7a43; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> Before Pickup</a>`)
-                             }
-                          </div>
+                          ${ item.status === 'PICKED_UP' ? 
+                             `<div class="d-flex gap-2 mb-2">
+                                <button class="btn btn-secondary w-100 py-1 font-13" disabled><i class="fa-solid fa-check"></i> Picked Up</button>
+                              </div>` : 
+                             (item.beforePickupDone ? 
+                             `<div class="d-flex gap-2 mb-2">
+                                <a href="{{ url('/vehicle/after-pickup') }}/${item.id}" class="btn w-100 py-1 font-13 fw-bold" style="background:#1f4e79; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> After Pickup</a>
+                              </div>` : '')
+                          }
 
                           <div class="d-flex justify-content-between align-items-center">
                               <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" class="btn-get-directions" style="margin-top: 0; width: 48%; text-align: center;">
-                                  <i class="fa-solid fa-location-dot"></i> Location
+                                  <i class="fa-solid fa-location-dot"></i> Get Directions
                               </a>
                               <button type="button" class="btn-view-card" data-request-index="${index}" style="width: 48%; margin-top: 0;">
                                   <i class="fa-regular fa-eye"></i> View

@@ -342,7 +342,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = data.next_url || ("{{ url('/vehicle/after-pickup') }}/" + reqId);
+                        window.location.href = data.next_url || "{{ route('vehicle.requests') }}";
                     });
                 } else {
                     if (typeof hidePageLoader === 'function') hidePageLoader();

@@ -92,7 +92,8 @@
               </li>
               <li>
                 <a class="{{ request()->routeIs('admin.masters.plants.*') ? 'active' : '' }}" href="{{ route('admin.masters.plants.index') }}">
-                  Plant Locations
+                  Dump locations
+
                 </a>
               </li>
             </ul>

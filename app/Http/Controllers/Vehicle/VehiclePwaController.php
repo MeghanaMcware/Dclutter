@@ -212,11 +212,11 @@ class VehiclePwaController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Before pickup details saved successfully.',
-                    'next_url' => route('vehicle.after_pickup', ['id' => $wasteRequest->id]),
+                    'next_url' => route('vehicle.requests'),
                 ]);
             }
 
-            return redirect()->route('vehicle.after_pickup', ['id' => $wasteRequest->id])
+            return redirect()->route('vehicle.requests')
                 ->with('success', 'Before pickup details saved successfully.');
         } catch (\InvalidArgumentException $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
@@ -550,7 +550,7 @@ class VehiclePwaController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'dump_photos' => 'nullable|array',
-            'dump_photos.*' => 'image|max:1024',
+            'dump_photos.*' => 'image|max:10240',
         ]);
 
         // Validate that selected plant is not inactive

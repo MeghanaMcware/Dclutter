@@ -209,6 +209,120 @@
 .text-start1{
     color: black !important;
 }
+
+/* =========================================================
+   SEARCHABLE SELECT2 FILTERS (CORPORATION & CONSTITUENCY)
+========================================================= */
+#corporationFilter + .select2-container,
+#constituencyFilter + .select2-container {
+    width: 100% !important;
+}
+
+#corporationFilter + .select2-container .select2-selection--single,
+#constituencyFilter + .select2-container .select2-selection--single {
+    height: 40px !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 6px !important;
+    background-color: #ffffff !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: relative !important;
+    box-shadow: none !important;
+}
+
+#corporationFilter + .select2-container .select2-selection--single .select2-selection__rendered,
+#constituencyFilter + .select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: 38px !important;
+    font-size: 13px !important;
+    color: #212529 !important;
+    padding-left: 12px !important;
+    padding-right: 32px !important;
+    display: block !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+}
+
+#corporationFilter + .select2-container .select2-selection--single .select2-selection__clear,
+#constituencyFilter + .select2-container .select2-selection--single .select2-selection__clear {
+    position: absolute !important;
+    right: 28px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #888888 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+}
+
+#corporationFilter + .select2-container .select2-selection--single .select2-selection__clear:hover,
+#constituencyFilter + .select2-container .select2-selection--single .select2-selection__clear:hover {
+    color: #dc3545 !important;
+}
+
+#corporationFilter + .select2-container .select2-selection--single .select2-selection__arrow,
+#constituencyFilter + .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 38px !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 8px !important;
+    width: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#corporationFilter + .select2-container.select2-container--open .select2-selection--single,
+#corporationFilter + .select2-container.select2-container--focus .select2-selection--single,
+#constituencyFilter + .select2-container.select2-container--open .select2-selection--single,
+#constituencyFilter + .select2-container.select2-container--focus .select2-selection--single {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    outline: 0 !important;
+}
+
+.select2-dropdown {
+    border: 1px solid #ced4da !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    font-size: 13px !important;
+    z-index: 99999 !important;
+}
+
+.select2-container--default .select2-search--dropdown {
+    padding: 8px !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    height: 34px !important;
+    outline: none !important;
+    width: 100% !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15) !important;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 7px 12px !important;
+    font-size: 13px !important;
+    text-align: left !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+}
 </style>
 @endsection
 
@@ -578,11 +692,37 @@
 
         const corporationsData = @json($corporations);
 
+        // Initialize Select2 with Search option for Corporation and Constituency
+        $('#corporationFilter').select2({
+            width: '100%',
+            placeholder: 'All Corporations',
+            allowClear: true,
+            minimumResultsForSearch: 0
+        });
+
+        $('#constituencyFilter').select2({
+            width: '100%',
+            placeholder: 'All Constituencies',
+            allowClear: true,
+            minimumResultsForSearch: 0
+        });
+
+        // Set search placeholder dynamically when Select2 opens
+        $(document).on('select2:open', function() {
+            setTimeout(function() {
+                var searchField = document.querySelector('.select2-container--open .select2-search__field');
+                if (searchField) {
+                    searchField.setAttribute('placeholder', 'Type to search...');
+                    searchField.focus();
+                }
+            }, 10);
+        });
+
         // Dependent Constituency Dropdown Filter
         $('#corporationFilter').on('change', function() {
             const corpName = $(this).val();
             const $constSelect = $('#constituencyFilter');
-            $constSelect.html('<option value="">All Constituencies</option>');
+            $constSelect.empty().append(new Option('All Constituencies', ''));
 
             if (corpName) {
                 const corp = corporationsData.find(c => c.name === corpName);
@@ -596,6 +736,8 @@
                     $constSelect.append(new Option("{{ $constituency->name }}", "{{ $constituency->name }}"));
                 @endforeach
             }
+
+            $constSelect.val('').trigger('change.select2');
         });
 
         // Initialize DataTables on unique ID admin-waste-requests-table
@@ -715,15 +857,11 @@
         $('#resetFilterBtn').on('click', function(e) {
             e.preventDefault();
             $('#statusFilter').val('');
-            $('#corporationFilter').val('');
             $('#fromDateFilter').val('');
             $('#toDateFilter').val('');
             
-            const $constSelect = $('#constituencyFilter');
-            $constSelect.html('<option value="">All Constituencies</option>');
-            @foreach($constituencies as $constituency)
-                $constSelect.append(new Option("{{ $constituency->name }}", "{{ $constituency->name }}"));
-            @endforeach
+            // Reset Corporation and trigger change to repopulate all Constituencies
+            $('#corporationFilter').val('').trigger('change');
 
             performAjaxFilter();
         });

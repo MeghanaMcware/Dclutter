@@ -121,6 +121,35 @@
     .text-start1{
         color: black !important;
     }
+
+    /* Searchable Select2 filters */
+    #importedCorpFilter + .select2-container,
+    #importedConstFilter + .select2-container {
+        width: 100% !important;
+    }
+    #importedCorpFilter + .select2-container .select2-selection--single,
+    #importedConstFilter + .select2-container .select2-selection--single {
+        height: 40px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 6px !important;
+        background-color: #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 10px !important;
+    }
+    #importedCorpFilter + .select2-container .select2-selection--single .select2-selection__rendered,
+    #importedConstFilter + .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 38px !important;
+        font-size: 13px !important;
+        color: #212529 !important;
+        padding-left: 2px !important;
+    }
+    #importedCorpFilter + .select2-container .select2-selection--single .select2-selection__arrow,
+    #importedConstFilter + .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 38px !important;
+        top: 0 !important;
+        right: 8px !important;
+    }
 </style>
 @endsection
 
@@ -148,7 +177,7 @@
 
                             <div class="col-md-3">
                                 <label class="form-label mb-0"><b>Corporation</b></label>
-                                <select name="corporation_id" class="form-select filter-input">
+                                <select name="corporation_id" id="importedCorpFilter" class="form-select filter-input">
                                     <option value="">All Corporations</option>
                                     @foreach($corporations as $corp)
                                         <option value="{{ $corp->id }}" {{ request('corporation_id') == $corp->id ? 'selected' : '' }}>{{ $corp->name }}</option>
@@ -158,7 +187,7 @@
 
                             <div class="col-md-3">
                                 <label class="form-label mb-0"><b>Constituency</b></label>
-                                <select name="constituency_id" class="form-select filter-input">
+                                <select name="constituency_id" id="importedConstFilter" class="form-select filter-input">
                                     <option value="">All Constituencies</option>
                                     @foreach($constituencies as $constituency)
                                         <option value="{{ $constituency->id }}" {{ request('constituency_id') == $constituency->id ? 'selected' : '' }}>{{ $constituency->name }}</option>
@@ -336,6 +365,31 @@ function submitExport() {
 }
 
 $(document).ready(function() {
+    // Initialize Searchable Select2 for Corporation and Constituency
+    if ($.fn.select2) {
+        $('#importedCorpFilter').select2({
+            width: '100%',
+            placeholder: 'All Corporations',
+            minimumResultsForSearch: 0
+        });
+
+        $('#importedConstFilter').select2({
+            width: '100%',
+            placeholder: 'All Constituencies',
+            minimumResultsForSearch: 0
+        });
+
+        $(document).on('select2:open', function() {
+            setTimeout(function() {
+                var searchField = document.querySelector('.select2-container--open .select2-search__field');
+                if (searchField) {
+                    searchField.setAttribute('placeholder', 'Type to search...');
+                    searchField.focus();
+                }
+            }, 10);
+        });
+    }
+
     const vehicles = [
         @foreach($vehicles as $vehicle)
         {

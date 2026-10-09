@@ -226,24 +226,10 @@
                 <!-- 1. Request Overview Card -->
                 <div class="card card-custom mb-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="mb-3">
                             <h5 class="section-title mb-0">
                                 <i class="fa fa-file-lines text-primary"></i> Request Information
                             </h5>
-
-                            @if(!in_array($wasteRequest->status, ['dumped', 'completed']))
-                                <button type="button"
-                                        class="btn btn-success btn-sm edit-request"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#assignVehicleModal"
-                                        data-db-id="{{ $wasteRequest->id }}"
-                                        data-request-number="{{ $wasteRequest->request_number }}"
-                                        data-constituency-id="{{ $wasteRequest->constituency_id }}"
-                                        data-constituency-name="{{ $wasteRequest->constituency?->name ?? 'N/A' }}"
-                                        title="Assign / Reassign Vehicle">
-                                    <i class="fa fa-truck me-1"></i> {{ $wasteRequest->vehicle ? 'Change Vehicle' : 'Assign Vehicle' }}
-                                </button>
-                            @endif
                         </div>
 
                         <div class="row">
@@ -409,9 +395,16 @@
                 <!-- 2. Assigned Vehicle & Driver Card -->
                 <div class="card card-custom mb-4">
                     <div class="card-body">
-                        <h5 class="section-title">
-                            <i class="fa fa-truck text-success"></i> Assigned Vehicle &amp; Driver Details
-                        </h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="section-title mb-0">
+                                <i class="fa fa-truck text-success"></i> Assigned Vehicle &amp; Driver Details
+                            </h5>
+                            @if(!in_array($wasteRequest->status, ['dumped', 'completed']))
+                                <button type="button" class="btn btn-success btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVehicleModal" title="{{ $wasteRequest->vehicle ? 'Change Assigned Vehicle' : 'Assign Vehicle' }}">
+                                    <i class="fa fa-truck me-1"></i> {{ $wasteRequest->vehicle ? 'Change Vehicle' : 'Assign Vehicle' }}
+                                </button>
+                            @endif
+                        </div>
 
                         @if($wasteRequest->vehicle)
                             <div class="row">
@@ -473,12 +466,7 @@
                         @else
                             <div class="p-3 bg-light rounded text-center text-muted">
                                 <i class="fa fa-truck-ramp-box fa-2x mb-2 text-secondary"></i>
-                                <p class="mb-2" style="font-size: 13px;">No vehicle has been assigned to this request yet.</p>
-                                @if(!in_array($wasteRequest->status, ['dumped', 'completed']))
-                                    <button type="button" class="btn btn-success btn-sm px-3" data-bs-toggle="modal" data-bs-target="#assignVehicleModal">
-                                        <i class="fa fa-plus me-1"></i> Assign Vehicle Now
-                                    </button>
-                                @endif
+                                <p class="mb-0" style="font-size: 13px;">No vehicle has been assigned to this request yet.</p>
                             </div>
                         @endif
                     </div>
@@ -720,11 +708,6 @@
 
                 <!-- Action Buttons -->
                 <div class="d-flex flex-column gap-2 mb-4">
-                    @if(!in_array($wasteRequest->status, ['dumped', 'completed']))
-                        <button type="button" class="btn btn-success w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVehicleModal">
-                            <i class="fa fa-truck"></i> {{ $wasteRequest->vehicle ? 'Change Assigned Vehicle' : 'Assign Vehicle' }}
-                        </button>
-                    @endif
                     <a href="{{ route('admin.requests.index') }}" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-arrow-left me-1"></i> Back to All Requests
                     </a>

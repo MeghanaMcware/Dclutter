@@ -106,6 +106,22 @@
         border: 1px solid #e2e8f0;
     }
 
+    .thumb-size-badge {
+        position: absolute;
+        bottom: 3px;
+        left: 3px;
+        right: 3px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #ffffff;
+        font-size: 9.5px;
+        font-weight: 700;
+        text-align: center;
+        border-radius: 4px;
+        padding: 1px 2px;
+        pointer-events: none;
+        letter-spacing: 0.3px;
+    }
+
     .btn-remove-thumb {
         position: absolute;
         top: -6px;
@@ -219,6 +235,10 @@
                     accept="image/*"
                 >
 
+                <div id="optimizingStatus" class="d-none small text-success mt-2 fw-semibold">
+                    <i class="fa-solid fa-spinner fa-spin me-1"></i> Optimizing and stamping photos...
+                </div>
+
                 <div id="photoPreview" class="photo-preview"></div>
             </div>
 
@@ -291,6 +311,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('requestId').value = urlReqId;
     }
 
+    let currentAddress = '';
+
     // 3. AUTO FETCH GPS LOCATION
     function fetchLocation() {
         const latElem = document.getElementById('latitude');
@@ -312,6 +334,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     latInput.value = lat.toFixed(6);
                     lngInput.value = lng.toFixed(6);
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.display_name) {
+                                currentAddress = data.display_name;
+                            }
+                        })
+                        .catch(err => console.warn("Reverse geocode notice:", err));
                 },
                 function(error) {
                     console.warn("Geolocation notice:", error.message);
@@ -340,15 +371,106 @@ document.addEventListener('DOMContentLoaded', function() {
         btnRefresh.addEventListener('click', fetchLocation);
     }
 
-    // 4. MULTIPLE PHOTO PREVIEW WITH INDIVIDUAL DELETE BUTTON
+    // Image Optimization & GPS Watermark function
+    function optimizeDumpImage(file, lat, lng, locationName, pickupId) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = Math.round(height * (MAX_WIDTH / width));
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = Math.round(width * (MAX_HEIGHT / height));
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const barHeight = 110;
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                    ctx.fillRect(0, height - barHeight, width, barHeight);
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 15px Arial';
+                    ctx.textAlign = 'left';
+
+                    let textY = height - barHeight + 28;
+                    let locLabel = locationName || currentAddress || 'Dump Yard';
+                    if (locLabel.length > 70) locLabel = locLabel.substring(0, 67) + '...';
+                    ctx.fillText(`Yard: ${locLabel}`, 15, textY);
+
+                    ctx.font = '14px Arial';
+                    ctx.fillText(`Lat: ${lat ? lat : 'N/A'}, Lng: ${lng ? lng : 'N/A'}`, 15, textY + 28);
+
+                    ctx.fillStyle = '#FFD700';
+                    const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+                    const pidLabel = pickupId ? ` | ${pickupId}` : '';
+                    ctx.fillText(`Time: ${dateStr}${pidLabel}`, 15, textY + 56);
+
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            resolve({
+                                file: file,
+                                dataUrl: e.target.result,
+                                originalSize: file.size,
+                                optimizedSize: file.size
+                            });
+                            return;
+                        }
+                        const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                        const newFile = new File([blob], newFileName, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+                        resolve({
+                            file: newFile,
+                            dataUrl: canvas.toDataURL('image/jpeg', 0.8),
+                            originalSize: file.size,
+                            optimizedSize: blob.size
+                        });
+                    }, 'image/jpeg', 0.8);
+                };
+                img.onerror = function() {
+                    resolve({
+                        file: file,
+                        dataUrl: e.target.result,
+                        originalSize: file.size,
+                        optimizedSize: file.size
+                    });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 4. MULTIPLE PHOTO PREVIEW WITH INDIVIDUAL DELETE BUTTON & COMPRESSION
     const dumpPhotosInput = document.getElementById('dumpPhotos');
     const photoPreview = document.getElementById('photoPreview');
     let selectedFiles = [];
 
     if (dumpPhotosInput) {
-        dumpPhotosInput.addEventListener('change', function() {
+        dumpPhotosInput.addEventListener('change', async function() {
             const newFiles = Array.from(this.files);
-            const maxFileSize = 1024 * 1024 * 10; // 10MB
+            if (!newFiles.length) return;
+
+            const maxFileSize = 1024 * 1024 * 15; // 15MB raw input limit
             const validFiles = newFiles.filter(file => file.size <= maxFileSize);
             const oversizedFiles = newFiles.filter(file => file.size > maxFileSize);
 
@@ -356,12 +478,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Image too large',
-                    text: 'Each dump image must be 10 MB or smaller.',
+                    text: 'Some photos exceed 15 MB and could not be loaded.',
                     confirmButtonColor: '#0e7a43'
                 });
             }
 
-            selectedFiles = selectedFiles.concat(validFiles);
+            const optimizingStatus = document.getElementById('optimizingStatus');
+            if (optimizingStatus) optimizingStatus.classList.remove('d-none');
+
+            const lat = document.getElementById('latInput').value || '';
+            const lng = document.getElementById('lngInput').value || '';
+            const locationName = document.getElementById('dumpLocation').value || '';
+            const pickupId = document.getElementById('pickupId').value || '';
+
+            for (const file of validFiles) {
+                try {
+                    const optimized = await optimizeDumpImage(file, lat, lng, locationName, pickupId);
+                    selectedFiles.push(optimized);
+                } catch (err) {
+                    console.error('Optimization error:', err);
+                    selectedFiles.push({
+                        file: file,
+                        dataUrl: URL.createObjectURL(file),
+                        originalSize: file.size,
+                        optimizedSize: file.size
+                    });
+                }
+            }
+
+            if (optimizingStatus) optimizingStatus.classList.add('d-none');
             renderThumbnails();
             dumpPhotosInput.value = '';
         });
@@ -369,16 +514,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderThumbnails() {
         photoPreview.innerHTML = '';
-        selectedFiles.forEach((file, index) => {
+        selectedFiles.forEach((item, index) => {
             const wrap = document.createElement('div');
             wrap.className = 'preview-thumb-wrap';
 
             const img = document.createElement('img');
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            img.src = item.dataUrl;
 
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
@@ -392,6 +533,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             wrap.appendChild(img);
             wrap.appendChild(removeBtn);
+
+            if (item.optimizedSize) {
+                const sizeBadge = document.createElement('div');
+                sizeBadge.className = 'thumb-size-badge';
+                const kb = (item.optimizedSize / 1024).toFixed(0);
+                sizeBadge.textContent = `${kb} KB`;
+                wrap.appendChild(sizeBadge);
+            }
+
             photoPreview.appendChild(wrap);
         });
 
@@ -445,8 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('latitude', document.getElementById('latInput').value || '12.9856');
             formData.append('longitude', document.getElementById('lngInput').value || '77.6057');
 
-            selectedFiles.forEach(file => {
-                formData.append('dump_photos[]', file);
+            selectedFiles.forEach(item => {
+                formData.append('dump_photos[]', item.file || item);
             });
 
             Swal.fire({
