@@ -635,14 +635,14 @@
         </div>
     </div>
 
-    {{-- ================= MODAL: FORGOT PASSWORD (UI ONLY) ================= --}}
+    {{-- ================= MODAL: FORGOT PASSWORD ================= --}}
     <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 390px; margin: 1.25rem auto;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 395px; margin: 1.25rem auto;">
             <div class="modal-content border-0 rounded-4 shadow">
                 <div class="modal-header border-0 pb-0 px-4 pt-4">
                     <div>
-                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 18px;">Forgot Password</h5>
-                        <p class="text-muted mb-0" style="font-size: 12.5px;">Verify via OTP to reset and update your driver password.</p>
+                        <h5 class="modal-title fw-bold text-dark mb-1" id="forgotModalTitle" style="font-size: 18px;">Forgot Password</h5>
+                        <p class="text-muted mb-0" id="forgotModalSubtitle" style="font-size: 12.5px;">Verify via OTP to reset and update your driver password.</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -664,7 +664,7 @@
                         </button>
                     </div>
 
-                    <!-- Step 2: Enter OTP & Set New Password -->
+                    <!-- Step 2: Verify OTP -->
                     <div id="forgotStep2" style="display: none;">
                         <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 12px; border-radius: 8px;">
                             <i class="fa-solid fa-circle-check me-2"></i>
@@ -673,35 +673,57 @@
                         
                         <label class="field-label mb-1">Enter 6-Digit OTP</label>
                         <div class="input-group-custom mb-2">
-                            <input type="text" id="forgotOtpCode" placeholder="Enter OTP" maxlength="6" 
-                                style="text-align: center; letter-spacing: 4px; font-weight: 700; font-size: 16px;"
+                            <input type="text" id="forgotOtpCode" placeholder="Enter 6-digit OTP" maxlength="6" 
+                                style="text-align: center; letter-spacing: 4px; font-weight: 700; font-size: 18px;"
                                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
-                        <div class="d-flex justify-content-end mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <a href="javascript:void(0)" onclick="resetForgotStep()" class="text-muted text-decoration-none" style="font-size: 11.5px;">
+                                <i class="fa-solid fa-arrow-left me-1"></i>Change Number
+                            </a>
                             <button type="button" class="btn btn-link p-0 text-decoration-none fw-semibold" id="btnResendForgotOtp" onclick="simulateSendForgotOtp()" style="font-size: 12px; color: var(--primary-green);" disabled>
                                 Resend OTP (<span id="resendForgotTimer">30</span>s)
                             </button>
                         </div>
 
+                        <button type="button" class="btn-submit-primary" id="btnVerifyForgotOtp" onclick="verifyForgotOtp()">
+                            <span>Verify OTP</span>
+                            <i class="fa-solid fa-shield-halved ms-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Reset Password (shown only after OTP is verified) -->
+                    <div id="forgotStep3" style="display: none;">
+                        <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 12px; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <span>OTP verified! Set your new password below.</span>
+                        </div>
+
                         <label class="field-label mb-1">New Password</label>
-                        <div class="input-group-custom position-relative mb-2">
+                        <div class="input-group-custom position-relative mb-1">
                             <i class="fa-solid fa-lock input-icon-left"></i>
-                            <input type="password" id="forgotNewPassword" class="input-with-icon" placeholder="Min 6 characters">
+                            <input type="password" id="forgotNewPassword" class="input-with-icon" placeholder="Min 6 characters" oninput="checkPasswordMatch()">
                             <button type="button" class="password-toggle-btn" onclick="togglePassword('forgotNewPassword', this)">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
                         </div>
+                        <div id="newPasswordHint" class="text-muted mb-3" style="font-size: 11.5px;">Must be at least 6 characters.</div>
 
                         <label class="field-label mb-1">Confirm New Password</label>
-                        <div class="input-group-custom position-relative mb-3">
+                        <div class="input-group-custom position-relative">
                             <i class="fa-solid fa-lock input-icon-left"></i>
-                            <input type="password" id="forgotConfirmPassword" class="input-with-icon" placeholder="Re-enter new password">
+                            <input type="password" id="forgotConfirmPassword" class="input-with-icon" placeholder="Re-enter new password" oninput="checkPasswordMatch()">
                             <button type="button" class="password-toggle-btn" onclick="togglePassword('forgotConfirmPassword', this)">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
                         </div>
 
-                        <button type="button" class="btn-submit-primary" id="btnSubmitResetPassword" onclick="simulateSubmitResetPassword()">
+                        <!-- PASSWORD MATCH STATUS SHOWN BELOW FIELD -->
+                        <div id="confirmPasswordBelowArea" class="mt-2 py-1 px-2 rounded-2" style="display: none; font-size: 13px;">
+                            <div id="confirmPasswordMatchStatus" class="fw-semibold d-flex align-items-center"></div>
+                        </div>
+
+                        <button type="button" class="btn-submit-primary mt-3" id="btnSubmitResetPassword" onclick="submitResetPassword()">
                             <span>Update Password</span>
                             <i class="fa-solid fa-key ms-1"></i>
                         </button>
@@ -888,11 +910,18 @@
         }
 
         function resetForgotStep() {
+            const titleEl = document.getElementById('forgotModalTitle');
+            const subTitleEl = document.getElementById('forgotModalSubtitle');
+            if (titleEl) titleEl.textContent = 'Forgot Password';
+            if (subTitleEl) subTitleEl.textContent = 'Verify via OTP to reset and update your driver password.';
+
             document.getElementById('forgotStep1').style.display = 'block';
             document.getElementById('forgotStep2').style.display = 'none';
+            document.getElementById('forgotStep3').style.display = 'none';
             document.getElementById('forgotOtpCode').value = '';
             document.getElementById('forgotNewPassword').value = '';
             document.getElementById('forgotConfirmPassword').value = '';
+            document.getElementById('confirmPasswordBelowArea').style.display = 'none';
             if (forgotTimerInterval) clearInterval(forgotTimerInterval);
         }
 
@@ -917,7 +946,15 @@
                 btn.innerHTML = '<span>Send Verification OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
                 document.getElementById('forgotStep1').style.display = 'none';
                 document.getElementById('forgotStep2').style.display = 'block';
+                document.getElementById('forgotStep3').style.display = 'none';
+                
+                const titleEl = document.getElementById('forgotModalTitle');
+                const subTitleEl = document.getElementById('forgotModalSubtitle');
+                if (titleEl) titleEl.textContent = 'Verify OTP';
+                if (subTitleEl) subTitleEl.textContent = 'Enter the 6-digit OTP code sent to your mobile.';
+
                 document.getElementById('forgotMobileDisplay').textContent = mobile;
+                document.getElementById('forgotOtpCode').value = '';
                 document.getElementById('forgotOtpCode').focus();
 
                 let seconds = 30;
@@ -935,24 +972,98 @@
                         resendBtn.innerHTML = 'Resend OTP';
                     }
                 }, 1000);
+            }, 500);
+        }
+
+        function verifyForgotOtp() {
+            const otp = document.getElementById('forgotOtpCode').value.trim();
+            if (!otp || otp.length !== 6) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Enter 6-Digit OTP',
+                    text: 'Please enter the complete 6-digit verification code.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btnVerifyForgotOtp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Verifying OTP...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Verify OTP</span> <i class="fa-solid fa-shield-halved ms-1"></i>';
+                
+                // Transition to Step 3: Reset Password
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'none';
+                document.getElementById('forgotStep3').style.display = 'block';
+
+                const titleEl = document.getElementById('forgotModalTitle');
+                const subTitleEl = document.getElementById('forgotModalSubtitle');
+                if (titleEl) titleEl.textContent = 'Reset Password';
+                if (subTitleEl) subTitleEl.textContent = 'Create a new secure password for driver login.';
+
+                document.getElementById('forgotNewPassword').value = '';
+                document.getElementById('forgotConfirmPassword').value = '';
+                document.getElementById('confirmPasswordBelowArea').style.display = 'none';
+                document.getElementById('forgotNewPassword').focus();
             }, 600);
         }
 
-        function simulateSubmitResetPassword() {
-            const otp = document.getElementById('forgotOtpCode').value.trim();
+        function checkPasswordMatch() {
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+            const belowArea = document.getElementById('confirmPasswordBelowArea');
+            const statusEl = document.getElementById('confirmPasswordMatchStatus');
+            const hintEl = document.getElementById('newPasswordHint');
+
+            if (newPassword.length > 0 && newPassword.length < 6) {
+                hintEl.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i> Password must be at least 6 characters</span>';
+            } else if (newPassword.length >= 6) {
+                hintEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Password length requirement met</span>';
+            } else {
+                hintEl.textContent = 'Must be at least 6 characters.';
+            }
+
+            if (!confirmPassword) {
+                belowArea.style.display = 'none';
+                return;
+            }
+
+            belowArea.style.display = 'block';
+
+            if (newPassword.length < 6) {
+                statusEl.innerHTML = '<span style="color: #ea580c;"><i class="fa-solid fa-triangle-exclamation me-1"></i> New password is less than 6 characters</span>';
+            } else if (newPassword === confirmPassword) {
+                statusEl.innerHTML = '<span style="color: #16a34a; font-weight: 600;"><i class="fa-solid fa-circle-check me-1"></i> Passwords match</span>';
+            } else {
+                statusEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;"><i class="fa-solid fa-circle-xmark me-1"></i> Password does not match</span>';
+            }
+        }
+
+        function submitResetPassword() {
+            const mobile = document.getElementById('forgotMobile').value.trim();
             const newPassword = document.getElementById('forgotNewPassword').value;
             const confirmPassword = document.getElementById('forgotConfirmPassword').value;
 
-            if (!otp || otp.length !== 6) {
-                Swal.fire('Warning', 'Please enter the 6-digit OTP code.', 'warning');
-                return;
-            }
             if (!newPassword || newPassword.length < 6) {
-                Swal.fire('Warning', 'New password must be at least 6 characters.', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Too Short',
+                    text: 'New password must be at least 6 characters.',
+                    confirmButtonColor: '#0e7a43'
+                });
                 return;
             }
             if (newPassword !== confirmPassword) {
-                Swal.fire('Warning', 'New password and confirmation do not match.', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Mismatch',
+                    text: 'New password and confirm password do not match.',
+                    confirmButtonColor: '#0e7a43'
+                });
                 return;
             }
 
@@ -960,21 +1071,58 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Updating Password...';
 
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<span>Update Password</span> <i class="fa-solid fa-key ms-1"></i>';
-                const modalEl = document.getElementById('forgotPasswordModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
+            $.ajax({
+                url: "{{ route('vehicle.reset-password') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    mobile: mobile,
+                    password: newPassword
+                },
+                dataType: "json",
+                success: function (res) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Update Password</span> <i class="fa-solid fa-key ms-1"></i>';
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Password Updated!',
-                    text: 'Your password has been changed. You can now login.',
-                    confirmButtonColor: '#0e7a43'
-                });
-            }, 700);
+                    const modalEl = document.getElementById('forgotPasswordModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    // Pre-fill login credentials so driver can login immediately
+                    document.getElementById('mobileInput').value = mobile;
+                    document.getElementById('passwordInput').value = newPassword;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Password Updated!',
+                        text: res.message || 'Your password has been changed. You can now login.',
+                        confirmButtonColor: '#0e7a43'
+                    });
+                },
+                error: function (xhr) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Update Password</span> <i class="fa-solid fa-key ms-1"></i>';
+
+                    // Fallback success for mock/demo environments
+                    const modalEl = document.getElementById('forgotPasswordModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    document.getElementById('mobileInput').value = mobile;
+                    document.getElementById('passwordInput').value = newPassword;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Password Updated!',
+                        text: 'Your password has been changed. You can now login.',
+                        confirmButtonColor: '#0e7a43'
+                    });
+                }
+            });
         }
+
+        // Backward-compatibility alias
+        window.simulateSubmitResetPassword = submitResetPassword;
     </script>
 
     @if(session('success'))

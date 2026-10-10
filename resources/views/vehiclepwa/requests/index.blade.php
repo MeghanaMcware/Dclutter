@@ -330,8 +330,8 @@
 }
 
 .btn-available-inactive {
-    background-color: #ffffff !important;
-    color: #15803d !important;
+    background-color: green !important;
+    color: #fff !important;
     border-color: #86efac !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
@@ -351,8 +351,8 @@
 }
 
 .btn-unavailable-inactive {
-    background-color: #ffffff !important;
-    color: #e11d48 !important;
+    background-color: red !important;
+    color: #ffff !important;
     border-color: #fecdd3 !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }

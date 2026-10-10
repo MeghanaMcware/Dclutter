@@ -132,6 +132,7 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     Route::post('/login', [VehicleAuthController::class, 'login'])->name('login.submit');
     Route::post('/logout', [VehicleAuthController::class, 'logout'])->name('logout');
     Route::get('/register', [VehicleAuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/reset-password', [VehicleAuthController::class, 'resetPassword'])->name('reset-password');
 
     // Authenticated Driver Routes
     Route::middleware('auth')->group(function () {

@@ -152,6 +152,52 @@ class VehicleAuthController extends Controller
     }
 
     /**
+     * Reset vehicle driver password.
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'mobile' => 'required|string',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $mobile = trim($request->input('mobile'));
+        $password = $request->input('password');
+
+        $user = User::where('mobile_number', $mobile)->orWhere('email', $mobile)->first();
+
+        if (!$user) {
+            $vehicle = Vehicle::where('driver_phone', $mobile)
+                ->orWhere('vehicle_number', $mobile)
+                ->first();
+
+            if ($vehicle) {
+                if ($vehicle->driver_phone) {
+                    $user = User::where('mobile_number', $vehicle->driver_phone)->first();
+                }
+                if (!$user && $vehicle->user_id) {
+                    $user = User::find($vehicle->user_id);
+                }
+            }
+        }
+
+        if ($user) {
+            $user->password = Hash::make($password);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successfully for ' . $user->name . ' (+91 ' . $mobile . ').',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully.',
+        ]);
+    }
+
+    /**
      * Log out.
      */
     public function logout(Request $request)
