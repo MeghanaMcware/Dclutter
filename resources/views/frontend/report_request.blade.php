@@ -388,6 +388,19 @@
     border-style: solid;
     background: #f0fdf4;
 }
+.file-upload-box.is-invalid {
+    border-color: #dc3545 !important;
+    border-style: solid !important;
+    background: #fff8f8 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+.file-upload-box.is-invalid:focus-visible {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+.file-upload-box.is-invalid ~ .invalid-feedback {
+    display: block !important;
+}
 .file-upload-btn {
     padding: 8px 16px;
     font-weight: 600;
@@ -607,13 +620,154 @@ textarea.is-invalid ~ .invalid-feedback,
     padding: 14px;
 }
 
+.step-card-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    background: #ffffff;
+}
+
 .step-header {
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 16px;
-    color: var(--ink);
-    border-bottom: 2px solid var(--green-light);
-    padding-bottom: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #166534;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.address-input-wrapper {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #ffffff;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 84px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.address-input-wrapper:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(14, 122, 67, 0.15);
+}
+
+.address-input-wrapper textarea {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    font-size: 13px;
+    color: #2b3930;
+    resize: none;
+    min-height: 44px;
+    height: 44px;
+    width: 100%;
+    background: transparent;
+}
+
+.address-fetch-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.map-field-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-field-container .map-container-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 310px;
+}
+
+.map-field-container .map-ui {
+    flex: 1;
+    min-height: 220px;
+    height: 100%;
+}
+
+.btn-map-search {
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    border-radius: 6px !important;
+}
+
+.side-mapped-fields {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.side-field-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.side-field-item label {
+    margin-bottom: 5px;
+}
+
+.side-field-item input {
+    height: 40px;
+}
+
+.btn-back-ui {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    padding: 10px 26px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    min-width: 120px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.btn-back-ui:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+    transform: none !important;
+}
+
+.btn-next-ui {
+    background: var(--green, #0e7a43) !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 10px 28px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(14, 122, 67, 0.2) !important;
+    min-width: 180px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.btn-next-ui:hover {
+    background: var(--green-dark, #095c32) !important;
+    transform: translateY(-1px) !important;
 }
 
 .mobile-step-badge {
@@ -802,18 +956,20 @@ textarea.is-invalid ~ .invalid-feedback,
                 </div>
 
                 <div class="d-flex flex-column align-items-center mt-4 justify-content-center">
-
-                <button type="button" class="btn-ui continue-btn w-auto" onclick="goToStep(2)">
-                    Next: Location Details <i class="bi bi-arrow-right"></i>
-                </button>
-</div>
+                    <button type="button" class="btn-ui btn-next-ui" onclick="goToStep(2)">
+                        Next: Location Details <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- ================= STEP 2: LOCATION ================= -->
             <div id="step-2" class="wizard-step" style="display:none;">
-                <div class="step-header">Pickup Location Details</div>
+                <div class="step-card-box">
+                    <div class="step-header">
+                        <i class="bi bi-geo-alt-fill text-success"></i> Pickup Location Details
+                    </div>
 
-                <div class="grid-ui">
+                    <div class="grid-ui">
                     <!-- Applicant Name -->
                     <div>
     <label>Applicant Full Name <span class="req">*</span></label>
@@ -907,6 +1063,7 @@ textarea.is-invalid ~ .invalid-feedback,
                 inputmode="numeric"
                 placeholder="Enter 6-digit OTP"
                 style="flex:1;"
+                oninput="this.classList.remove('is-invalid');"
             >
 
             <button
@@ -923,6 +1080,7 @@ textarea.is-invalid ~ .invalid-feedback,
 
         <div
             id="otpMessage"
+            class="invalid-feedback"
             style="
                 display:none;
                 margin-top:7px;
@@ -936,12 +1094,12 @@ textarea.is-invalid ~ .invalid-feedback,
 </div>
 
 <div id="otpProtectedFields" style="display:contents;">
-                    <!-- Image Upload -->
-                    <div class="wide">
+                    <!-- Row 2: Left - Upload Waste Images -->
+                    <div class="form-group-ui">
                         <label>Upload Waste Images <span class="req">*</span></label>
                         <div class="custom-file-upload">
                             <input type="file" id="wasteImagesInput" name="waste_images[]" accept="image/*" capture="environment" multiple style="display:none;" onchange="handleImageSelection(event)">
-                            <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
+                            <div class="file-upload-box" id="fileUploadBox" onclick="handleChooseFileClick(event)" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleChooseFileClick(event);}">
                                 <button type="button" class="file-upload-btn">
                                     <i class="fa-solid fa-camera"></i> Choose Files
                                 </button>
@@ -955,26 +1113,30 @@ textarea.is-invalid ~ .invalid-feedback,
                         </div>
                     </div>
 
-                    <!-- Pickup Address -->
-                    <div class="wide">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <label style="margin-bottom: 0;">Pickup Location <span class="req">*</span></label>
-                            <button type="button" class="btn-fetch-loc" onclick="fetchCurrentLocation()">
-                                <i class="bi bi-crosshair"></i> Fetch Location
-                            </button>
+                    <!-- Row 2: Right - Pickup Location -->
+                    <div class="form-group-ui">
+                        <label>Pickup Location <span class="req">*</span></label>
+                        <div class="address-input-wrapper">
+                            <textarea id="addressInput" name="address" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter complete site address (House/Site No, Street, Main, Area)"></textarea>
+                            <div class="address-fetch-btn-row">
+                                <button type="button" class="btn-fetch-loc" onclick="fetchCurrentLocation()">
+                                    <i class="bi bi-crosshair"></i> Fetch Location
+                                </button>
+                            </div>
                         </div>
-                        <textarea id="addressInput" name="address" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter complete site address (House/Site No, Street, Main, Area)"></textarea>
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter complete site address.</div>
                     </div>
 
-                    <!-- Map -->
-                    <div class="wide">
-                        <label>Pin location on map (Click map to position marker &amp; auto-map Ward)</label>
+                    <!-- Row 3: Left - Pin location on map -->
+                    <div class="form-group-ui map-field-container">
+                        <label>Pin location on map (Click map to position marker &amp; auto-map Ward) <span class="req">*</span></label>
                         <div class="map-container-box">
                             <div class="map-search-bar">
                                 <input type="text" id="mapSearchInput" placeholder="Search location e.g. Indiranagar, Bengaluru">
-                                <button type="button" class="btn-ui" onclick="searchOnMap()" style="padding: 6px 14px; font-size: 12px;">Search</button>
-                                <button type="button" class="btn-fetch-loc" onclick="fetchCurrentLocation()" style="padding: 6px 12px; font-size: 12px;">
+                                <button type="button" class="btn-ui btn-map-search" onclick="searchOnMap()">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                                <button type="button" class="btn-fetch-loc" onclick="fetchCurrentLocation()">
                                     <i class="bi bi-geo-alt-fill"></i> GPS
                                 </button>
                             </div>
@@ -985,66 +1147,73 @@ textarea.is-invalid ~ .invalid-feedback,
                         </div>
                     </div>
 
-                    <!-- House No -->
-                    <div>
+                    <!-- Row 3: Right - Stacked Auto-Mapped & Landmark Fields -->
+                    <div class="form-group-ui side-mapped-fields">
+                        <!-- Ward -->
+                        <div class="side-field-item">
+                            <label>Ward (Auto-Mapped from Map Pin) <span class="req">*</span></label>
+                            <input type="hidden" name="ward_id" id="wardIdInput" required>
+                            <input type="text" id="wardDisplayInput" placeholder="Pin location on map to map Ward..." readonly required style="background-color: #f8f9fa; cursor: not-allowed; font-weight: 700; color: var(--green);">
+                            <div class="invalid-feedback" style="color: #dc3545 !important;">Please pin your location on the map to auto-map Ward.</div>
+                        </div>
+
+                        <!-- Constituency -->
+                        <div class="side-field-item">
+                            <label>Constituency (Auto-Mapped)</label>
+                            <input type="text" id="constituencyInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                        </div>
+
+                        <!-- Corporation -->
+                        <div class="side-field-item">
+                            <label>Corporation (Auto-Mapped)</label>
+                            <input type="text" id="corporationInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                        </div>
+
+                        <!-- Landmark -->
+                        <div class="side-field-item">
+                            <label>Landmark <span class="req">*</span></label>
+                            <input type="text" id="landmarkInput" name="landmark" placeholder="Enter nearby landmark (e.g. Near Metro Station)" required oninput="validateSingleField(this)">
+                            <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a landmark.</div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Left - House No -->
+                    <div class="form-group-ui">
                         <label>House No <span class="req">*</span></label>
                         <input type="text" id="houseNoInput" name="house_no" placeholder="e.g. #123" required oninput="validateSingleField(this)">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter house number.</div>
                     </div>
 
-                    <!-- Floor No (now optional) -->
-                    <div>
+                    <!-- Row 4: Right - Floor No / Level -->
+                    <div class="form-group-ui">
                         <label>Floor No / Level <span class="req">*</span></label>
                         <input type="number" id="floorNoInput" name="floor_no" placeholder="e.g. 1" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); validateSingleField(this)">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter floor number.</div>
                     </div>
 
-                    <!-- Ward (Readonly - Auto-Mapped from GPS) -->
-                    <div>
-                        <label>Ward (Auto-Mapped from Map Pin) <span class="req">*</span></label>
-                        <input type="hidden" name="ward_id" id="wardIdInput" required>
-                        <input type="text" id="wardDisplayInput" placeholder="Pin location on map to map Ward..." readonly required style="background-color: #f8f9fa; cursor: not-allowed; font-weight: 700; color: var(--green);">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please pin your location on the map to auto-map Ward.</div>
-                    </div>
-
-                    <!-- Constituency (Readonly - Auto-Mapped) -->
-                    <div>
-                        <label>Constituency (Auto-Mapped)</label>
-                        <input type="text" id="constituencyInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
-                    </div>
-
-                    <!-- Corporation (Readonly - Auto-Mapped) -->
-                    <div>
-                        <label>Corporation (Auto-Mapped)</label>
-                        <input type="text" id="corporationInput" placeholder="Auto-mapped from Ward..." readonly style="background-color: #f8f9fa; cursor: not-allowed;">
-                    </div>
-
-                    <!-- Landmark -->
-                    <div>
-                        <label>Landmark <span class="req">*</span></label>
-                        <input type="text" id="landmarkInput" name="landmark" placeholder="Enter nearby landmark (e.g. Near Metro Station)" required oninput="validateSingleField(this)">
-                        <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a landmark.</div>
-                    </div>
-
-                    <!-- Pincode -->
-                    <div>
+                    <!-- Row 5: Left - Pincode -->
+                    <div class="form-group-ui">
                         <label>Pincode <span class="req">*</span></label>
                         <input type="text" id="pincodeInput" name="pincode" required oninput="validateSingleField(this)" onchange="validateSingleField(this)" placeholder="Enter 6-digit Pincode" maxlength="6" pattern="[0-9]{6}">
                         <div class="invalid-feedback" style="color: #dc3545 !important;">Please enter a valid 6-digit pincode.</div>
                     </div>
 
+                    <!-- Row 5: Right - Empty column to balance grid -->
+                    <div></div>
 </div>
                 </div>
-
-                <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
-                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(1)" style="width: 30%;">
-                        <i class="bi bi-arrow-left"></i> Back
-                    </button>
-                    <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(3)" style="width: 70%;">
-                        Next: Pickup Day <i class="bi bi-arrow-right"></i>
-                    </button>
-                </div>
             </div>
+
+            <!-- Navigation Buttons outside card -->
+            <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
+                <button type="button" class="btn-ui btn-back-ui" onclick="goToStep(1)">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+                <button type="button" class="btn-ui btn-next-ui" onclick="goToStep(3)">
+                    Next: Pickup Day <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
 
             <!-- ================= STEP 3: PICKUP DAY (SUNDAYS ONLY) ================= -->
             <div id="step-3" class="wizard-step" style="display:none;">
@@ -1059,10 +1228,10 @@ textarea.is-invalid ~ .invalid-feedback,
                 </div>
 
                 <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
-                    <button type="button" class="btn-ui btn-secondary-ui" onclick="goToStep(2)" style="width: 30%;">
+                    <button type="button" class="btn-ui btn-back-ui" onclick="goToStep(2)">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="button" class="btn-ui continue-btn mt-0 w-auto" onclick="goToStep(4)" style="width: 70%;">
+                    <button type="button" class="btn-ui btn-next-ui" onclick="goToStep(4)">
                         Next: Review &amp; Submit <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>
@@ -1149,10 +1318,10 @@ All Bulky Waste shall be dismantled & should be kept in the ground floor for the
                 </div>
 
                 <div class="d-flex gap-3 mt-4 align-items-center justify-content-center">
-                    <button type="button" class="btn-ui btn-secondary-ui w-auto" onclick="goToStep(3)" style="width: 30%;">
+                    <button type="button" class="btn-ui btn-back-ui" onclick="goToStep(3)">
                         <i class="bi bi-arrow-left"></i> Back
                     </button>
-                    <button type="submit" class="btn-ui continue-btn mt-0" style="width: 70%;">
+                    <button type="submit" class="btn-ui btn-next-ui">
                         <i class="bi bi-check-circle-fill"></i> Submit D-Clutter Request
                     </button>
                 </div>
@@ -2078,6 +2247,7 @@ function handleFormSubmit(event) {
    OTP PROTECTION & VERIFICATION
 ========================================================= */
 let otpVerified = false;
+let otpSent = false;
 
 const otpProtectedFieldIds = [
     'wasteImagesInput',
@@ -2091,6 +2261,109 @@ const otpProtectedFieldIds = [
     'landmarkInput',
     'pincodeInput'
 ];
+
+function handleChooseFileClick(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!otpVerified) {
+        // 1. Highlight file upload box with Bootstrap invalid style
+        const box = document.getElementById('fileUploadBox');
+        if (box) {
+            box.classList.remove('is-valid');
+            box.classList.add('is-invalid');
+        }
+
+        // 2. Display Bootstrap invalid feedback for file upload
+        const err = document.getElementById('fileUploadError');
+        if (err) {
+            err.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Please verify OTP before choosing files.';
+            err.style.display = 'block';
+        }
+
+        // 3. Validate Applicant Name
+        const applicantNameInput = document.getElementById('applicantNameInput');
+        if (applicantNameInput && (!applicantNameInput.value || applicantNameInput.value.trim() === '')) {
+            applicantNameInput.classList.remove('is-valid');
+            applicantNameInput.classList.add('is-invalid');
+        }
+
+        // 4. Validate Mobile Number
+        const mobileInput = document.getElementById('mobileInput');
+        const mobileError = document.getElementById('mobileError');
+        const mobileVal = mobileInput ? mobileInput.value.trim() : '';
+
+        if (!/^[0-9]{10}$/.test(mobileVal)) {
+            if (mobileInput) {
+                mobileInput.classList.remove('is-valid');
+                mobileInput.classList.add('is-invalid');
+                focusInvalidField(mobileInput);
+            }
+            if (mobileError) {
+                mobileError.style.display = 'block';
+            }
+            return false;
+        } else {
+            if (mobileInput) {
+                mobileInput.classList.remove('is-invalid');
+                mobileInput.classList.add('is-valid');
+            }
+            if (mobileError) {
+                mobileError.style.display = 'none';
+            }
+        }
+
+        // 5. Open OTP section & display OTP verification prompt
+        const otpSection = document.getElementById('otpSection');
+        if (otpSection) {
+            otpSection.style.display = 'block';
+        }
+
+        const otpMessage = document.getElementById('otpMessage');
+        const otpInput = document.getElementById('otpInput');
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+
+        if (!otpSent) {
+            if (sendOtpBtn) {
+                sendOtpBtn.style.display = 'inline-flex';
+            }
+            if (otpMessage) {
+                otpMessage.style.display = 'block';
+                otpMessage.style.color = '#dc3545';
+                otpMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Please click "Send OTP" and verify OTP to proceed.';
+            }
+            if (otpInput) {
+                otpInput.classList.add('is-invalid');
+            }
+            if (sendOtpBtn) {
+                focusInvalidField(sendOtpBtn);
+            } else if (otpInput) {
+                focusInvalidField(otpInput);
+            }
+        } else {
+            if (otpMessage) {
+                otpMessage.style.display = 'block';
+                otpMessage.style.color = '#dc3545';
+                otpMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter and verify the OTP sent to your WhatsApp.';
+            }
+            if (otpInput) {
+                otpInput.classList.add('is-invalid');
+                focusInvalidField(otpInput);
+            }
+        }
+
+        return false;
+    }
+
+    // When OTP is verified:
+    const fileInput = document.getElementById('wasteImagesInput');
+    if (fileInput) {
+        fileInput.disabled = false;
+        fileInput.click();
+    }
+}
 
 function lockOtpProtectedFields() {
     otpProtectedFieldIds.forEach(function(id) {
@@ -2111,6 +2384,22 @@ function unlockOtpProtectedFields() {
         button.disabled = false;
     });
     otpVerified = true;
+
+    // Reset OTP invalid state on file upload box
+    const box = document.getElementById('fileUploadBox');
+    if (box) {
+        box.classList.remove('is-invalid');
+    }
+    const err = document.getElementById('fileUploadError');
+    if (err && err.innerHTML.includes('verify OTP')) {
+        err.style.display = 'none';
+        err.innerHTML = 'Please select at least one image.';
+    }
+    const otpInput = document.getElementById('otpInput');
+    if (otpInput) {
+        otpInput.classList.remove('is-invalid');
+        otpInput.classList.add('is-valid');
+    }
 }
 
 function validateMobileAndShowOtp() {
@@ -2122,12 +2411,16 @@ function validateMobileAndShowOtp() {
     mobileEl.value = mobileEl.value.replace(/\D/g, '').substring(0, 10);
 
     if (/^[0-9]{10}$/.test(mobileEl.value)) {
-        if (sendOtpBtn) sendOtpBtn.style.display = 'inline-flex';
+        if (sendOtpBtn && !otpVerified) sendOtpBtn.style.display = 'inline-flex';
         if (mobileError) mobileError.style.display = 'none';
+        mobileEl.classList.remove('is-invalid');
+        mobileEl.classList.add('is-valid');
     } else {
         if (sendOtpBtn && !otpVerified) sendOtpBtn.style.display = 'none';
+        mobileEl.classList.remove('is-valid');
         if (mobileError && mobileEl.value.length > 0) {
             mobileError.style.display = 'block';
+            mobileEl.classList.add('is-invalid');
         } else if (mobileError) {
             mobileError.style.display = 'none';
         }
@@ -2174,6 +2467,7 @@ function sendWhatsAppOTP() {
             sendBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Resend OTP';
         }
         if (data.success) {
+            otpSent = true;
             if (otpSection) otpSection.style.display = 'block';
             if (otpMessage) {
                 otpMessage.style.display = 'block';
@@ -2181,7 +2475,10 @@ function sendWhatsAppOTP() {
                 otpMessage.textContent = data.message || 'OTP sent successfully to your WhatsApp!';
             }
             const otpInput = document.getElementById('otpInput');
-            if (otpInput) otpInput.focus();
+            if (otpInput) {
+                otpInput.classList.remove('is-invalid');
+                otpInput.focus();
+            }
         } else {
             if (otpMessage) {
                 otpMessage.style.display = 'block';

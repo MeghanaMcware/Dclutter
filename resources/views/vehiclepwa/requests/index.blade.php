@@ -300,6 +300,112 @@
     align-items: stretch;
 }
 
+.btn-availability-toggle {
+    flex: 1;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1.5px solid transparent;
+    text-decoration: none;
+    letter-spacing: 0.2px;
+}
+
+.btn-availability-toggle:active {
+    transform: scale(0.98);
+}
+
+/* Available button states */
+.btn-available-active {
+    background: linear-gradient(135deg, #0e7a43 0%, #0a5f33 100%) !important;
+    color: #ffffff !important;
+    border-color: #0e7a43 !important;
+    box-shadow: 0 4px 12px rgba(14, 122, 67, 0.35);
+}
+
+.btn-available-inactive {
+    background-color: #ffffff !important;
+    color: #15803d !important;
+    border-color: #86efac !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.btn-available-inactive:hover {
+    background-color: #f0fdf4 !important;
+    color: #166534 !important;
+    border-color: #4ade80 !important;
+}
+
+/* Unavailable button states */
+.btn-unavailable-active {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+.btn-unavailable-inactive {
+    background-color: #ffffff !important;
+    color: #e11d48 !important;
+    border-color: #fecdd3 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.btn-unavailable-inactive:hover {
+    background-color: #fff1f2 !important;
+    color: #be123c !important;
+    border-color: #fda4af !important;
+}
+
+/* Modern Before/After Pickup CTA Button */
+.btn-modal-pickup-action {
+    background: linear-gradient(135deg, #0e7a43 0%, #0a5f33 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    height: 44px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 14px rgba(14, 122, 67, 0.35) !important;
+    transition: all 0.25s ease !important;
+    letter-spacing: 0.2px;
+}
+
+.btn-modal-pickup-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(14, 122, 67, 0.45) !important;
+    color: #ffffff !important;
+}
+
+.btn-modal-pickup-action:active {
+    transform: scale(0.99);
+}
+
+/* Modern Get Directions Button */
+.btn-modal-directions {
+    background-color: #f0fdf4 !important;
+    color: #0e7a43 !important;
+    border: 1.5px solid #86efac !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-modal-directions:hover {
+    background-color: #0e7a43 !important;
+    color: #ffffff !important;
+    border-color: #0e7a43 !important;
+    box-shadow: 0 3px 10px rgba(14, 122, 67, 0.25);
+}
+
 .modal-availability-select,
 .modal-reason-select {
     width: 100%;
@@ -426,28 +532,28 @@ input.modal-reason-select {
 }
 
 .modal-section-label {
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     color: #64748b;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     display: block;
 }
 
 .modal-section-value {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 600;
-    color: #1e293b;
+    color: #0f172a;
 }
 
 .modal-badge-tag {
     background: #f1f5f9;
-    color: #475569;
+    color: #334155;
     border: 1px solid #e2e8f0;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 3px 9px;
     border-radius: 6px;
     display: inline-block;
 }
@@ -455,35 +561,50 @@ input.modal-reason-select {
 .modal-category-card {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 10px;
+    padding: 10px 12px;
     height: 100%;
+    transition: all 0.2s ease;
+}
+
+.modal-category-card:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
 }
 
 .modal-category-title {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
     color: #64748b;
-    display: block;
-    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
 }
 
 .modal-category-val {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     color: #0f172a;
     display: block;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 .modal-rescheduled-card {
     background: #fffbeb;
     border: 1px solid #fde68a;
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 10px;
+    padding: 10px 12px;
     font-size: 11.5px;
+}
+
+.modal-info-panel {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 10px;
+    padding: 10px 12px;
 }
 
 
@@ -589,10 +710,10 @@ input.modal-reason-select {
                 </div>
 
                 <!-- Applicant & Mobile Row -->
-                <div class="row g-2 mb-2 pb-1">
+                <div class="row g-2 mb-3 pb-2 border-bottom">
                     <div class="col-6">
                         <span class="modal-section-label">Applicant Name</span>
-                        <span class="modal-section-value d-block" id="modalApplicantName">Ramesh Kumar</span>
+                        <span class="modal-section-value d-block text-truncate" id="modalApplicantName">Ramesh Kumar</span>
                     </div>
                     <div class="col-6">
                         <span class="modal-section-label">Mobile No</span>
@@ -604,35 +725,41 @@ input.modal-reason-select {
                 </div>
 
                 <!-- Pickup Address -->
-                <div class="mb-2 pb-1">
+                <div class="mb-3 pb-2 border-bottom">
                     <span class="modal-section-label">Pickup Address</span>
-                    <p class="mb-1 text-secondary" style="font-size: 12px; line-height: 1.45;">
+                    <p class="mb-2 text-secondary" style="font-size: 12px; line-height: 1.45;">
                         <strong id="modalHouseNo" class="text-dark">#123</strong>, <span id="modalAddress">BTM Layout 2nd Stage, Bengaluru</span>
                     </p>
-                    <div class="d-flex flex-wrap gap-1 mt-1">
+                    <div class="d-flex flex-wrap gap-1 mb-2">
                         <span class="modal-badge-tag" id="modalWard">Ward 150</span>
                         <span class="modal-badge-tag" id="modalConstituency">Bommanahalli</span>
                         <span class="modal-badge-tag" id="modalPincode">560102</span>
                     </div>
+
+                    <!-- Get Directions (Full Width) -->
+                    <a id="modalDirectionsBtn" href="#" target="_blank"
+                        class="btn btn-modal-directions w-100 d-flex align-items-center justify-content-center mt-2">
+                        <i class="fa-solid fa-diamond-turn-right me-1"></i> Get Directions
+                    </a>
                 </div>
 
                 <!-- Assigned / Requested Date -->
-                <div class="mb-2 pb-1">
+                <div class="mb-3">
                     <span class="modal-section-label">Assigned / Requested Date</span>
-                    <div class="d-flex align-items-center gap-1 text-dark" style="font-size: 12.5px; font-weight: 600;">
-                        <i class="fa-regular fa-calendar text-primary" style="font-size: 11.5px;"></i>
+                    <div class="d-flex align-items-center gap-2 text-dark" style="font-size: 13px; font-weight: 600;">
+                        <i class="fa-regular fa-calendar text-primary" style="font-size: 12px;"></i>
                         <span id="modalDate">09-Aug-2026</span>
                     </div>
                 </div>
 
                 <!-- Rescheduled Box -->
-                <div class="mb-2" id="modalRescheduledBox" style="display: none;">
+                <div class="mb-3" id="modalRescheduledBox" style="display: none;">
                     <div class="modal-rescheduled-card">
-                        <div class="d-flex align-items-center gap-1 fw-bold" style="font-size: 11.5px; color: #92400e;">
+                        <div class="d-flex align-items-center gap-1 fw-bold" style="font-size: 12px; color: #92400e;">
                             <i class="fa-solid fa-calendar-check text-warning"></i>
                             <span>Rescheduled Date: <span id="modalRescheduledDate" class="fw-bold"></span></span>
                         </div>
-                        <div class="mt-1 text-muted" style="font-size: 11px;" id="modalRescheduledReasonWrap">Reason: <span id="modalRescheduledReason" class="text-dark fw-semibold"></span></div>
+                        <div class="mt-1 text-muted" style="font-size: 11.5px;" id="modalRescheduledReasonWrap">Reason: <span id="modalRescheduledReason" class="text-dark fw-semibold"></span></div>
                     </div>
                 </div>
 
@@ -640,13 +767,13 @@ input.modal-reason-select {
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <div class="modal-category-card">
-                            <span class="modal-category-title">Pickup Category</span>
+                            <span class="modal-category-title"><i class="fa-solid fa-box text-success me-1"></i> Category</span>
                             <strong class="modal-category-val" id="modalCategory">Furniture</strong>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="modal-category-card">
-                            <span class="modal-category-title">Sub Category</span>
+                            <span class="modal-category-title"><i class="fa-solid fa-layer-group text-primary me-1"></i> Sub Category</span>
                             <strong class="modal-category-val" id="modalSubCategory">Cots, Sofas</strong>
                         </div>
                     </div>
@@ -666,22 +793,17 @@ input.modal-reason-select {
                 </div>
 
                 <!-- Modal Action Buttons -->
-                <div class="mt-3" id="modalActionButtons">
-                    <!-- Directions + Availability -->
-                    <div class="d-flex gap-2 align-items-center">
-                        <a id="modalDirectionsBtn" href="#" target="_blank"
-                            class="btn btn-outline-success w-50 d-flex align-items-center justify-content-center"
-                            style="font-size: 12px; font-weight: 700; height: 38px; border-radius: 8px;">
-                            <i class="fa-solid fa-diamond-turn-right me-1"></i> Get Directions
-                        </a>
-
-                        <div class="w-50" id="pickupAvailabilityContainer">
-                            <select id="pickupAvailability" class="modal-availability-select"
-                                style="font-size: 12px; height: 38px; border-radius: 8px;">
-                                <option value="">Select Availability</option>
-                                <option value="available">Available</option>
-                                <option value="not_available">Not Available</option>
-                            </select>
+                <div class="mt-3 pt-2 border-top" id="modalActionButtons">
+                    <!-- Availability Buttons (Available vs Unavailable) -->
+                    <div id="pickupAvailabilityContainer" class="mb-2">
+                        <label class="modal-section-label mb-2">Select Availability</label>
+                        <div class="d-flex gap-2">
+                            <button type="button" id="btnAvailable" class="btn-availability-toggle btn-available-inactive">
+                                <i class="fa-solid fa-circle-check"></i> Available
+                            </button>
+                            <button type="button" id="btnUnavailable" class="btn-availability-toggle btn-unavailable-inactive">
+                                <i class="fa-solid fa-circle-xmark"></i> Unavailable
+                            </button>
                         </div>
                     </div>
 
@@ -689,7 +811,7 @@ input.modal-reason-select {
                     <div id="notAvailableSection" class="mt-2" style="display: none;">
                         <label class="modal-reason-label d-block mb-1" style="font-size: 10.5px;">Reason</label>
                         <select id="notAvailableReason" class="modal-reason-select"
-                            style="font-size: 12px; height: 36px; border-radius: 8px;">
+                            style="font-size: 12px; height: 38px; border-radius: 8px;">
                             <option value="">Select Reason</option>
                             <option value="door_closed">Door Closed</option>
                             <option value="call_not_attended">Call Not Attended</option>
@@ -705,7 +827,7 @@ input.modal-reason-select {
                                 <input type="text" id="nextPickupDate" class="modal-reason-select"
                                     placeholder="Select upcoming Sunday"
                                     readonly
-                                    style="font-size: 12px; height: 36px; border-radius: 8px; background-color: #ffffff; cursor: pointer; padding-right: 32px;">
+                                    style="font-size: 12px; height: 38px; border-radius: 8px; background-color: #ffffff; cursor: pointer; padding-right: 32px;">
                                 <i class="fa-regular fa-calendar position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #0e7a43; font-size: 13px;"></i>
                             </div>
                             <small class="text-muted d-block mt-1" style="font-size: 10px;">
@@ -713,7 +835,7 @@ input.modal-reason-select {
                             </small>
                         </div>
                         <button type="button" id="notAvailableSubmitBtn" class="modal-submit-btn mt-2"
-                            style="font-size: 12px; height: 36px; border-radius: 8px;" disabled>
+                            style="font-size: 13px; height: 40px; border-radius: 8px;" disabled>
                             <i class="fa-solid fa-paper-plane"></i> Submit
                         </button>
                     </div>
@@ -721,9 +843,8 @@ input.modal-reason-select {
                     <!-- Available / Existing Before Pickup Action -->
                     <div id="availablePickupSection" class="mt-2" style="display: none;">
                         <a id="modalPickupActionBtn" href="#"
-                            class="btn btn-success w-100 d-flex align-items-center justify-content-center"
-                            style="font-size: 12.5px; font-weight: 700; height: 38px; border-radius: 8px;">
-                            <i class="fa-solid fa-camera me-1"></i> <span id="modalPickupActionText">Before Pickup</span>
+                            class="btn btn-modal-pickup-action w-100 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-camera me-2"></i> <span id="modalPickupActionText">Before Pickup</span>
                         </a>
                     </div>
                 </div>
@@ -1059,7 +1180,8 @@ input.modal-reason-select {
 
     function setupAvailabilityControls(item) {
 
-        const availabilitySelect = document.getElementById('pickupAvailability');
+        const btnAvailable = document.getElementById('btnAvailable');
+        const btnUnavailable = document.getElementById('btnUnavailable');
         const availabilityContainer = document.getElementById('pickupAvailabilityContainer');
         const directionsBtn = document.getElementById('modalDirectionsBtn');
         const notAvailableSection = document.getElementById('notAvailableSection');
@@ -1069,10 +1191,29 @@ input.modal-reason-select {
         const notAvailableSubmitBtn = document.getElementById('notAvailableSubmitBtn');
         const availablePickupSection = document.getElementById('availablePickupSection');
 
-        if (!availabilitySelect) return;
+        if (!btnAvailable || !btnUnavailable) return;
+
+        // Reset state function
+        function setAvailabilityState(mode) {
+            if (mode === 'available') {
+                btnAvailable.className = 'btn-availability-toggle btn-available-active';
+                btnUnavailable.className = 'btn-availability-toggle btn-unavailable-inactive';
+                availablePickupSection.style.display = 'block';
+                notAvailableSection.style.display = 'none';
+            } else if (mode === 'unavailable') {
+                btnAvailable.className = 'btn-availability-toggle btn-available-inactive';
+                btnUnavailable.className = 'btn-availability-toggle btn-unavailable-active';
+                availablePickupSection.style.display = 'none';
+                notAvailableSection.style.display = 'block';
+            } else {
+                btnAvailable.className = 'btn-availability-toggle btn-available-inactive';
+                btnUnavailable.className = 'btn-availability-toggle btn-unavailable-inactive';
+                availablePickupSection.style.display = 'none';
+                notAvailableSection.style.display = 'none';
+            }
+        }
 
         // Reset every time modal opens
-        availabilitySelect.value = '';
         notAvailableReason.value = '';
         if (nextDateFlatpickrInstance) {
             nextDateFlatpickrInstance.destroy();
@@ -1080,59 +1221,33 @@ input.modal-reason-select {
         }
         nextPickupDate.value = '';
         nextDateSection.style.display = 'none';
-        notAvailableSection.style.display = 'none';
-        availablePickupSection.style.display = 'none';
         notAvailableSubmitBtn.disabled = true;
 
-        // Check status: Only show availability dropdown for ASSIGNED / NOT_AVAILABLE requests
+        // Check status: Only show availability buttons for ASSIGNED / NOT_AVAILABLE requests
         const isAlreadyPickedUp = (item.status === 'PICKED_UP' || item.status === 'COMPLETED' || item.status ===
             'DUMPED' || item.pickedUpDone);
 
         if (isAlreadyPickedUp) {
             if (availabilityContainer) availabilityContainer.style.display = 'none';
-            if (directionsBtn) {
-                directionsBtn.classList.remove('w-50');
-                directionsBtn.classList.add('w-100');
-            }
+            setAvailabilityState('none');
         } else if (item.beforePickupDone) {
             if (availabilityContainer) availabilityContainer.style.display = 'none';
-            if (directionsBtn) {
-                directionsBtn.classList.remove('w-50');
-                directionsBtn.classList.add('w-100');
-            }
+            setAvailabilityState('none');
             if (availablePickupSection) availablePickupSection.style.display = 'block';
         } else {
             if (availabilityContainer) availabilityContainer.style.display = 'block';
-            if (directionsBtn) {
-                directionsBtn.classList.remove('w-100');
-                directionsBtn.classList.add('w-50');
-            }
+            // Default: neither selected until clicked
+            setAvailabilityState('none');
         }
 
-        // Availability selection
-        availabilitySelect.onchange = function() {
+        // Available button click
+        btnAvailable.onclick = function() {
+            setAvailabilityState('available');
+        };
 
-            if (this.value === 'available') {
-
-                // Show existing Before Pickup functionality
-                availablePickupSection.style.display = 'block';
-
-                // Hide not available section
-                notAvailableSection.style.display = 'none';
-
-            } else if (this.value === 'not_available') {
-
-                // Show reason dropdown
-                notAvailableSection.style.display = 'block';
-
-                // Hide Before Pickup
-                availablePickupSection.style.display = 'none';
-
-            } else {
-
-                notAvailableSection.style.display = 'none';
-                availablePickupSection.style.display = 'none';
-            }
+        // Unavailable button click
+        btnUnavailable.onclick = function() {
+            setAvailabilityState('unavailable');
         };
 
         // Enable Submit only after reason is selected
@@ -1304,7 +1419,7 @@ input.modal-reason-select {
                                   <i class="fa-solid fa-location-dot"></i> Get Directions
                               </a>
                               <button type="button" class="btn-view-card" data-request-index="${index}" style="width: 48%; margin-top: 0;">
-                                  <i class="fa-regular fa-eye"></i> View
+                                  <i class="fa-regular fa-eye"></i> Update
                               </button>
                           </div>
                     </div>`;

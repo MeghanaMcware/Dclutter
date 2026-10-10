@@ -175,6 +175,11 @@
 @section('content')
 
 @php
+    $rawReqIds = request('id') ?? request('ids') ?? ($wasteRequest?->id ?? '');
+    $idList = is_string($rawReqIds) && str_contains($rawReqIds, ',') 
+        ? array_values(array_filter(array_map('trim', explode(',', $rawReqIds)))) 
+        : ($rawReqIds ? [$rawReqIds] : []);
+    $countSelected = count($idList);
     $defaultPickupId = $wasteRequest?->request_number ?? request('pickup_id') ?? '';
 @endphp
 
@@ -182,21 +187,28 @@
 
     <div class="form-card">
 
-        <div class="pickup-id-box d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fa-solid fa-recycle me-1"></i>
-                Pickup ID:
-                <span id="pickupIdText" class="fw-bold">{{ $defaultPickupId ?: 'General Dump' }}</span>
+        <div class="pickup-id-box mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fa-solid fa-recycle me-1"></i>
+                    @if($countSelected > 1)
+                        <span>Selected Requests:</span>
+                        <span class="badge bg-success ms-1">{{ $countSelected }} Items</span>
+                    @else
+                        <span>Pickup ID:</span>
+                        <span id="pickupIdText" class="fw-bold">{{ $defaultPickupId ?: 'General Dump' }}</span>
+                    @endif
+                </div>
+                <a href="{{ route('vehicle.dump') }}" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                </a>
             </div>
-            <a href="{{ route('vehicle.dump') }}" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11px;">
-                <i class="fa-solid fa-arrow-left me-1"></i>Back
-            </a>
         </div>
 
         <form id="dumpForm">
 
             <input type="hidden" id="pickupId" name="pickup_id" value="{{ $defaultPickupId }}">
-            <input type="hidden" id="requestId" name="request_id" value="{{ $wasteRequest?->id ?? request('id') ?? '' }}">
+            <input type="hidden" id="requestId" name="request_id" value="{{ is_array($idList) ? implode(',', $idList) : ($wasteRequest?->id ?? '') }}">
 
             <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -583,21 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Submitting Dump...';
 
-            const formData = new FormData();
-            formData.append('_token', '{{ csrf_token() }}');
-            formData.append('dump_location', dumpLocationVal);
-            formData.append('pickup_id', document.getElementById('pickupId').value);
-            
-            const reqId = document.getElementById('requestId').value;
-            if (reqId) {
-                formData.append('request_id', reqId);
-            }
-            formData.append('latitude', document.getElementById('latInput').value || '12.9856');
-            formData.append('longitude', document.getElementById('lngInput').value || '77.6057');
-
-            selectedFiles.forEach(item => {
-                formData.append('dump_photos[]', item.file || item);
-            });
+            const reqIdRaw = document.getElementById('requestId').value;
+            const reqIds = reqIdRaw ? reqIdRaw.split(',').map(s => s.trim()).filter(Boolean) : [''];
 
             Swal.fire({
                 title: 'Recording Dump...',
@@ -606,47 +605,65 @@ document.addEventListener('DOMContentLoaded', function() {
                 didOpen: () => { Swal.showLoading(); }
             });
 
-            fetch("{{ route('vehicle.store_dump') }}", {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
+            async function submitAllRequests() {
+                try {
+                    let lastMessage = 'Dump details have been successfully saved.';
+                    for (let i = 0; i < reqIds.length; i++) {
+                        const curId = reqIds[i];
+                        const formData = new FormData();
+                        formData.append('_token', '{{ csrf_token() }}');
+                        formData.append('dump_location', dumpLocationVal);
+                        formData.append('pickup_id', document.getElementById('pickupId').value);
+                        if (curId) {
+                            formData.append('request_id', curId);
+                        }
+                        formData.append('latitude', document.getElementById('latInput').value || '12.9856');
+                        formData.append('longitude', document.getElementById('lngInput').value || '77.6057');
+
+                        selectedFiles.forEach(item => {
+                            formData.append('dump_photos[]', item.file || item);
+                        });
+
+                        const res = await fetch("{{ route('vehicle.store_dump') }}", {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                            throw new Error(data.message || 'Failed to record dump submission.');
+                        }
+                        if (data.message) {
+                            lastMessage = data.message;
+                        }
+                    }
+
                     Swal.fire({
                         icon: 'success',
                         title: 'Dump Recorded Successfully!',
-                        text: data.message || 'Dump details have been successfully saved.',
+                        text: reqIds.length > 1 ? `Successfully recorded dump for ${reqIds.length} requests.` : lastMessage,
                         confirmButtonColor: '#0e7a43'
                     }).then(() => {
-                        window.location.href = data.redirect_url || "{{ route('vehicle.dump') }}";
+                        window.location.href = "{{ route('vehicle.dump') }}";
                     });
-                } else {
+                } catch (err) {
+                    console.error(err);
                     submitButton.disabled = false;
                     submitButton.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i> Submit Dump';
                     Swal.fire({
                         icon: 'error',
-                        title: 'Submission Failed',
-                        text: data.message || 'Failed to record dump submission.',
+                        title: 'Submission Error',
+                        text: err.message || 'An unexpected error occurred while saving dump details. Please try again.',
                         confirmButtonColor: '#dc3545'
                     });
                 }
-            })
-            .catch(err => {
-                console.error(err);
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i> Submit Dump';
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Submission Error',
-                    text: 'An unexpected error occurred while saving dump details. Please try again.',
-                    confirmButtonColor: '#dc3545'
-                });
-            });
+            }
+
+            submitAllRequests();
         });
     }
 });

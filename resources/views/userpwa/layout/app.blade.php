@@ -19,7 +19,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter' !important;
             background-color: #f8fafc;
         }
         .page-content {

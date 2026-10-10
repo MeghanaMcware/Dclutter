@@ -264,28 +264,36 @@
             padding: 0 12px;
         }
 
-        /* Secondary Employee Button */
+        /* Secondary Employee / Login with OTP Button */
         .btn-secondary-emp {
             width: 100%;
-            height: 46px;
+            height: 48px;
             background: #ffffff;
-            color: #334155;
+            color: #0f172a;
             border: 1.5px solid #cbd5e1;
-            border-radius: 12px;
-            font-size: 14px;
+            border-radius: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         }
 
         .btn-secondary-emp:hover {
             background: #f8fafc;
             border-color: #94a3b8;
             color: #0f172a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-secondary-emp svg.whatsapp-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
         }
 
         /* Footer Terms */
@@ -484,7 +492,10 @@
 
                         <!-- Password Field -->
                         <div class="mt-3">
-                            <label class="field-label">Password</label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="field-label mb-0">Password</label>
+                               
+                            </div>
                             <div class="input-group-custom position-relative">
                                 <i class="fa-solid fa-lock input-icon-left"></i>
                                 <input type="password" 
@@ -518,7 +529,10 @@
                                    placeholder="e.g. DRV1024">
                         </div>
 
-                        <label class="field-label">Password</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="field-label mb-0">Password</label>
+                            
+                        </div>
                         <div class="input-group-custom position-relative">
                             <i class="fa-solid fa-lock input-icon-left"></i>
                             <input type="password" 
@@ -540,15 +554,17 @@
                 </form>
 
                 <!-- Divider -->
-                <!-- <div class="divider-or">
+                <div class="divider-or">
                     <span>or</span>
-                </div> -->
+                </div>
 
-                <!-- Secondary Button Toggle -->
-                <!-- <button type="button" class="btn-secondary-emp" id="btnToggleLoginMode" onclick="toggleLoginMode()">
-                    <i class="fa-solid fa-id-badge" style="color: var(--primary-green);"></i>
-                    <span id="toggleBtnText">Login with Employee ID</span>
-                </button> -->
+                <!-- Secondary Action Button: Forgot Password -->
+                <button type="button" class="btn-secondary-emp" id="btnOpenForgotPassword" onclick="openForgotPasswordModal()">
+                    <i class="fa-solid fa-key text-muted fs-6"></i>
+                    <span>Forgot Password</span>
+                </button>
+
+                
 
                 <!-- Footer Terms -->
                 <div class="terms-footer-text">
@@ -560,6 +576,139 @@
 
         </div>
 
+    </div>
+
+    {{-- ================= MODAL: LOGIN WITH OTP (UI ONLY) ================= --}}
+    <div class="modal fade" id="otpLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 390px; margin: 1.25rem auto;">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 18px;">Login with OTP</h5>
+                        <p class="text-muted mb-0" style="font-size: 12.5px;">Verify your mobile number to receive a one-time password.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Step 1: Request OTP -->
+                    <div id="otpLoginStep1">
+                        <label class="field-label mb-1">Mobile Number</label>
+                        <div class="input-group-custom mb-3">
+                            <div class="prefix-badge">
+                                <i class="fa-solid fa-phone" style="color: var(--primary-green);"></i>
+                                <span>+91</span>
+                            </div>
+                            <input type="tel" id="otpLoginMobile" placeholder="98765 43210" maxlength="10" 
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <button type="button" class="btn-submit-primary mt-1" id="btnSendLoginOtp" onclick="simulateSendLoginOtp()">
+                            <span>Send OTP</span>
+                            <i class="fa-solid fa-paper-plane ms-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Verify OTP -->
+                    <div id="otpLoginStep2" style="display: none;">
+                        <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 12px; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <span>OTP sent to +91 <strong id="otpLoginMobileDisplay"></strong></span>
+                        </div>
+                        <label class="field-label mb-1">Enter 6-Digit OTP</label>
+                        <div class="input-group-custom mb-2">
+                            <input type="text" id="otpLoginCode" placeholder="Enter 6-digit code" maxlength="6" 
+                                style="text-align: center; letter-spacing: 4px; font-weight: 700; font-size: 18px;"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <a href="javascript:void(0)" onclick="resetLoginOtpStep()" class="text-muted" style="font-size: 11.5px;">Change Number</a>
+                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-semibold" id="btnResendLoginOtp" onclick="simulateSendLoginOtp()" style="font-size: 12px; color: var(--primary-green);" disabled>
+                                Resend OTP (<span id="resendLoginTimer">30</span>s)
+                            </button>
+                        </div>
+                        <button type="button" class="btn-submit-primary" id="btnVerifyLoginOtp" onclick="simulateVerifyLoginOtp()">
+                            <span>Verify & Login</span>
+                            <i class="fa-solid fa-right-to-bracket ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ================= MODAL: FORGOT PASSWORD (UI ONLY) ================= --}}
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 390px; margin: 1.25rem auto;">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" style="font-size: 18px;">Forgot Password</h5>
+                        <p class="text-muted mb-0" style="font-size: 12.5px;">Verify via OTP to reset and update your driver password.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Step 1: Send Reset OTP -->
+                    <div id="forgotStep1">
+                        <label class="field-label mb-1">Registered Mobile Number</label>
+                        <div class="input-group-custom mb-3">
+                            <div class="prefix-badge">
+                                <i class="fa-solid fa-phone" style="color: var(--primary-green);"></i>
+                                <span>+91</span>
+                            </div>
+                            <input type="tel" id="forgotMobile" placeholder="98765 43210" maxlength="10" 
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <button type="button" class="btn-submit-primary mt-1" id="btnSendForgotOtp" onclick="simulateSendForgotOtp()">
+                            <span>Send Verification OTP</span>
+                            <i class="fa-solid fa-paper-plane ms-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Enter OTP & Set New Password -->
+                    <div id="forgotStep2" style="display: none;">
+                        <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 12px; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <span>OTP sent to +91 <strong id="forgotMobileDisplay"></strong></span>
+                        </div>
+                        
+                        <label class="field-label mb-1">Enter 6-Digit OTP</label>
+                        <div class="input-group-custom mb-2">
+                            <input type="text" id="forgotOtpCode" placeholder="Enter OTP" maxlength="6" 
+                                style="text-align: center; letter-spacing: 4px; font-weight: 700; font-size: 16px;"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <div class="d-flex justify-content-end mb-3">
+                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-semibold" id="btnResendForgotOtp" onclick="simulateSendForgotOtp()" style="font-size: 12px; color: var(--primary-green);" disabled>
+                                Resend OTP (<span id="resendForgotTimer">30</span>s)
+                            </button>
+                        </div>
+
+                        <label class="field-label mb-1">New Password</label>
+                        <div class="input-group-custom position-relative mb-2">
+                            <i class="fa-solid fa-lock input-icon-left"></i>
+                            <input type="password" id="forgotNewPassword" class="input-with-icon" placeholder="Min 6 characters">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword('forgotNewPassword', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+
+                        <label class="field-label mb-1">Confirm New Password</label>
+                        <div class="input-group-custom position-relative mb-3">
+                            <i class="fa-solid fa-lock input-icon-left"></i>
+                            <input type="password" id="forgotConfirmPassword" class="input-with-icon" placeholder="Re-enter new password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword('forgotConfirmPassword', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn-submit-primary" id="btnSubmitResetPassword" onclick="simulateSubmitResetPassword()">
+                            <span>Update Password</span>
+                            <i class="fa-solid fa-key ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -633,6 +782,199 @@
         document.getElementById('loginForm').addEventListener('submit', function () {
             document.getElementById('pageLoader').classList.add('active');
         });
+
+        // ================= UI-ONLY MODAL INTERACTIONS =================
+        let loginTimerInterval = null;
+        let forgotTimerInterval = null;
+
+        function openOtpLoginModal() {
+            const currentMobile = document.getElementById('mobileInput').value;
+            if (currentMobile && currentMobile.length === 10) {
+                document.getElementById('otpLoginMobile').value = currentMobile;
+            }
+            resetLoginOtpStep();
+            const modal = new bootstrap.Modal(document.getElementById('otpLoginModal'));
+            modal.show();
+        }
+
+        function resetLoginOtpStep() {
+            document.getElementById('otpLoginStep1').style.display = 'block';
+            document.getElementById('otpLoginStep2').style.display = 'none';
+            document.getElementById('otpLoginCode').value = '';
+            if (loginTimerInterval) clearInterval(loginTimerInterval);
+        }
+
+        function simulateSendLoginOtp() {
+            const mobile = document.getElementById('otpLoginMobile').value.trim();
+            if (!mobile || mobile.length !== 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Mobile Number',
+                    text: 'Please enter a valid 10-digit mobile number.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btnSendLoginOtp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Sending...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Send OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
+                document.getElementById('otpLoginStep1').style.display = 'none';
+                document.getElementById('otpLoginStep2').style.display = 'block';
+                document.getElementById('otpLoginMobileDisplay').textContent = mobile;
+                document.getElementById('otpLoginCode').focus();
+
+                let seconds = 30;
+                const timerEl = document.getElementById('resendLoginTimer');
+                const resendBtn = document.getElementById('btnResendLoginOtp');
+                resendBtn.disabled = true;
+                timerEl.textContent = seconds;
+                if (loginTimerInterval) clearInterval(loginTimerInterval);
+                loginTimerInterval = setInterval(() => {
+                    seconds--;
+                    timerEl.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(loginTimerInterval);
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = 'Resend OTP';
+                    }
+                }, 1000);
+            }, 600);
+        }
+
+        function simulateVerifyLoginOtp() {
+            const otp = document.getElementById('otpLoginCode').value.trim();
+            if (!otp || otp.length !== 6) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Enter 6-Digit OTP',
+                    text: 'Please enter the complete 6-digit verification code.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btnVerifyLoginOtp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Verifying...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Verify & Login</span> <i class="fa-solid fa-right-to-bracket ms-1"></i>';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'OTP Verified!',
+                    text: 'Redirecting to vehicle dashboard...',
+                    timer: 1200,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "{{ route('vehicle.dashboard') }}";
+                });
+            }, 700);
+        }
+
+        function openForgotPasswordModal() {
+            const currentMobile = document.getElementById('mobileInput').value;
+            if (currentMobile && currentMobile.length === 10) {
+                document.getElementById('forgotMobile').value = currentMobile;
+            }
+            resetForgotStep();
+            const modal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+            modal.show();
+        }
+
+        function resetForgotStep() {
+            document.getElementById('forgotStep1').style.display = 'block';
+            document.getElementById('forgotStep2').style.display = 'none';
+            document.getElementById('forgotOtpCode').value = '';
+            document.getElementById('forgotNewPassword').value = '';
+            document.getElementById('forgotConfirmPassword').value = '';
+            if (forgotTimerInterval) clearInterval(forgotTimerInterval);
+        }
+
+        function simulateSendForgotOtp() {
+            const mobile = document.getElementById('forgotMobile').value.trim();
+            if (!mobile || mobile.length !== 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Mobile Number',
+                    text: 'Please enter your registered 10-digit mobile number.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btnSendForgotOtp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Sending...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Send Verification OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'block';
+                document.getElementById('forgotMobileDisplay').textContent = mobile;
+                document.getElementById('forgotOtpCode').focus();
+
+                let seconds = 30;
+                const timerEl = document.getElementById('resendForgotTimer');
+                const resendBtn = document.getElementById('btnResendForgotOtp');
+                resendBtn.disabled = true;
+                timerEl.textContent = seconds;
+                if (forgotTimerInterval) clearInterval(forgotTimerInterval);
+                forgotTimerInterval = setInterval(() => {
+                    seconds--;
+                    timerEl.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(forgotTimerInterval);
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = 'Resend OTP';
+                    }
+                }, 1000);
+            }, 600);
+        }
+
+        function simulateSubmitResetPassword() {
+            const otp = document.getElementById('forgotOtpCode').value.trim();
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+
+            if (!otp || otp.length !== 6) {
+                Swal.fire('Warning', 'Please enter the 6-digit OTP code.', 'warning');
+                return;
+            }
+            if (!newPassword || newPassword.length < 6) {
+                Swal.fire('Warning', 'New password must be at least 6 characters.', 'warning');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                Swal.fire('Warning', 'New password and confirmation do not match.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitResetPassword');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Updating Password...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Update Password</span> <i class="fa-solid fa-key ms-1"></i>';
+                const modalEl = document.getElementById('forgotPasswordModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Password Updated!',
+                    text: 'Your password has been changed. You can now login.',
+                    confirmButtonColor: '#0e7a43'
+                });
+            }, 700);
+        }
     </script>
 
     @if(session('success'))

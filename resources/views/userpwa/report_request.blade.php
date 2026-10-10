@@ -391,6 +391,17 @@
             background: #f0fdf4;
         }
 
+        .file-upload-box.is-invalid {
+            border-color: #dc3545 !important;
+            border-width: 2px !important;
+            background: #fff8f8 !important;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+        }
+
+        .file-upload-box.is-invalid ~ .invalid-feedback {
+            display: block !important;
+        }
+
         .file-upload-btn {
             padding: 0 16px;
             font-weight: 500;
@@ -979,7 +990,7 @@
                                     <input type="file" id="wasteImagesInput" name="waste_images[]"
                                         capture="environment" multiple style="display:none;"
                                         onchange="handleImageSelection(event)">
-                                    <div class="file-upload-box" id="fileUploadBox" onclick="document.getElementById('wasteImagesInput').click()">
+                                    <div class="file-upload-box" id="fileUploadBox" onclick="handleChooseFileClick(event)" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleChooseFileClick(event);}">
                                         <button type="button" class="file-upload-btn"
                                             >
                                             <i class="bi bi-folder2-open me-1"></i> Choose Files
@@ -2371,6 +2382,37 @@
             'pincodeInput'
         ];
 
+        function handleChooseFileClick(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            if (!otpVerified) {
+                const box = document.getElementById('fileUploadBox');
+                if (box) {
+                    box.classList.remove('is-valid');
+                    box.classList.add('is-invalid');
+                }
+                const err = document.getElementById('fileUploadError');
+                if (err) {
+                    err.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Please verify OTP before choosing files.';
+                    err.style.display = 'block';
+                }
+                const mobileInput = document.getElementById('mobileInput');
+                if (mobileInput) {
+                    focusInvalidField(mobileInput);
+                }
+                return false;
+            }
+
+            const fileInput = document.getElementById('wasteImagesInput');
+            if (fileInput) {
+                fileInput.disabled = false;
+                fileInput.click();
+            }
+        }
+
         function lockOtpProtectedFields() {
             otpProtectedFieldIds.forEach(function(id) {
                 const field = document.getElementById(id);
@@ -2394,6 +2436,16 @@
                 button.disabled = false;
             });
             otpVerified = true;
+
+            const box = document.getElementById('fileUploadBox');
+            if (box) {
+                box.classList.remove('is-invalid');
+            }
+            const err = document.getElementById('fileUploadError');
+            if (err && err.innerHTML.includes('verify OTP')) {
+                err.style.display = 'none';
+                err.innerHTML = 'Please select at least one image.';
+            }
         }
 
         function validateMobileAndShowOtp() {

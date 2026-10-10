@@ -41,7 +41,7 @@
         }
 
         .new-family {
-          font-family:'Inter',sans-serif;
+          font-family:'Inter' !important;
         }
 
         .bg-highlight{
