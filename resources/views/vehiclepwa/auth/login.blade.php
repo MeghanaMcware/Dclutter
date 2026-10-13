@@ -939,43 +939,68 @@
 
             const btn = document.getElementById('btnSendForgotOtp');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Sending...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Sending OTP...';
 
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<span>Send Verification OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
-                document.getElementById('forgotStep1').style.display = 'none';
-                document.getElementById('forgotStep2').style.display = 'block';
-                document.getElementById('forgotStep3').style.display = 'none';
-                
-                const titleEl = document.getElementById('forgotModalTitle');
-                const subTitleEl = document.getElementById('forgotModalSubtitle');
-                if (titleEl) titleEl.textContent = 'Verify OTP';
-                if (subTitleEl) subTitleEl.textContent = 'Enter the 6-digit OTP code sent to your mobile.';
+            $.ajax({
+                url: "{{ route('vehicle.send-forgot-otp') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    mobile: mobile
+                },
+                dataType: "json",
+                success: function (res) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Send Verification OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
+                    document.getElementById('forgotStep1').style.display = 'none';
+                    document.getElementById('forgotStep2').style.display = 'block';
+                    document.getElementById('forgotStep3').style.display = 'none';
 
-                document.getElementById('forgotMobileDisplay').textContent = mobile;
-                document.getElementById('forgotOtpCode').value = '';
-                document.getElementById('forgotOtpCode').focus();
+                    const titleEl = document.getElementById('forgotModalTitle');
+                    const subTitleEl = document.getElementById('forgotModalSubtitle');
+                    if (titleEl) titleEl.textContent = 'Verify OTP';
+                    if (subTitleEl) subTitleEl.textContent = 'Enter the 6-digit OTP code sent to your mobile.';
 
-                let seconds = 30;
-                const timerEl = document.getElementById('resendForgotTimer');
-                const resendBtn = document.getElementById('btnResendForgotOtp');
-                resendBtn.disabled = true;
-                timerEl.textContent = seconds;
-                if (forgotTimerInterval) clearInterval(forgotTimerInterval);
-                forgotTimerInterval = setInterval(() => {
-                    seconds--;
+                    document.getElementById('forgotMobileDisplay').textContent = res.mobile || mobile;
+                    document.getElementById('forgotOtpCode').value = '';
+                    document.getElementById('forgotOtpCode').focus();
+
+                    let seconds = 30;
+                    const timerEl = document.getElementById('resendForgotTimer');
+                    const resendBtn = document.getElementById('btnResendForgotOtp');
+                    resendBtn.disabled = true;
                     timerEl.textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(forgotTimerInterval);
-                        resendBtn.disabled = false;
-                        resendBtn.innerHTML = 'Resend OTP';
-                    }
-                }, 1000);
-            }, 500);
+                    if (forgotTimerInterval) clearInterval(forgotTimerInterval);
+                    forgotTimerInterval = setInterval(() => {
+                        seconds--;
+                        timerEl.textContent = seconds;
+                        if (seconds <= 0) {
+                            clearInterval(forgotTimerInterval);
+                            resendBtn.disabled = false;
+                            resendBtn.innerHTML = 'Resend OTP';
+                        }
+                    }, 1000);
+                },
+                error: function (xhr) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Send Verification OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
+
+                    const errorMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                        ? xhr.responseJSON.message 
+                        : 'Failed to send OTP. Please try again.';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg,
+                        confirmButtonColor: '#0e7a43'
+                    });
+                }
+            });
         }
 
         function verifyForgotOtp() {
+            const mobile = document.getElementById('forgotMobile').value.trim();
             const otp = document.getElementById('forgotOtpCode').value.trim();
             if (!otp || otp.length !== 6) {
                 Swal.fire({
@@ -991,25 +1016,50 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Verifying OTP...';
 
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<span>Verify OTP</span> <i class="fa-solid fa-shield-halved ms-1"></i>';
-                
-                // Transition to Step 3: Reset Password
-                document.getElementById('forgotStep1').style.display = 'none';
-                document.getElementById('forgotStep2').style.display = 'none';
-                document.getElementById('forgotStep3').style.display = 'block';
+            $.ajax({
+                url: "{{ route('vehicle.verify-forgot-otp') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    mobile: mobile,
+                    otp: otp
+                },
+                dataType: "json",
+                success: function (res) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Verify OTP</span> <i class="fa-solid fa-shield-halved ms-1"></i>';
 
-                const titleEl = document.getElementById('forgotModalTitle');
-                const subTitleEl = document.getElementById('forgotModalSubtitle');
-                if (titleEl) titleEl.textContent = 'Reset Password';
-                if (subTitleEl) subTitleEl.textContent = 'Create a new secure password for driver login.';
+                    // Transition to Step 3: Reset Password
+                    document.getElementById('forgotStep1').style.display = 'none';
+                    document.getElementById('forgotStep2').style.display = 'none';
+                    document.getElementById('forgotStep3').style.display = 'block';
 
-                document.getElementById('forgotNewPassword').value = '';
-                document.getElementById('forgotConfirmPassword').value = '';
-                document.getElementById('confirmPasswordBelowArea').style.display = 'none';
-                document.getElementById('forgotNewPassword').focus();
-            }, 600);
+                    const titleEl = document.getElementById('forgotModalTitle');
+                    const subTitleEl = document.getElementById('forgotModalSubtitle');
+                    if (titleEl) titleEl.textContent = 'Reset Password';
+                    if (subTitleEl) subTitleEl.textContent = 'Create a new secure password for driver login.';
+
+                    document.getElementById('forgotNewPassword').value = '';
+                    document.getElementById('forgotConfirmPassword').value = '';
+                    document.getElementById('confirmPasswordBelowArea').style.display = 'none';
+                    document.getElementById('forgotNewPassword').focus();
+                },
+                error: function (xhr) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Verify OTP</span> <i class="fa-solid fa-shield-halved ms-1"></i>';
+
+                    const errorMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                        ? xhr.responseJSON.message 
+                        : 'Invalid OTP code. Please enter the correct code.';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Verification Failed',
+                        text: errorMsg,
+                        confirmButtonColor: '#0e7a43'
+                    });
+                }
+            });
         }
 
         function checkPasswordMatch() {
@@ -1045,6 +1095,7 @@
 
         function submitResetPassword() {
             const mobile = document.getElementById('forgotMobile').value.trim();
+            const otp = document.getElementById('forgotOtpCode').value.trim();
             const newPassword = document.getElementById('forgotNewPassword').value;
             const confirmPassword = document.getElementById('forgotConfirmPassword').value;
 
@@ -1077,6 +1128,7 @@
                 data: {
                     _token: "{{ csrf_token() }}",
                     mobile: mobile,
+                    otp: otp,
                     password: newPassword
                 },
                 dataType: "json",
@@ -1103,18 +1155,14 @@
                     btn.disabled = false;
                     btn.innerHTML = '<span>Update Password</span> <i class="fa-solid fa-key ms-1"></i>';
 
-                    // Fallback success for mock/demo environments
-                    const modalEl = document.getElementById('forgotPasswordModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-
-                    document.getElementById('mobileInput').value = mobile;
-                    document.getElementById('passwordInput').value = newPassword;
+                    const errorMsg = (xhr.responseJSON && xhr.responseJSON.message)
+                        ? xhr.responseJSON.message
+                        : 'Failed to update password. Please try again.';
 
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Password Updated!',
-                        text: 'Your password has been changed. You can now login.',
+                        icon: 'error',
+                        title: 'Reset Failed',
+                        text: errorMsg,
                         confirmButtonColor: '#0e7a43'
                     });
                 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vehicle;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\PasswordResetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -152,49 +153,72 @@ class VehicleAuthController extends Controller
     }
 
     /**
-     * Reset vehicle driver password.
+     * Send OTP for forgot password via PasswordResetService.
      */
-    public function resetPassword(Request $request)
+    public function sendForgotOtp(Request $request, PasswordResetService $passwordResetService)
+    {
+        $request->validate([
+            'mobile' => 'required|string',
+        ]);
+
+        $result = $passwordResetService->sendResetOtp(
+            identifier: $request->input('mobile'),
+            scope: 'vehicle',
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Verify OTP for forgot password via PasswordResetService.
+     */
+    public function verifyForgotOtp(Request $request, PasswordResetService $passwordResetService)
+    {
+        $request->validate([
+            'mobile' => 'required|string',
+            'otp' => 'required|string',
+        ]);
+
+        $result = $passwordResetService->verifyResetOtp(
+            mobile: $request->input('mobile'),
+            otp: $request->input('otp')
+        );
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Reset vehicle driver password via PasswordResetService.
+     */
+    public function resetPassword(Request $request, PasswordResetService $passwordResetService)
     {
         $request->validate([
             'mobile' => 'required|string',
             'password' => 'required|string|min:6',
         ]);
 
-        $mobile = trim($request->input('mobile'));
-        $password = $request->input('password');
+        $result = $passwordResetService->resetPassword(
+            identifier: $request->input('mobile'),
+            newPassword: $request->input('password'),
+            otp: $request->input('otp'), // optional if verified in preceding step
+            scope: 'vehicle'
+        );
 
-        $user = User::where('mobile_number', $mobile)->orWhere('email', $mobile)->first();
-
-        if (!$user) {
-            $vehicle = Vehicle::where('driver_phone', $mobile)
-                ->orWhere('vehicle_number', $mobile)
-                ->first();
-
-            if ($vehicle) {
-                if ($vehicle->driver_phone) {
-                    $user = User::where('mobile_number', $vehicle->driver_phone)->first();
-                }
-                if (!$user && $vehicle->user_id) {
-                    $user = User::find($vehicle->user_id);
-                }
-            }
+        if (!$result['success']) {
+            return response()->json($result, 422);
         }
 
-        if ($user) {
-            $user->password = Hash::make($password);
-            $user->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Password reset successfully for ' . $user->name . ' (+91 ' . $mobile . ').',
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Password updated successfully.',
-        ]);
+        return response()->json($result);
     }
 
     /**

@@ -132,6 +132,8 @@ Route::prefix('vehicle')->name('vehicle.')->group(function () {
     Route::post('/login', [VehicleAuthController::class, 'login'])->name('login.submit');
     Route::post('/logout', [VehicleAuthController::class, 'logout'])->name('logout');
     Route::get('/register', [VehicleAuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/send-forgot-otp', [VehicleAuthController::class, 'sendForgotOtp'])->name('send-forgot-otp');
+    Route::post('/verify-forgot-otp', [VehicleAuthController::class, 'verifyForgotOtp'])->name('verify-forgot-otp');
     Route::post('/reset-password', [VehicleAuthController::class, 'resetPassword'])->name('reset-password');
 
     // Authenticated Driver Routes
