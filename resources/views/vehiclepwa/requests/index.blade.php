@@ -659,7 +659,86 @@ input.modal-reason-select {
 
     {{-- ================= LIST VIEW ================= --}}
     <div id="list-view-section">
-        <div id="cards-container"></div>
+        <div id="cards-container">
+            @forelse($assignedRequests as $req)
+                @php
+                    $statusUpper = strtoupper($req->status);
+                    $statusLower = strtolower($req->status);
+                    $categories = is_array($req->category_ids) ? implode(', ', $req->category_ids) : ($req->category_ids ?? 'N/A');
+                    $searchText = strtolower("{$req->request_number} {$req->applicant_name} {$req->address} {$categories} {$req->status}");
+                    $assignedDate = ($req->preferred_pickup_date ?? $req->assigned_at ?? $req->created_at)->format('d-M-Y (l)');
+                    $nextPickupFormatted = $req->next_pickup_date ? $req->next_pickup_date->format('d-M-Y (l)') : null;
+                    $beforePickupDone = !empty($req->before_pickup_images) || !empty($req->approx_weight_kg);
+                    $lat = $req->latitude ?? 12.9716;
+                    $lng = $req->longitude ?? 77.5946;
+                @endphp
+                <div class="request-card request-item-row" data-search="{{ $searchText }}" data-status="{{ $statusLower }}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge-cwd-id">{{ $req->request_number }}</span>
+                        @if($statusUpper === 'PICKED_UP')
+                            <span class="badge bg-success py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-circle-check"></i> PICKED UP</span>
+                        @elseif($statusUpper === 'NOT_AVAILABLE')
+                            <span class="badge bg-warning text-dark py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-calendar-days"></i> RESCHEDULED</span>
+                        @elseif($statusUpper === 'CLOSED')
+                            <span class="badge bg-secondary text-white py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-ban"></i> CLOSED</span>
+                        @else
+                            <span class="badge bg-primary py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-truck-fast"></i> ASSIGNED</span>
+                        @endif
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end">
+                        <div>
+                            <div class="card-info-item">
+                                <i class="fa-solid fa-user text-primary" style="width: 16px; text-align: center; margin-right: 2px;"></i>
+                                <span class="card-info-label">Name:</span>
+                                <span class="card-info-value">{{ $req->applicant_name }}</span>
+                            </div>
+                            <div class="card-info-item" style="margin-top: 4px;">
+                                <i class="fa-solid fa-phone text-success" style="width: 16px; text-align: center; margin-right: 2px;"></i>
+                                <span class="card-info-label">Phone:</span>
+                                <span class="card-info-value"><a href="tel:{{ $req->mobile_number }}" style="text-decoration:none; color:inherit;">{{ $req->mobile_number }}</a></span>
+                            </div>
+                            <div class="card-info-item" style="margin-top: 4px;">
+                                <i class="fa-regular fa-calendar-days text-warning" style="width: 16px; text-align: center; margin-right: 2px;"></i>
+                                <span class="card-info-label">Assigned Date:</span>
+                                <span class="card-info-value">{{ $assignedDate }}</span>
+                            </div>
+                            @if($statusUpper === 'NOT_AVAILABLE' && $nextPickupFormatted)
+                                <div class="card-info-item" style="margin-top: 4px; color: #b45309;">
+                                    <i class="fa-solid fa-calendar-check text-warning"></i>
+                                    <span class="card-info-label" style="color: #b45309;">Pickup Due:</span>
+                                    <span class="card-info-value fw-bold" style="color: #92400e;">{{ $nextPickupFormatted }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <hr class="card-divider">
+
+                    @if($statusUpper === 'PICKED_UP')
+                        <div class="d-flex gap-2 mb-2">
+                            <button class="btn btn-secondary w-100 py-1 font-13" disabled><i class="fa-solid fa-check"></i> Picked Up</button>
+                        </div>
+                    @elseif($beforePickupDone)
+                        <div class="d-flex gap-2 mb-2">
+                            <a href="{{ url('/vehicle/after-pickup/'.$req->id) }}" class="btn w-100 py-1 font-13 fw-bold" style="background:#1f4e79; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> After Pickup</a>
+                        </div>
+                    @endif
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ $lat }},{{ $lng }}" target="_blank" class="btn-get-directions" style="margin-top: 0; width: 48%; text-align: center;">
+                            <i class="fa-solid fa-location-dot"></i> Get Directions
+                        </a>
+                        <button type="button" class="btn-view-card" data-request-index="{{ $loop->index }}" style="width: 48%; margin-top: 0;">
+                            <i class="fa-regular fa-eye"></i> Update
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="p-4 text-center text-muted card border-0 rounded-4 shadow-sm">
+                    <i class="fa-solid fa-folder-open fs-2 mb-2 text-secondary"></i>
+                    <h6 class="fw-bold">No assigned requests found</h6>
+                </div>
+            @endforelse
+        </div>
 
         <div id="no-results-msg" class="p-4 text-center text-muted card border-0 rounded-4 shadow-sm"
             style="display: none;">
@@ -743,9 +822,9 @@ input.modal-reason-select {
                     </a>
                 </div>
 
-                <!-- Assigned / Requested Date -->
+                <!-- Assigned Date -->
                 <div class="mb-3">
-                    <span class="modal-section-label">Assigned / Requested Date</span>
+                    <span class="modal-section-label">Assigned Date</span>
                     <div class="d-flex align-items-center gap-2 text-dark" style="font-size: 13px; font-weight: 600;">
                         <i class="fa-regular fa-calendar text-primary" style="font-size: 12px;"></i>
                         <span id="modalDate">09-Aug-2026</span>
@@ -877,7 +956,7 @@ input.modal-reason-select {
             }, $req->subcategory_ids)) : ($req->subcategory_ids ?? "N/A")) !!},
             applicant: '{{ addslashes($req->applicant_name) }}',
             mobile: '{{ $req->mobile_number }}',
-            date: '{{ $req->created_at->format("d-M-Y") }}',
+            date: '{{ ($req->preferred_pickup_date ?? $req->assigned_at ?? $req->created_at)->format("d-M-Y (l)") }}',
             nextPickupDate: '{{ $req->next_pickup_date ? $req->next_pickup_date->format("d-M-Y (l)") : "" }}',
             notAvailableReason: '{{ addslashes($req->not_available_reason ?? "") }}',
             houseNo: '{{ addslashes($req->house_no) }}',
@@ -1350,91 +1429,16 @@ input.modal-reason-select {
 
 
 
-    function renderRequestCards() {
-        const cardsContainer = document.getElementById('cards-container');
-        cardsContainer.innerHTML = allRequestData.map((item, index) => {
-            let statusBadge =
-                '<span class="badge bg-primary py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-truck-fast"></i> ASSIGNED</span>';
-            if (item.status === 'PICKED_UP') {
-                statusBadge =
-                    '<span class="badge bg-success py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-circle-check"></i> PICKED UP</span>';
-            } else if (item.status === 'NOT_AVAILABLE') {
-                statusBadge =
-                    '<span class="badge bg-warning text-dark py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-calendar-days"></i> RESCHEDULED</span>';
-            } else if (item.status === 'CLOSED') {
-                statusBadge =
-                    '<span class="badge bg-secondary text-white py-1 px-2 font-11 rounded-2"><i class="fa-solid fa-ban"></i> CLOSED</span>';
-            }
-            const searchText = `${item.ref} ${item.applicant} ${item.location} ${item.category} ${item.status}`
-                .toLowerCase();
-
-            const rescheduledInfo = (item.status === 'NOT_AVAILABLE' && item.nextPickupDate) ?
-                `<div class="card-info-item" style="margin-top: 4px; color: #b45309;">
-                           <i class="fa-solid fa-calendar-check text-warning"></i>
-                           <span class="card-info-label" style="color: #b45309;">Pickup Due:</span>
-                           <span class="card-info-value fw-bold" style="color: #92400e;">${item.nextPickupDate}</span>
-                       </div>` :
-                '';
-
-            return `
-                                        <div class="request-card request-item-row" data-search="${searchText}" data-status="${item.status.toLowerCase()}">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge-cwd-id">${item.ref}</span>
-                            ${statusBadge}
-                        </div>
-                        <div class="d-flex justify-content-between align-items-end">
-                            <div>
-                                <div class="card-info-item">
-                                    <i class="fa-solid fa-user text-primary" style="width: 16px; text-align: center; margin-right: 2px;"></i>
-                                    <span class="card-info-label">Name:</span>
-                                    <span class="card-info-value">${item.applicant}</span>
-                                </div>
-                                <div class="card-info-item" style="margin-top: 4px;">
-                                    <i class="fa-solid fa-phone text-success" style="width: 16px; text-align: center; margin-right: 2px;"></i>
-                                    <span class="card-info-label">Phone:</span>
-                                    <span class="card-info-value"><a href="tel:${item.mobile}" style="text-decoration:none; color:inherit;">${item.mobile}</a></span>
-                                </div>
-                                <div class="card-info-item" style="margin-top: 4px;">
-                                    <i class="fa-regular fa-calendar-days text-warning" style="width: 16px; text-align: center; margin-right: 2px;"></i>
-                                    <span class="card-info-label">Date:</span>
-                                    <span class="card-info-value">${item.date}</span>
-                                </div>
-                                ${rescheduledInfo}
-                            </div>
-                        </div>
-                        <hr class="card-divider">
-                          
-                          ${ item.status === 'PICKED_UP' ? 
-                             `<div class="d-flex gap-2 mb-2">
-                                <button class="btn btn-secondary w-100 py-1 font-13" disabled><i class="fa-solid fa-check"></i> Picked Up</button>
-                              </div>` : 
-                             (item.beforePickupDone ? 
-                             `<div class="d-flex gap-2 mb-2">
-                                <a href="{{ url('/vehicle/after-pickup') }}/${item.id}" class="btn w-100 py-1 font-13 fw-bold" style="background:#1f4e79; color:white; border-radius:8px;"><i class="fa-solid fa-camera"></i> After Pickup</a>
-                              </div>` : '')
-                          }
-
-                          <div class="d-flex justify-content-between align-items-center">
-                              <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" class="btn-get-directions" style="margin-top: 0; width: 48%; text-align: center;">
-                                  <i class="fa-solid fa-location-dot"></i> Get Directions
-                              </a>
-                              <button type="button" class="btn-view-card" data-request-index="${index}" style="width: 48%; margin-top: 0;">
-                                  <i class="fa-regular fa-eye"></i> Update
-                              </button>
-                          </div>
-                    </div>`;
-        }).join('');
-
-        cardsContainer.querySelectorAll('[data-request-index]').forEach(button => {
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.btn-view-card').forEach(button => {
             button.addEventListener('click', () => {
                 const item = allRequestData[Number(button.dataset.requestIndex)];
-                openRequestModal(item);
+                if (item) {
+                    openRequestModal(item);
+                }
             });
         });
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        renderRequestCards();
         const searchInput = document.getElementById('unified-search');
         const filterSelect = document.getElementById('unified-filter');
         const rows = document.querySelectorAll('.request-item-row');
