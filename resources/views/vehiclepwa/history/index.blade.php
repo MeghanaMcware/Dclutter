@@ -1,7 +1,7 @@
 @extends('vehiclepwa.layout.app')
 
-@section('title') Dumped History @endsection
-@section('heading') Dumped History @endsection
+@section('title') Request History @endsection
+@section('heading') Request History @endsection
 
 @section('style')
 <style>
@@ -75,6 +75,12 @@
         background: #fef3c7;
         color: #92400e;
         border: 1px solid #fde68a;
+    }
+
+    .status-closed {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
     }
 
     .status-assigned {
@@ -203,20 +209,42 @@
 <div class="container py-2" style="max-width: 460px; margin: 0 auto;">
 
     <!-- Search Form -->
-    <div class="mb-3">
+    <div class="mb-2">
         <form method="GET" action="{{ route('vehicle.history') }}">
+            @if(request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
             <div class="input-group">
                 <input type="text" name="search" class="form-control" placeholder="Search ID, Name, Mobile or Area" value="{{ request('search') }}" style="border-radius: 10px 0 0 10px; border-color: #cbd5e1; font-size: 13.5px;">
                 <button class="btn btn-primary" type="submit" style="background: var(--primary-green); border-color: var(--primary-green); border-radius: 0 10px 10px 0; padding: 0 16px;">
                     <i class="fa-solid fa-search text-white"></i>
                 </button>
                 @if(request('search'))
-                    <a href="{{ route('vehicle.history') }}" class="btn btn-outline-secondary" style="border-color: #cbd5e1;">
+                    <a href="{{ route('vehicle.history', request()->except('search', 'page')) }}" class="btn btn-outline-secondary" style="border-color: #cbd5e1;">
                         <i class="fa-solid fa-times"></i>
                     </a>
                 @endif
             </div>
         </form>
+    </div>
+
+    <!-- Status Filter Pills -->
+    <div class="d-flex gap-2 mb-3 overflow-auto pb-1" style="white-space: nowrap;">
+        <a href="{{ route('vehicle.history', array_merge(request()->except('status', 'page'), [])) }}" 
+           class="btn btn-sm rounded-pill px-3 fw-bold {{ !request('status') || request('status') === 'all' ? 'btn-success text-white' : 'btn-outline-secondary bg-white' }}"
+           style="font-size: 12.5px;">
+            All
+        </a>
+        <a href="{{ route('vehicle.history', array_merge(request()->except('page'), ['status' => 'dumped'])) }}" 
+           class="btn btn-sm rounded-pill px-3 fw-bold {{ request('status') === 'dumped' ? 'btn-success text-white' : 'btn-outline-secondary bg-white' }}"
+           style="font-size: 12.5px;">
+            <i class="fa-solid fa-check-double me-1"></i> Dumped
+        </a>
+        <a href="{{ route('vehicle.history', array_merge(request()->except('page'), ['status' => 'closed'])) }}" 
+           class="btn btn-sm rounded-pill px-3 fw-bold {{ request('status') === 'closed' ? 'btn-danger text-white' : 'btn-outline-secondary bg-white' }}"
+           style="font-size: 12.5px;">
+            <i class="fa-solid fa-ban me-1"></i> Closed
+        </a>
     </div>
 
     <!-- Requests Listing -->
@@ -228,13 +256,15 @@
                 'picked_up' => 'PICKED UP',
                 'dumped', 'completed' => 'DUMPED',
                 'not_available' => 'RESCHEDULED',
+                'closed' => 'CLOSED',
                 'assigned' => 'ASSIGNED',
                 default => strtoupper(str_replace('_', ' ', $statusLower))
             };
             $statusIcon = match($statusLower) {
                 'picked_up' => 'fa-solid fa-truck-ramp-box',
                 'dumped', 'completed' => 'fa-solid fa-check-double',
-                'not_available' => 'fa-solid fa-calendar-xmark',
+                'not_available' => 'fa-solid fa-calendar-days',
+                'closed' => 'fa-solid fa-ban',
                 default => 'fa-solid fa-clock'
             };
 
@@ -373,6 +403,15 @@
                             @endif
                         </div>
                     </div>
+                @elseif($statusLower === 'closed')
+                    <div class="info-item" style="color: #991b1b;">
+                        <i class="fa-solid fa-ban text-danger"></i>
+                        <div>
+                            <span class="info-label" style="color: #991b1b;">Closed:</span>
+                            <span class="info-value fw-semibold" style="color: #7f1d1d;">{{ $req->remarks ?: 'Closed by Driver' }}</span>
+                            <div class="small text-muted mt-1">Closed on {{ $req->updated_at ? $req->updated_at->format('d M Y, h:i A') : 'N/A' }}</div>
+                        </div>
+                    </div>
                 @else
                     <div class="info-item">
                         <i class="fa-regular fa-calendar"></i>
@@ -408,18 +447,22 @@
     @empty
         <div class="text-center py-5 card border-0 rounded-4 shadow-sm bg-white p-4">
             <i class="fa-solid fa-clock-rotate-left fa-3x text-muted mb-3"></i>
-            <h5 class="fw-bold">No Dumped History Found</h5>
+            <h5 class="fw-bold">No History Found</h5>
             <p class="text-muted small mb-0">
                 @if(request('search'))
-                    No dumped requests match your search criteria. Try clearing your search.
-                @else
+                    No requests match your search criteria. Try clearing your search.
+                @elseif(request('status') === 'closed')
+                    You have no closed requests in your history.
+                @elseif(request('status') === 'dumped')
                     You have no completed dump records in your history yet.
+                @else
+                    You have no completed or closed records in your history yet.
                 @endif
             </p>
-            @if(request('search'))
+            @if(request('search') || request('status'))
                 <div class="mt-3">
                     <a href="{{ route('vehicle.history') }}" class="btn btn-sm btn-outline-success">
-                        <i class="fa-solid fa-rotate-left me-1"></i> Clear Search
+                        <i class="fa-solid fa-rotate-left me-1"></i> Reset Filters
                     </a>
                 </div>
             @endif

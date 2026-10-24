@@ -82,12 +82,29 @@ class VehiclePwaController extends Controller
 
         $vehicleId = $vehicle->id;
 
-        $assignedQuery = WasteRequest::whereIn('status', ['assigned', 'not_available'])->where('vehicle_id', $vehicleId);
-        $pickedUpQuery = WasteRequest::where('status', 'picked_up')->where('vehicle_id', $vehicleId);
+        $pendingQuery = WasteRequest::where('vehicle_id', $vehicleId)
+            ->whereIn('status', ['assigned', 'not_available', 'rescheduled']);
+        $totalPickupsQuery = WasteRequest::where('vehicle_id', $vehicleId)
+            ->whereIn('status', ['picked_up', 'dumped', 'completed']);
+        $completedQuery = WasteRequest::where('vehicle_id', $vehicleId)
+            ->whereIn('status', ['dumped', 'completed']);
+        $totalAssignedQuery = WasteRequest::where('vehicle_id', $vehicleId)
+            ->whereIn('status', ['assigned', 'not_available', 'rescheduled', 'picked_up', 'dumped', 'completed', 'closed']);
         $recentQuery = WasteRequest::whereIn('status', ['assigned', 'picked_up', 'not_available'])->where('vehicle_id', $vehicleId);
 
-        $assignedCount = $assignedQuery->count();
-        $pickedUpCount = $pickedUpQuery->count();
+        $todayDate = now()->toDateString();
+        $todayScheduledQuery = WasteRequest::where('vehicle_id', $vehicleId)
+            ->where(function ($q) use ($todayDate) {
+                $q->whereDate('preferred_pickup_date', $todayDate)
+                  ->orWhereDate('next_pickup_date', $todayDate);
+            });
+        $todayScheduledCount = $todayScheduledQuery->count();
+
+        $assignedCount = $pendingQuery->count();
+        $pendingCount = $assignedCount;
+        $totalPickupsCount = $totalPickupsQuery->count();
+        $completedCount = $completedQuery->count();
+        $totalAssignedCount = $totalAssignedQuery->count();
         $recentRequests = $recentQuery->orderByRaw('COALESCE(assigned_at, updated_at, created_at) DESC')->take(5)->get();
 
         $driverName = !empty(trim($user?->name ?? '')) ? $user->name : ($vehicle?->driver_name ?: 'N/A');
@@ -95,7 +112,11 @@ class VehiclePwaController extends Controller
 
         return view('vehiclepwa.dashboard', compact(
             'assignedCount',
-            'pickedUpCount',
+            'pendingCount',
+            'totalPickupsCount',
+            'completedCount',
+            'totalAssignedCount',
+            'todayScheduledCount',
             'recentRequests',
             'user',
             'vehicle',
@@ -625,14 +646,28 @@ class VehiclePwaController extends Controller
 
 
     /**
-     * Vehicle Request History List (Strictly Dumped Requests).
+     * Vehicle Request History List (Dumped, Completed & Closed Requests).
      */
     public function history(Request $request)
     {
         $vehicleId = $this->getDriverVehicleId();
         
-        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dumpRecord', 'dump'])
-            ->whereIn('status', ['dumped', 'completed']);
+        $query = WasteRequest::with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dumpRecord', 'dump']);
+        
+        if ($request->filled('status')) {
+            $status = strtolower(trim($request->status));
+            if ($status === 'dumped') {
+                $query->whereIn('status', ['dumped', 'completed']);
+            } elseif ($status === 'closed') {
+                $query->where('status', 'closed');
+            } elseif ($status !== 'all') {
+                $query->where('status', $status);
+            } else {
+                $query->whereIn('status', ['dumped', 'completed', 'closed']);
+            }
+        } else {
+            $query->whereIn('status', ['dumped', 'completed', 'closed']);
+        }
             
         if ($vehicleId) {
             $query->where('vehicle_id', $vehicleId);

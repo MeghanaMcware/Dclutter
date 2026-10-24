@@ -247,15 +247,17 @@
     $dump = $wasteRequest->dump ?: $wasteRequest->dumpRecord;
 
     $isSubmitted = true;
-    $isAssigned = in_array($status, ['assigned', 'picked_up', 'dumped', 'completed']) || !empty($wasteRequest->vehicle_id);
+    $isAssigned = in_array($status, ['assigned', 'picked_up', 'dumped', 'completed', 'closed']) || !empty($wasteRequest->vehicle_id);
     $isPickedUp = in_array($status, ['picked_up', 'dumped', 'completed']) || !empty($wasteRequest->picked_up_at);
     $isCompleted = in_array($status, ['dumped', 'completed']);
     $isRescheduled = ($status === 'not_available') || !empty($wasteRequest->not_available_at) || !empty($wasteRequest->next_pickup_date);
+    $isClosed = ($status === 'closed');
 
     $badgeClass = match($status) {
         'picked_up' => 'background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;',
         'dumped', 'completed' => 'background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;',
         'not_available' => 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;',
+        'closed' => 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;',
         default => 'background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;'
     };
 
@@ -263,6 +265,7 @@
         'picked_up' => 'fa-solid fa-truck-ramp-box',
         'dumped', 'completed' => 'fa-solid fa-check-double',
         'not_available' => 'fa-solid fa-calendar-xmark',
+        'closed' => 'fa-solid fa-ban',
         default => 'fa-solid fa-truck'
     };
 
@@ -270,6 +273,7 @@
         'picked_up' => 'PICKED UP',
         'dumped', 'completed' => 'DUMPED',
         'not_available', 'rescheduled' => 'RESCHEDULED',
+        'closed' => 'CLOSED',
         'assigned' => 'ASSIGNED',
         default => strtoupper(str_replace('_', ' ', $status))
     };
@@ -313,38 +317,50 @@
                         @endif
                     </small>
                 </div>
-                <div class="timeline-item {{ $isPickedUp ? 'active' : '' }}">
-                    <p>3. Waste Collected / Picked Up</p>
-                    <small>
-                        @if($wasteRequest->picked_up_at)
-                            {{ \Carbon\Carbon::parse($wasteRequest->picked_up_at)->format('d M Y, h:i A') }}
-                            @if($wasteRequest->approx_weight_kg) &bull; Approx {{ $wasteRequest->approx_weight_kg }} kg @endif
-                        @else
-                            {{ $isPickedUp ? 'Picked up from location' : 'Pending pickup' }}
-                        @endif
-                    </small>
-                </div>
-                @if($status === 'not_available' || $wasteRequest->not_available_reason)
+                @if($isClosed)
                     <div class="timeline-item active">
-                        <p style="color: #92400e;">4. Rescheduled / Not Available</p>
-                        <small style="color: #b45309;">
-                            Due: {{ $wasteRequest->next_pickup_date ? \Carbon\Carbon::parse($wasteRequest->next_pickup_date)->format('d M Y (l)') : 'Next Sunday' }}
-                            @if($wasteRequest->not_available_reason)
-                                <br>Reason: {{ $wasteRequest->not_available_reason }}
+                        <p style="color: #991b1b;">3. Request Closed</p>
+                        <small style="color: #b91c1c;">
+                            {{ $wasteRequest->remarks ?: 'Closed by driver' }}
+                            @if($wasteRequest->updated_at)
+                                <br>{{ $wasteRequest->updated_at->format('d M Y, h:i A') }}
                             @endif
                         </small>
                     </div>
                 @else
-                    <div class="timeline-item {{ $isCompleted ? 'active' : '' }}">
-                        <p>4. Disposed at Processing Plant</p>
+                    <div class="timeline-item {{ $isPickedUp ? 'active' : '' }}">
+                        <p>3. Waste Collected / Picked Up</p>
                         <small>
-                            @if($dump && $dump->dumped_at)
-                                {{ \Carbon\Carbon::parse($dump->dumped_at)->format('d M Y, h:i A') }} &bull; {{ $dump->plant_name ?: 'Facility' }} ({{ $dump->dump_weight }} kg)
+                            @if($wasteRequest->picked_up_at)
+                                {{ \Carbon\Carbon::parse($wasteRequest->picked_up_at)->format('d M Y, h:i A') }}
+                                @if($wasteRequest->approx_weight_kg) &bull; Approx {{ $wasteRequest->approx_weight_kg }} kg @endif
                             @else
-                                {{ $isCompleted ? 'Completed at processing facility' : 'Pending dump' }}
+                                {{ $isPickedUp ? 'Picked up from location' : 'Pending pickup' }}
                             @endif
                         </small>
                     </div>
+                    @if($status === 'not_available' || $wasteRequest->not_available_reason)
+                        <div class="timeline-item active">
+                            <p style="color: #92400e;">4. Rescheduled / Not Available</p>
+                            <small style="color: #b45309;">
+                                Due: {{ $wasteRequest->next_pickup_date ? \Carbon\Carbon::parse($wasteRequest->next_pickup_date)->format('d M Y (l)') : 'Next Sunday' }}
+                                @if($wasteRequest->not_available_reason)
+                                    <br>Reason: {{ $wasteRequest->not_available_reason }}
+                                @endif
+                            </small>
+                        </div>
+                    @else
+                        <div class="timeline-item {{ $isCompleted ? 'active' : '' }}">
+                            <p>4. Disposed at Processing Plant</p>
+                            <small>
+                                @if($dump && $dump->dumped_at)
+                                    {{ \Carbon\Carbon::parse($dump->dumped_at)->format('d M Y, h:i A') }} &bull; {{ $dump->plant_name ?: 'Facility' }} ({{ $dump->dump_weight }} kg)
+                                @else
+                                    {{ $isCompleted ? 'Completed at processing facility' : 'Pending dump' }}
+                                @endif
+                            </small>
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>
@@ -530,6 +546,25 @@
                     <b style="color: #78350f;">{{ \Carbon\Carbon::parse($wasteRequest->not_available_at)->format('d M Y, h:i A') }}</b>
                 </div>
                 @endif
+            </div>
+        </div>
+        @endif
+
+        <!-- Closed Details (if closed) -->
+        @if($isClosed)
+        <div class="card-ui" style="background: #fef2f2; border-color: #fecaca;">
+            <div class="card-title-bar" style="color: #991b1b; border-bottom-color: #fecaca;">
+                <i class="fa-solid fa-ban text-danger"></i> Closed Request Details
+            </div>
+            <div class="facts-list">
+                <div class="fact-item">
+                    <small style="color: #991b1b;">Closure Reason / Remarks</small>
+                    <b style="color: #7f1d1d;">{{ $wasteRequest->remarks ?: 'Request marked closed by driver' }}</b>
+                </div>
+                <div class="fact-item">
+                    <small style="color: #991b1b;">Closed Date & Time</small>
+                    <b style="color: #7f1d1d;">{{ $wasteRequest->updated_at ? $wasteRequest->updated_at->format('l, d F Y, h:i A') : 'N/A' }}</b>
+                </div>
             </div>
         </div>
         @endif

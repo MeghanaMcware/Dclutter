@@ -66,19 +66,19 @@
         <!-- 4 Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="num">{{ $pickedUpCount }}</div>
+                <div class="num">{{ $totalPickupsCount }}</div>
                 <div class="label">Total Pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">{{ $assignedCount + $pickedUpCount }}</div>
-                <div class="label">Today Assigned</div>
+                <div class="num">{{ $todayScheduledCount }}</div>
+                <div class="label">Pickups Scheduled Today</div>
             </div>
             <div class="stat-card">
-                <div class="num">{{ $assignedCount }}</div>
+                <div class="num">{{ $pendingCount }}</div>
                 <div class="label">Pending Pickups</div>
             </div>
             <div class="stat-card">
-                <div class="num">1</div>
+                <div class="num">{{ $completedCount }}</div>
                 <div class="label">Completed Pickups</div>
             </div>
         </div>

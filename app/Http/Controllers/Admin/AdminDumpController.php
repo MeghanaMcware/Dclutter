@@ -18,7 +18,7 @@ class AdminDumpController extends Controller
         $pickupRequests = WasteRequest::forUserJurisdiction()
             ->with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'updates'])
             ->where('status', 'picked_up')
-            ->latest('picked_up_at')
+            ->orderByRaw('COALESCE(updated_at, picked_up_at, created_at) DESC')
             ->latest('id')
             ->get();
 
@@ -26,7 +26,7 @@ class AdminDumpController extends Controller
         $dumpRequests = WasteRequest::forUserJurisdiction()
             ->with(['ward', 'constituency', 'corporation', 'vehicle.owner', 'dump', 'dumpRecord.vehicle.owner', 'updates'])
             ->where('status', 'dumped')
-            ->latest('updated_at')
+            ->orderByRaw('COALESCE(updated_at, created_at) DESC')
             ->latest('id')
             ->get();
 

@@ -66,7 +66,7 @@ class AdminRequestController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $requests = $query->latest()->get();
+        $requests = $query->orderByRaw('COALESCE(updated_at, created_at) DESC')->latest('id')->get();
 
         if ($request->ajax()) {
             return response()->json([
@@ -183,7 +183,7 @@ class AdminRequestController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $requests = $query->latest()->get();
+        $requests = $query->orderByRaw('COALESCE(updated_at, created_at) DESC')->latest('id')->get();
 
         $filename = 'waste_requests_' . date('Y-m-d_His') . '.csv';
 

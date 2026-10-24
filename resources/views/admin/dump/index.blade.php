@@ -112,7 +112,7 @@
                                                 <th>VEHICLE NO.</th>
                                                 <th>DRIVER NUMBER</th>
                                                 <th>STATUS</th>
-                                                <th>CREATED AT</th>
+                                                <th>PICKED UP AT</th>
                                                 <th>ACTIONS</th>
                                             </tr>
                                         </thead>
@@ -139,7 +139,7 @@
                                                         @endphp
                                                         <span class="status-badge {{ $badgeClass }}">{{ $req->status_label }}</span>
                                                     </td>
-                                                    <td>{{ $req->picked_up_at ? $req->picked_up_at->format('d M Y') : ($req->created_at ? $req->created_at->format('d M Y') : 'N/A') }}</td>
+                                                    <td>{{ $req->picked_up_at ? $req->picked_up_at->format('d M Y, h:i A') : ($req->updated_at ? $req->updated_at->format('d M Y, h:i A') : $req->created_at->format('d M Y, h:i A')) }}</td>
                                                     <td>
                                                         <a href="{{ route('admin.dump.show', $req->id) }}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View</a>
                                                     </td>
@@ -170,7 +170,7 @@
                                                 <th>VEHICLE NO.</th>
                                                 <th>DRIVER NUMBER</th>
                                                 <th>STATUS</th>
-                                                <th>CREATED AT</th>
+                                                <th>DUMPED AT</th>
                                                 <th>ACTIONS</th>
                                             </tr>
                                         </thead>
@@ -195,7 +195,7 @@
                                                     <td>{{ $veh?->vehicle_number ?? 'N/A' }}</td>
                                                     <td>{{ $driverName . ' (' . $driverPhone . ')' }}</td>
                                                     <td><span class="status-badge status-completed">Dumped</span></td>
-                                                    <td>{{ $dumpDate ? $dumpDate->format('d M Y') : 'N/A' }}</td>
+                                                    <td>{{ $dumpDate ? $dumpDate->format('d M Y, h:i A') : 'N/A' }}</td>
                                                     <td>
                                                         <a href="{{ route('admin.dump.show', $req->id) }}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View</a>
                                                     </td>
@@ -224,12 +224,14 @@
     $(document).ready(function() {
         if ($.fn.DataTable) {
             $('#pickup-table').DataTable({
+                "order": [],
                 "pageLength": 10,
                 "ordering": true,
                 "info": true,
                 "searching": true
             });
             $('#dump-table').DataTable({
+                "order": [],
                 "pageLength": 10,
                 "ordering": true,
                 "info": true,
