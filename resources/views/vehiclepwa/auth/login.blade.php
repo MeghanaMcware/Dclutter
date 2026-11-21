@@ -82,7 +82,7 @@
 
         /* Main Container */
         .login-wrapper {
-            max-width: 420px;
+            /* max-width: 420px; */
             margin: 0 auto;
             padding: 16px;
         }

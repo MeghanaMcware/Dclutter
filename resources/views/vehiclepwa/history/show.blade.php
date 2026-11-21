@@ -287,7 +287,7 @@
     $dumpPhotos = ($dump && is_array($dump->dump_images)) ? $dump->dump_images : [];
 @endphp
 
-<div class="container py-2" style="max-width: 460px; margin: 0 auto;">
+<div class="container py-2" >
     <div class="details-container">
 
         <!-- Header & Tracking Status -->

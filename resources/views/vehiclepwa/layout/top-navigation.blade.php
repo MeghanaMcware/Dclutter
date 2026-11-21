@@ -18,7 +18,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        padding: 0 max(18px, calc((100vw - 440px) / 2 + 18px));
+        padding: 0 max(18px, calc((100vw - 1225px) / 2 + 18px));
         background: #0e7a43;
         border-bottom: 1px solid #e2e8f0;
         box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);

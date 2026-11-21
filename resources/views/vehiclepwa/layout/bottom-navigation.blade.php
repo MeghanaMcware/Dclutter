@@ -56,7 +56,7 @@
         align-items: center;
         min-height: var(--driver-bottom-nav-height, 68px);
         padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
-        max-width: 420px;
+        /* max-width: 420px; */
         margin: 0 auto;
         z-index: 1000;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);

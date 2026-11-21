@@ -206,7 +206,7 @@
 @endsection
 
 @section('content')
-<div class="container py-2" style="max-width: 460px; margin: 0 auto;">
+<div class="container py-2" >
 
     <!-- Search Form -->
     <div class="mb-2">

@@ -29,7 +29,7 @@
         <p>Saving before pickup details...</p>
     </div>
 
-    <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
+    <div class="container py-2" >
         
         <!-- Form Section -->
         <div id="beforeFormSection">

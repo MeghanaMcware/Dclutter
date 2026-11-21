@@ -28,7 +28,7 @@
 @endsection
 
 @section('content')
-    <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
+    <div class="container py-2" >
         
         <div id="afterFormSection">
             <h5 class="fw-bold text-dark mb-2 px-1">Step 2: After Pickup</h5>

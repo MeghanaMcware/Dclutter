@@ -186,7 +186,7 @@
 
 @section('content')
 
-<div class="container py-2" style="max-width:440px; margin:0 auto; padding-bottom:120px;">
+<div class="container py-2" >
 
     <div class="mb-3">
         <h6 class="fw-bold text-dark mb-1">Items Ready for Dump Disposal</h6>

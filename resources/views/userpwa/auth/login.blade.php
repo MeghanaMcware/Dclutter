@@ -38,7 +38,7 @@
 
     .login-wrapper {
         width: 100%;
-        max-width: 430px;
+        /* max-width: 430px; */
         min-height: calc(100vh - 6px);
         min-height: calc(100dvh - 6px);
         overflow: hidden;

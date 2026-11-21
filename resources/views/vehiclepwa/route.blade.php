@@ -60,7 +60,7 @@
 @endsection
 
 @section('content')
-    <div class="container py-2" style="max-width: 440px; margin: 0 auto;">
+    <div class="container py-2" >
 
         <!-- Trip Details Card -->
         <div class="trip-info-card">

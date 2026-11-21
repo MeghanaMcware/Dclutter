@@ -11,21 +11,27 @@
         background: #ffffff;
         min-height: 100%;
         padding-bottom: 24px;
+        border-radius: 20px;
+        box-shadow: 0 2px 14px rgba(0,0,0,0.03);
+        border: 1px solid #eef2f6;
+        overflow: hidden;
+        width: 100%;
     }
 
     .hero-section {
-           padding: 10px 20px 16px;
+        padding: 24px 24px 16px;
         position: relative;
         overflow: hidden;
-        background: linear-gradient(180deg, rgba(230,244,255,0.4) 0%, rgba(255,255,255,0) 100%);
+        background: linear-gradient(180deg, rgba(230,244,255,0.45) 0%, rgba(255,255,255,0) 100%);
     }
 
     .hero-title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 800;
         line-height: 1.15;
         color: #1e293b;
         margin-bottom: 12px;
+        letter-spacing: -0.5px;
     }
 
     .text-green {
@@ -33,7 +39,7 @@
     }
 
     .hero-subtitle {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 700;
         color: #334155;
         margin-bottom: 8px;
@@ -43,16 +49,16 @@
     }
 
     .hero-desc {
-        font-size: 12px;
+        font-size: 13px;
         color: #64748b;
-        line-height: 1.5;
+        line-height: 1.55;
         margin-bottom: 20px;
-        max-width: 90%;
+        max-width: 900px;
     }
 
     .hero-illustration {
         width: 100%;
-        border-radius: 12px;
+        border-radius: 16px;
         margin-bottom: 24px;
         overflow: hidden;
     }
@@ -60,50 +66,76 @@
     .hero-illustration img {
         width: 100%;
         height: auto;
+        max-height: 480px;
         display: block;
+        border-radius: 16px;
+        object-fit: cover;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     }
     
     .action-buttons {
         padding: 0 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-bottom: 32px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 30px;
+    }
+
+    @media (min-width: 768px) {
+        .action-buttons {
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
     }
 
     .btn-action-primary {
         background: #0e7a43;
         color: #ffffff;
-        border-radius: 12px;
-        padding: 16px;
+        border-radius: 14px;
+        padding: 16px 20px;
         display: flex;
         align-items: center;
         gap: 16px;
         text-decoration: none;
         box-shadow: 0 4px 12px rgba(14, 122, 67, 0.2);
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-action-primary:hover {
+        background: #095930;
+        color: #ffffff;
+        transform: translateY(-1px);
     }
 
     .btn-action-secondary {
         background: #ffffff;
         color: #0e7a43;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        padding: 16px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 16px 20px;
         display: flex;
         align-items: center;
         gap: 16px;
         text-decoration: none;
         box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .btn-action-secondary:hover {
+        border-color: #0e7a43;
+        color: #0e7a43;
+        transform: translateY(-1px);
     }
 
     .btn-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 20px;
+        flex-shrink: 0;
     }
 
     .btn-action-primary .btn-icon {
@@ -131,10 +163,10 @@
     .btn-action-secondary .btn-title { color: #1e293b; }
 
     .btn-subtitle {
-        font-size: 12px;
+        font-size: 12.5px;
     }
     
-    .btn-action-primary .btn-subtitle { color: rgba(255,255,255,0.8); }
+    .btn-action-primary .btn-subtitle { color: rgba(255,255,255,0.85); }
     .btn-action-secondary .btn-subtitle { color: #64748b; }
 
     .stats-section {
@@ -150,43 +182,77 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: 8px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
     }
 
     .stat-card {
         background: #f8fafc;
-        border-radius: 12px;
-        padding: 12px 8px;
+        border-radius: 14px;
+        padding: 16px 10px;
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         border: 1px solid #f1f5f9;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-color: #cbd5e1;
     }
 
     .stat-val {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 20px;
+        font-weight: 800;
         margin-bottom: 4px;
+        line-height: 1.2;
     }
 
     .stat-lbl {
-        font-size: 10px;
+        font-size: 11.5px;
         color: #475569;
         font-weight: 600;
         line-height: 1.2;
     }
 
-    .text-blue { color: #3b82f6; }
+    .text-blue { color: #2563eb; }
     .text-orange { color: #f59e0b; }
     .text-red { color: #ef4444; }
-    .font-13{
-        font-size:13px;
+    .font-13 { font-size: 13px; }
+    .font-11 { font-size: 12px; }
+
+    .recent-section {
+        padding: 0 24px;
     }
-    .font-11{
-        font-size:12px;
+
+    @media (min-width: 768px) {
+        .hero-title {
+            font-size: 38px;
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+        }
+
+        .hero-desc {
+            font-size: 14px;
+        }
+
+        .stat-card {
+            padding: 20px 14px;
+        }
+
+        .stat-val {
+            font-size: 24px;
+        }
+
+        .stat-lbl {
+            font-size: 12.5px;
+        }
     }
 </style>
 @endsection
@@ -259,12 +325,11 @@
                 <div class="stat-val text-red">{{ number_format($pendingRequests) }}</div>
                 <div class="stat-lbl">Pending</div>
             </a>
-            
         </div>
     </div>
 
     @if(isset($recentRequests) && $recentRequests->count() > 0)
-        <div class="recent-section mt-4" style="padding: 0 24px;">
+        <div class="recent-section mt-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span style="font-size: 14px; font-weight: 700; color: #1e293b;">Recent Requests</span>
                 <a href="{{ route('user.track') }}" style="font-size: 12px; font-weight: 600; color: #0e7a43; text-decoration: none;">View All <i class="fa fa-arrow-right ms-1"></i></a>
@@ -291,14 +356,12 @@
                         <span class="badge {{ $badgeClass }}" style="font-size: 11px; text-transform: capitalize; padding: 6px 10px;">
                             {{ $req->status_label }}
                         </span>
-                       <span class="btn btn-sm btn-outline-primary"
-      style="font-size: 12px; padding: 2px 21px; font-weight: 600; cursor: pointer;" onclick="window.location.href='{{ route('user.details', ['id' => $req->id]) }}'">
-    View
-</span>
+                        <span class="btn btn-sm btn-outline-primary"
+                              style="font-size: 12px; padding: 2px 21px; font-weight: 600; cursor: pointer;" onclick="window.location.href='{{ route('user.details', ['id' => $req->id]) }}'">
+                            View
+                        </span>
                     </div>
-                    
                 </a>
-            
             @endforeach
             
             <div class="mt-3 d-flex justify-content-center">

@@ -28,7 +28,7 @@
         position: relative;
         isolation: isolate;
         min-height: 154px;
-        max-width: 420px;
+        /* max-width: 420px; */
         overflow: hidden;
         background: linear-gradient(180deg, #f2f8ff 0%, #eef8ff 72%, #dff4ec 100%);
         border-radius: 18px 18px 18px 18px;

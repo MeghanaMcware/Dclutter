@@ -19,18 +19,21 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Inter' !important;
+            font-family: 'Inter', sans-serif !important;
             background-color: #f8fafc;
+            color: #1e293b;
         }
         .page-content {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             min-height: 100dvh;
-            padding-top: calc(var(--user-header-height) + 12px);
-            padding-bottom: calc(var(--user-bottom-nav-height) + 16px);
-            max-width: 420px;
+            padding-top: calc(var(--user-header-height) + 14px);
+            padding-bottom: calc(var(--user-bottom-nav-height) + 20px);
+            width: 100%;
             margin: 0 auto;
+            padding-left: 20px;
+            padding-right: 20px;
         }
         .bg-primary {
             background-color: #0e7a43 !important;
