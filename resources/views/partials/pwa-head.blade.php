@@ -24,11 +24,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="{{ $appTitle }}">
-<link rel="apple-touch-icon" href="{{ asset('icons/icon-192x192.png') }}">
-<link rel="apple-touch-icon" sizes="152x152" href="{{ asset('icons/icon-152x152.png') }}">
-<link rel="apple-touch-icon" sizes="192x192" href="{{ asset('icons/icon-192x192.png') }}">
-<link rel="apple-touch-icon" sizes="512x512" href="{{ asset('icons/icon-512x512.png') }}">
-<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/icon-192x192.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
+<link rel="apple-touch-icon" sizes="152x152" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
+<link rel="apple-touch-icon" sizes="192x192" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
+<link rel="apple-touch-icon" sizes="512x512" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
 
 <!-- PWA Service Worker Registration -->
 <script>

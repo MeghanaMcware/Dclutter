@@ -102,8 +102,7 @@
             <div class="spinner-border" style="width: 3.5rem; height: 3.5rem; color: var(--primary-green);" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <h5 class="mt-4 text-dark fw-bold">Uploading Photos...</h5>
-            <p class="text-muted">Please do not close the app.</p>
+            <h5 class="mt-4 text-dark fw-bold">Submitting...</h5>
         </div>
 
     </div>
@@ -343,7 +342,7 @@
         if (!isValid) return;
 
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Submitting...</span>';
         loader.style.display = 'flex';
 
         const formData = new FormData();

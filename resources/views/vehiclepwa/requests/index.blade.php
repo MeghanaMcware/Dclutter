@@ -920,9 +920,9 @@ input.modal-reason-select {
                     </div>
 
                     <!-- Available / Existing Before Pickup Action -->
-                    <div id="availablePickupSection" class="mt-2" style="display: none;">
+                    <div id="availablePickupSection" class="mt-2 text-center" style="display: none; justify-content: center;">
                         <a id="modalPickupActionBtn" href="#"
-                            class="btn btn-modal-pickup-action w-100 d-flex align-items-center justify-content-center">
+                            class="btn btn-success w-50 d-flex align-items-center justify-content-center py-2 mx-auto">
                             <i class="fa-solid fa-camera me-2"></i> <span id="modalPickupActionText">Before Pickup</span>
                         </a>
                     </div>
@@ -1170,15 +1170,15 @@ input.modal-reason-select {
                 pickupBtnText.innerText = 'Picked Up';
                 pickupBtn.href = '#';
                 pickupBtn.className =
-                    'btn btn-secondary w-50 d-flex align-items-center justify-content-center py-2 disabled';
+                    'btn btn-secondary w-50 d-flex align-items-center justify-content-center py-2 disabled mx-auto';
             } else if (item.beforePickupDone) {
                 pickupBtnText.innerText = 'After Pickup';
                 pickupBtn.href = "{{ url('/vehicle/after-pickup') }}/" + item.id;
-                pickupBtn.className = 'btn btn-primary w-50 d-flex align-items-center justify-content-center py-2';
+                pickupBtn.className = 'btn btn-primary w-50 d-flex align-items-center justify-content-center py-2 mx-auto';
             } else {
                 pickupBtnText.innerText = 'Before Pickup';
                 pickupBtn.href = "{{ url('/vehicle/before-pickup') }}/" + item.id;
-                pickupBtn.className = 'btn btn-success w-50 d-flex align-items-center justify-content-center py-2';
+                pickupBtn.className = 'btn btn-success w-50 d-flex align-items-center justify-content-center py-2 mx-auto';
             }
         }
 
@@ -1277,7 +1277,8 @@ input.modal-reason-select {
             if (mode === 'available') {
                 btnAvailable.className = 'btn-availability-toggle btn-available-active';
                 btnUnavailable.className = 'btn-availability-toggle btn-unavailable-inactive';
-                availablePickupSection.style.display = 'block';
+                availablePickupSection.style.display = 'flex';
+                availablePickupSection.style.justifyContent = 'center';
                 notAvailableSection.style.display = 'none';
             } else if (mode === 'unavailable') {
                 btnAvailable.className = 'btn-availability-toggle btn-available-inactive';
@@ -1312,7 +1313,10 @@ input.modal-reason-select {
         } else if (item.beforePickupDone) {
             if (availabilityContainer) availabilityContainer.style.display = 'none';
             setAvailabilityState('none');
-            if (availablePickupSection) availablePickupSection.style.display = 'block';
+            if (availablePickupSection) {
+                availablePickupSection.style.display = 'flex';
+                availablePickupSection.style.justifyContent = 'center';
+            }
         } else {
             if (availabilityContainer) availabilityContainer.style.display = 'block';
             // Default: neither selected until clicked

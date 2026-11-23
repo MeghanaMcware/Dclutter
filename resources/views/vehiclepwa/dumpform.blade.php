@@ -183,7 +183,7 @@
     $defaultPickupId = $wasteRequest?->request_number ?? request('pickup_id') ?? '';
 @endphp
 
-<div class="container py-2" style="max-width:440px;margin:0 auto;">
+<div class="container py-2">
 
     <div class="form-card">
 

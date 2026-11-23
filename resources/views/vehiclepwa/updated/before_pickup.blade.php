@@ -26,7 +26,7 @@
 @section('content')
     <div id="pageLoader" role="status" aria-live="polite">
         <div class="spin"></div>
-        <p>Saving before pickup details...</p>
+        <p>Submitting...</p>
     </div>
 
     <div class="container py-2" >
@@ -304,7 +304,7 @@
         }
 
         if (isValid) {
-            saveBeforeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Processing...</span>';
+            saveBeforeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Submitting...</span>';
             saveBeforeBtn.disabled = true;
             if (typeof showPageLoader === 'function') {
                 showPageLoader();

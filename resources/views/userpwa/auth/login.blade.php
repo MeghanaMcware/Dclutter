@@ -3,619 +3,856 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>User Login - {{ env('APP_NAME', 'D-Clutter') }}</title>
-    <link rel="icon" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
-    @include('partials.pwa-head')
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Login - {{ env('APP_NAME', 'DCLUTTER') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ asset('frontendwebsite/img/GBA-removebg-preview.png') }}">
+    @include('partials.pwa-head')
 
     <style>
-    :root {
-        --green: #00894d;
-        --ink: #263238;
-        --line: #e1e8e5;
-    }
-
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        min-height: 100vh;
-        min-height: 100dvh;
-        padding: 3px;
-        display: flex;
-        justify-content: center;
-        background: #edf7ef;
-        color: var(--ink);
-        font-family: 'DM Sans', sans-serif;
-    }
-
-    .login-wrapper {
-        width: 100%;
-        /* max-width: 430px; */
-        min-height: calc(100vh - 6px);
-        min-height: calc(100dvh - 6px);
-        overflow: hidden;
-        border: 1px solid #dbeade;
-        border-radius: 28px 28px 0 0;
-        background: linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%);
-        box-shadow: 0 12px 35px rgba(24, 92, 54, .08);
-    }
-
-    .login-card {
-        padding: 20px 10px 20px;
-        text-align: center;
-    }
-
-    .brand {
-        display: inline-flex;
-        align-items: center;
-        gap: 9px;
-        color: var(--green);
-    }
-
-    .brand-mark {
-        width: 37px;
-        height: 37px;
-        display: grid;
-        place-items: center;
-        border: 2px solid var(--green);
-        border-radius: 50%;
-        font-size: 20px;
-        transform: rotate(-12deg);
-    }
-
-    .brand-name {
-        font: 800 23px/1 'Manrope', sans-serif;
-        letter-spacing: .2px;
-    }
-
-    .brand-tagline {
-        margin: 3px 0 0 46px;
-        color: #66746c;
-        font-size: 7px;
-        font-weight: 700;
-        letter-spacing: 1.7px;
-    }
-
-    .hero {
-        position: relative;
-        height: 150px;
-        margin: 14px -34px 0;
-        overflow: hidden;
-        background: linear-gradient(180deg, #f4fbf5 0%, #e7f5e9 67%, #c9e8bf 68%, #f8fbf8 69%, #fff 100%);
-    }
-
-    .hero::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        opacity: .16;
-        background: url('{{ asset('frontendwebsite/img/hero-truck-new.png') }}') center 63% / cover no-repeat;
-        filter: saturate(.75) hue-rotate(20deg);
-    }
-
-    .hero::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, #f3fbf4 0%, transparent 35%, transparent 70%, #e4f4e6 100%);
-    }
-
-    .hero-city {
-        position: absolute;
-        z-index: 1;
-        left: 0;
-        right: 0;
-        bottom: 45px;
-        height: 42px;
-        opacity: .22;
-        background: repeating-linear-gradient(90deg, transparent 0 13px, #8fbd9c 13px 25px, transparent 25px 32px);
-        clip-path: polygon(0 100%, 0 60%, 8% 60%, 8% 30%, 14% 30%, 14% 64%, 23% 64%, 23% 10%, 30% 10%, 30% 52%, 38% 52%, 38% 24%, 45% 24%, 45% 64%, 55% 64%, 55% 5%, 63% 5%, 63% 45%, 73% 45%, 73% 18%, 81% 18%, 81% 58%, 90% 58%, 90% 28%, 97% 28%, 97% 100%);
-    }
-
-    .hero-truck {
-        position: absolute;
-        z-index: 2;
-        right: 9px;
-        bottom: 16px;
-        width: 145px;
-        height: 85px;
-        object-fit: cover;
-        object-position: 78% 60%;
-        border-radius: 45% 20% 10% 10%;
-        mix-blend-mode: multiply;
-        opacity: .88;
-    }
-
-    .welcome-header {
-        position: relative;
-        z-index: 3;
-        margin-top: 5px;
-    }
-
-    .welcome-header h2 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #242927;
-    }
-
-    .welcome-header h2 strong {
-        /* display: block; */
-        color: var(--green);
-        font: 800 18px / 1.2 'Manrope', sans-serif;
-    }
-
-    .welcome-header p {
-        margin: 5px 0 0;
-        font-size: 11px;
-        line-height: 1.45;
-        color: #4d5953;
-    }
-
-    .welcome-header p strong {
-        color: var(--green);
-    }
-
-    .form-panel {
-        margin-top: 16px;
-        padding: 13px 15px 14px;
-        border: 1px solid #edf0ee;
-        border-radius: 13px;
-        background: #fff;
-        box-shadow: 0 5px 18px rgba(30, 71, 47, .09);
-        text-align: left;
-    }
-
-    .field-label {
-        display: block;
-    margin-bottom: 2px;
-    color: #131715;
-    font-size: 14px;
-    font-weight: 500;
-    }
-
-    .phone-field {
-        display: flex;
-        height: 36px;
-        border: 1px solid #dfe6e2;
-        border-radius: 9px;
-        overflow: hidden;
-        background: #fafcfa;
-    }
-
-    .country-code {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 0 10px;
-        border-right: 1px solid #e3e9e5;
-        color: #35413b;
-        font-size: 11px;
-    }
-
-    .country-code i {
-        color: #59645f;
-        font-size: 9px;
-    }
-
-    .phone-field input {
-        min-width: 0;
-        flex: 1;
-        border: 0;
-        outline: 0;
-        padding: 0 10px;
-        background: transparent;
-        color: #27322d;
-        font-size: 11px;
-    }
-
-    .phone-field input::placeholder {
-        color: #8a948f;
-    }
-
-    .phone-field:focus-within {
-        border-color: var(--green);
-        box-shadow: 0 0 0 3px rgba(0, 137, 77, .1);
-    }
-
-    .was-validated .phone-field:has(input:invalid) {
-        border-color: #dc3545;
-    }
-
-    .was-validated .phone-field:has(input:valid) {
-        border-color: #198754;
-    }
-
-    .was-validated .phone-field:has(input:invalid) + .helper {
-        color: #dc3545;
-    }
-
-    .was-validated .phone-field + .helper + .invalid-feedback {
-        display: block;
-        font-size: 10px;
-        margin-top: 5px;
-    }
-
-    .was-validated .phone-field:has(input:invalid) + .invalid-feedback {
-        display: block;
-        font-size: 10px;
-        margin-top: 5px;
-    }
-
-    .helper {
-        margin: 6px 0 0;
-        color: #84908a;
-        font-size: 9px;
-    }
-
-    .btn-primary {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 9px;
-        width: 100%;
-        height: 37px;
-        margin-top: 14px;
-        border: 0;
-        border-radius: 9px;
-        background: var(--green);
-        color: #fff;
-        font-size: 12px;
-        font-weight: 600;
-        box-shadow: 0 5px 11px rgba(0, 137, 77, .2);
-    }
-
-    .btn-primary:hover {
-        background: #006d3d;
-    }
-
-    .btn-primary i {
-        font-size: 12px;
-    }
-
-    .btn-loading {
-        pointer-events: none;
-        opacity: .85;
-    }
-
-    .page-loader {
-        position: fixed;
-        z-index: 1055;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, .78);
-        backdrop-filter: blur(3px);
-    }
-
-    .page-loader.show {
-        display: flex;
-    }
-
-    .page-loader__content {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 14px 18px;
-        border: 1px solid #e1eae4;
-        border-radius: 10px;
-        background: #fff;
-        color: var(--green);
-        font-size: 12px;
-        font-weight: 600;
-        box-shadow: 0 8px 25px rgba(30, 71, 47, .14);
-    }
-
-    .or-divider {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 16px 0 12px;
-        color: #828d88;
-        font-size: 9px;
-    }
-
-    .or-divider::before,
-    .or-divider::after {
-        content: '';
-        height: 1px;
-        flex: 1;
-        background: #e6ebe8;
-    }
-
-    .alt-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 9px;
-    }
-
-    .alt-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        height: 36px;
-        border: 1px solid #e1e7e4;
-        border-radius: 9px;
-        background: #fff;
-        color: #303a35;
-        font-size: 10px;
-        font-weight: 600;
-        box-shadow: 0 3px 7px rgba(23, 54, 35, .05);
-    }
-
-    .alt-button.google i {
-        color: #4285f4;
-        font-size: 15px;
-    }
-
-    .alt-button.phone i {
-        color: var(--green);
-        font-size: 13px;
-    }
-
-    .privacy {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin: 14px auto 0;
-        max-width: 240px;
-        color: #7c8781;
-        font-size: 10px;
-        line-height: 1.45;
-        text-align: center;
-        color:#242927;
-    }
-
-    .privacy i {
-        margin-top: 1px;
-        color: #69756f;
-    }
-
-    #otpSection {
-        display: none;
-    }
-
-    #otpSection .form-panel {
-        margin-top: 2px;
-    }
-
-    @media (max-width: 380px) {
-        .login-card {
-            padding-right: 22px;
-            padding-left: 22px;
+        :root {
+            --primary-green: #0e7a43;
+            --primary-green-dark: #095930;
+            --primary-green-light: #e8f5e9;
+            --accent-green: #10b981;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --bg-canvas: #f8fafc;
         }
 
-        .hero {
-            margin-right: -22px;
-            margin-left: -22px;
-        }
-
-        .hero-truck {
-            right: 1px;
-        }
-    }
-
-    @media (min-width: 700px) {
         body {
-            align-items: center;
-            padding: 24px;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
 
+        /* Main Container */
         .login-wrapper {
-            min-height: 0;
+            margin: 0 auto;
+            padding: 16px;
         }
-    }
 
-    /* OTP Section Hidden by Default */
+        .login-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+        }
+
+        /* Welcome Section */
+        .welcome-header {
+            text-align: center;
+            padding: 12px 24px 8px;
+        }
+
+        .welcome-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .welcome-header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Hero Vector Graphic Container */
+        .illustration-container {
+            width: 100%;
+            padding: 10px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(232, 245, 233, 0.4) 0%, rgba(255,255,255,1) 100%);
+        }
+
+        .illustration-container svg {
+            width: 100%;
+            max-height: 155px;
+            height: auto;
+        }
+
+        /* Form Area */
+        .form-area {
+            padding: 16px 24px 24px;
+        }
+
+        .field-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--primary-green);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(14, 122, 67, 0.15);
+        }
+
+        .prefix-badge {
+            padding: 0 12px 0 14px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-right: 1px solid #e2e8f0;
+            height: 48px;
+            background: #f1f5f9;
+        }
+
+        .input-group-custom input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .input-group-custom input::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-icon-left {
+            position: absolute;
+            left: 14px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            padding-left: 40px !important;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 15px;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--primary-green);
+        }
+
+        /* Buttons */
+        .btn-submit-primary {
+            width: 100%;
+            height: 48px;
+            background: var(--primary-green);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(14, 122, 67, 0.25);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .btn-submit-primary:hover, .btn-submit-primary:focus {
+            background: var(--primary-green-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(14, 122, 67, 0.35);
+        }
+
+        .btn-submit-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Divider */
+        .divider-or {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 18px 0;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .divider-or::before, .divider-or::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .divider-or span {
+            padding: 0 12px;
+        }
+
+        /* Secondary Button */
+        .btn-secondary-emp {
+            width: 100%;
+            height: 48px;
+            background: #ffffff;
+            color: #0f172a;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+
+        .btn-secondary-emp:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Footer Terms */
+        .terms-footer-text {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .terms-footer-text a {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .terms-footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Page Loader Overlay */
+        #pageLoader {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(14, 122, 67, 0.92);
+            z-index: 99999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            backdrop-filter: blur(4px);
+        }
+
+        #pageLoader.active {
+            display: flex;
+        }
+
+        #pageLoader .spin {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        #pageLoader p {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .mode-panel {
+            display: block;
+        }
+
+        .mode-panel.hidden {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- Full Screen Loader -->
+    <div id="pageLoader">
+        <div class="spin"></div>
+        <p>Logging into User Portal…</p>
+    </div>
+
     <div class="login-wrapper">
+
         <div class="login-card">
-            <div class="brand"><span class="brand-mark"><i class="fa-solid fa-leaf"></i></span><span
-                    class="brand-name">DCLUTTER</span></div>
-            <div class="brand-tagline">BENGALURU'S CLEAN STREETS</div>
 
-            <div class="hero" aria-hidden="true">
-                <div class="hero-city"></div><img class="hero-truck"
-                    src="{{ asset('frontendwebsite/img/hero-truck-new.png') }}" alt="">
+            <!-- Header Welcome Title -->
+            <div class="welcome-header">
+                <h2>DCLUTTER - User Portal</h2>
+                <p>Login to continue your Credentials</p>
             </div>
 
-            <div id="phoneSection">
+            <!-- Vector Graphic: Green Waste Truck & Collection Workers with City Skyline -->
+            <div class="illustration-container">
+                <svg viewBox="0 0 360 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- City Skyline Silhouette -->
+                    <path d="M0 130H360V140H0V130Z" fill="#e2e8f0"/>
+                    <path d="M20 130V90H35V130H20Z" fill="#cbd5e1" opacity="0.6"/>
+                    <path d="M30 130V75H50V130H30Z" fill="#cbd5e1" opacity="0.4"/>
+                    <path d="M55 130V100H70V130H55Z" fill="#cbd5e1" opacity="0.5"/>
+                    <path d="M120 130V70H145V130H120Z" fill="#cbd5e1" opacity="0.5"/>
+                    <path d="M140 130V50H170V130H140Z" fill="#cbd5e1" opacity="0.3"/>
+                    <path d="M180 130V80H205V130H180Z" fill="#cbd5e1" opacity="0.4"/>
+                    <path d="M290 130V65H320V130H290Z" fill="#cbd5e1" opacity="0.5"/>
+                    <path d="M315 130V85H340V130H315Z" fill="#cbd5e1" opacity="0.6"/>
 
-                <div class="form-panel">
-                    <form id="phoneForm" class="needs-validation" novalidate onsubmit="showOtp(event)">
-                        <label class="field-label" for="mobileNumber">Mobile Number</label>
-                        <div class="phone-field">
-                            <span class="country-code">+91 <i class="fa-solid fa-chevron-down"></i></span><input
-                                id="mobileNumber" type="tel" placeholder="Enter your mobile number"
-                                pattern="^[0-9]{10}$" minlength="10" maxlength="10" required
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                        </div>
-                        <p class="helper">We'll send you an OTP to verify your number</p>
-                        <div class="invalid-feedback">Please enter a valid 10-digit mobile number.</div>
-                        <button type="submit" class="btn btn-primary" data-loading-label="Sending OTP..."><i class="fa-solid fa-shield-halved"></i> Send
-                            OTP</button>
-                    </form>
-                    <!-- <div class="or-divider">or continue with</div> -->
-                    {{-- <div class="alt-actions"><button type="button" class="alt-button google"><i
-                                class="fa-brands fa-google"></i> Continue with Google</button><button type="button"
-                            class="alt-button phone"><i class="fa-brands fa-whatsapp"></i> Continue with Phone</button>
-                    </div> --}}
-                    <div class="privacy"><i class="fa-solid fa-lock"></i><span>Your number is safe with us. We don't
-                            share it<br>with anyone.</span></div>
-                </div>
+                    <!-- Clouds -->
+                    <ellipse cx="60" cy="40" rx="20" ry="8" fill="#e2e8f0" opacity="0.6"/>
+                    <ellipse cx="280" cy="35" rx="25" ry="10" fill="#e2e8f0" opacity="0.6"/>
+
+                    <!-- Waste Bins / Containers on Left -->
+                    <rect x="22" y="105" width="16" height="25" rx="3" fill="#0e7a43"/>
+                    <path d="M20 103H40V107H20V103Z" fill="#095930"/>
+                    <circle cx="30" cy="117" r="4" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="2 2" fill="none"/>
+                    
+                    <rect x="42" y="110" width="14" height="20" rx="2" fill="#64748b"/>
+                    <path d="M40 108H58V111H40V108Z" fill="#475569"/>
+
+                    <!-- Worker 1 (Left of Truck) -->
+                    <circle cx="80" cy="98" r="6" fill="#f87171"/> <!-- Head/Skin -->
+                    <rect x="74" y="105" width="12" height="15" rx="3" fill="#0e7a43"/> <!-- Uniform -->
+                    <path d="M74 108H86V112H74V108Z" fill="#facc15"/> <!-- Hi-Vis Vest Strip -->
+                    <rect x="76" y="120" width="4" height="10" fill="#1e293b"/> <!-- Pants L -->
+                    <rect x="80" y="120" width="4" height="10" fill="#1e293b"/> <!-- Pants R -->
+
+                    <!-- Waste Collection Truck (Center Main) -->
+                    <!-- Truck Body Rear / Compactor Box -->
+                    <rect x="105" y="70" width="115" height="55" rx="6" fill="#0e7a43"/>
+                    <path d="M105 70L125 55H210V70H105Z" fill="#0e7a43"/>
+                    <!-- White Accent Stripes -->
+                    <path d="M115 80H210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+                    <path d="M115 92H185" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+                    <circle cx="160" cy="105" r="10" fill="#ffffff" opacity="0.2"/>
+
+                    <!-- Truck Cab (Front Right) -->
+                    <path d="M220 85H245C252 85 258 91 258 98V125H220V85Z" fill="#095930"/>
+                    <path d="M230 92H252V105H230V92Z" fill="#bae6fd"/> <!-- Windshield Window -->
+                    <rect x="220" y="112" width="12" height="4" fill="#facc15"/> <!-- Side Light -->
+
+                    <!-- Wheels -->
+                    <circle cx="130" cy="125" r="12" fill="#1e293b"/>
+                    <circle cx="130" cy="125" r="5" fill="#94a3b8"/>
+                    <circle cx="170" cy="125" r="12" fill="#1e293b"/>
+                    <circle cx="170" cy="125" r="5" fill="#94a3b8"/>
+                    <circle cx="238" cy="125" r="12" fill="#1e293b"/>
+                    <circle cx="238" cy="125" r="5" fill="#94a3b8"/>
+
+                    <!-- Worker 2 (Right of Truck) -->
+                    <circle cx="275" cy="98" r="6" fill="#f87171"/>
+                    <rect x="269" y="105" width="12" height="15" rx="3" fill="#0e7a43"/>
+                    <path d="M269 108H281V112H269V108Z" fill="#facc15"/>
+                    <rect x="271" y="120" width="4" height="10" fill="#1e293b"/>
+                    <rect x="275" y="120" width="4" height="10" fill="#1e293b"/>
+
+                    <!-- Worker 3 / Driver with Trash Bin -->
+                    <circle cx="300" cy="100" r="6" fill="#f87171"/>
+                    <rect x="294" y="107" width="12" height="13" rx="3" fill="#0e7a43"/>
+                    <rect x="296" y="120" width="3" height="10" fill="#1e293b"/>
+                    <rect x="301" y="120" width="3" height="10" fill="#1e293b"/>
+                    <rect x="308" y="110" width="12" height="20" rx="2" fill="#0e7a43"/>
+
+                    <!-- Ground Line -->
+                    <line x1="10" y1="130" x2="350" y2="130" stroke="#cbd5e1" stroke-width="2"/>
+                </svg>
             </div>
 
-            <div id="otpSection">
-                <div class="welcome-header">
-                    <h2>Verify <strong>OTP</strong></h2>
-                    <p>Enter the 6-digit code sent to your WhatsApp number.</p>
+            <!-- Form Content -->
+            <div class="form-area">
+
+                <form id="loginForm" method="POST" action="javascript:void(0)">
+                    @csrf
+
+                    <!-- Mobile Login Mode -->
+                    <div id="mobileModePanel" class="mode-panel">
+                        <label class="field-label">Mobile Number</label>
+                        <div class="input-group-custom">
+                            <div class="prefix-badge">
+                                <i class="fa-solid fa-phone" style="color: var(--primary-green);"></i>
+                                <span>+91</span>
+                            </div>
+                            <input type="tel" 
+                                   id="mobileInput" 
+                                   name="mobile" 
+                                   placeholder="+91 98765 43210" 
+                                   maxlength="10" 
+                                   pattern="[0-9]{10}"
+                                   required oninput="this.value = this.value.replace(/[^0-9]/g, '')"> 
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="field-label mb-0">Password</label>
+                            </div>
+                            <div class="input-group-custom position-relative">
+                                <i class="fa-solid fa-lock input-icon-left"></i>
+                                <input type="password" 
+                                       id="passwordInput" 
+                                       name="password" 
+                                       class="input-with-icon" 
+                                       placeholder="Enter your password" 
+                                       required>
+                                <button type="button" class="password-toggle-btn" onclick="togglePassword('passwordInput', this)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-submit-primary" id="btnSubmitMobile">
+                            <span>Submit</span>
+                            <i class="fa-solid fa-arrow-right font-12"></i>
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- Divider -->
+                <div class="divider-or">
+                    <span>or</span>
                 </div>
-                <div class="form-panel">
-                    <form id="otpForm" class="needs-validation" novalidate>
-                        <label class="field-label" for="otpCode">Verification code</label>
-                        <div class="phone-field"><input id="otpCode" type="text" placeholder="Enter 6-digit OTP"
-                                pattern="^[0-9]{6}$" minlength="6" maxlength="6" required
+
+                <!-- Secondary Action Button: Forgot Password -->
+                <button type="button" class="btn-secondary-emp" id="btnOpenForgotPassword" onclick="openForgotPasswordModal()">
+                    <i class="fa-solid fa-key text-muted fs-6"></i>
+                    <span>Forgot Password</span>
+                </button>
+
+                <!-- Footer Terms -->
+                <div class="terms-footer-text">
+                    By continuing, you agree to the<br>
+                    <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {{-- ================= MODAL: FORGOT PASSWORD ================= --}}
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 395px; margin: 1.25rem auto;">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" id="forgotModalTitle" style="font-size: 18px;">Forgot Password</h5>
+                        <p class="text-muted mb-0" id="forgotModalSubtitle" style="font-size: 12.5px;">Verify via OTP to reset and update your user password.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Step 1: Send Reset OTP -->
+                    <div id="forgotStep1">
+                        <label class="field-label mb-1">Registered Mobile Number</label>
+                        <div class="input-group-custom mb-3">
+                            <div class="prefix-badge">
+                                <i class="fa-solid fa-phone" style="color: var(--primary-green);"></i>
+                                <span>+91</span>
+                            </div>
+                            <input type="tel" id="forgotMobile" placeholder="98765 43210" maxlength="10" 
                                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
-                        <div id="otpError" class="invalid-feedback text-danger font-11 mt-1" style="display:none;">Please enter a valid 6-digit OTP.</div>
-                        <button type="submit" class="btn btn-primary" data-loading-label="Verifying..."><i class="fa-solid fa-right-to-bracket"></i> Verify &amp; Login</button>
-                        <p class="mt-3 text-primary text-center" style="font-size: 14px; cursor: pointer;" onclick="showPhone()">
-                            Change Mobile Number</p>
-                    </form>
+                        <button type="button" class="btn-submit-primary mt-1" id="btnSendForgotOtp" onclick="simulateSendForgotOtp()">
+                            <span>Send Verification OTP</span>
+                            <i class="fa-solid fa-paper-plane ms-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Verify OTP -->
+                    <div id="forgotStep2" style="display: none;">
+                        <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 12px; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <span>OTP sent to +91 <strong id="forgotMobileDisplay"></strong></span>
+                        </div>
+                        
+                        <label class="field-label mb-1">Enter 6-Digit OTP</label>
+                        <div class="input-group-custom mb-2">
+                            <input type="text" id="forgotOtpCode" placeholder="Enter 6-digit OTP" maxlength="6" 
+                                style="text-align: center; letter-spacing: 4px; font-weight: 700; font-size: 18px;"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <a href="javascript:void(0)" onclick="resetForgotStep()" class="text-muted text-decoration-none" style="font-size: 11.5px;">
+                                <i class="fa-solid fa-arrow-left me-1"></i>Change Number
+                            </a>
+                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-semibold" id="btnResendForgotOtp" onclick="simulateSendForgotOtp()" style="font-size: 12px; color: var(--primary-green);" disabled>
+                                Resend OTP (<span id="resendForgotTimer">30</span>s)
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn-submit-primary" id="btnVerifyForgotOtp" onclick="verifyForgotOtp()">
+                            <span>Verify OTP</span>
+                            <i class="fa-solid fa-shield-halved ms-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Reset Password (shown only after OTP is verified) -->
+                    <div id="forgotStep3" style="display: none;">
+                        <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 12px; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <span>OTP verified! Set your new password below.</span>
+                        </div>
+
+                        <label class="field-label mb-1">New Password</label>
+                        <div class="input-group-custom position-relative mb-1">
+                            <i class="fa-solid fa-lock input-icon-left"></i>
+                            <input type="password" id="forgotNewPassword" class="input-with-icon" placeholder="Min 6 characters" oninput="checkPasswordMatch()">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword('forgotNewPassword', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="newPasswordHint" class="text-muted mb-3" style="font-size: 11.5px;">Must be at least 6 characters.</div>
+
+                        <label class="field-label mb-1">Confirm New Password</label>
+                        <div class="input-group-custom position-relative">
+                            <i class="fa-solid fa-lock input-icon-left"></i>
+                            <input type="password" id="forgotConfirmPassword" class="input-with-icon" placeholder="Re-enter new password" oninput="checkPasswordMatch()">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword('forgotConfirmPassword', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+
+                        <!-- PASSWORD MATCH STATUS SHOWN BELOW FIELD -->
+                        <div id="confirmPasswordBelowArea" class="mt-2 py-1 px-2 rounded-2" style="display: none; font-size: 13px;">
+                            <div id="confirmPasswordMatchStatus" class="fw-semibold d-flex align-items-center"></div>
+                        </div>
+
+                        <button type="button" class="btn-submit-primary mt-3" id="btnSubmitResetPassword" onclick="submitResetPassword()">
+                            <span>Update Password</span>
+                            <i class="fa-solid fa-key ms-1"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        @include('userpwa.layout.footer')
     </div>
 
-    <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-hidden="true">
-        <div class="page-loader__content">
-            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-            <span>Signing you in...</span>
-        </div>
-    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    (function() {
-        'use strict';
-
-        function setButtonLoading(button, loading) {
-            if (!button) return;
-
-            if (loading) {
-                button.dataset.originalContent = button.innerHTML;
-                button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> ' +
-                    (button.dataset.loadingLabel || 'Loading...');
-                button.classList.add('btn-loading');
-                button.setAttribute('aria-disabled', 'true');
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                button.innerHTML = button.dataset.originalContent || button.innerHTML;
-                button.classList.remove('btn-loading');
-                button.removeAttribute('aria-disabled');
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
 
-        const phoneForm = document.getElementById('phoneForm');
-        if (phoneForm) {
-            phoneForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const mobileInput = document.getElementById('mobileNumber');
-                const submitBtn = phoneForm.querySelector('button[type="submit"]');
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const mobile = document.getElementById('mobileInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
 
-                if (!mobileInput || !/^[0-9]{10}$/.test(mobileInput.value)) {
-                    phoneForm.classList.add('was-validated');
-                    return;
-                }
-
-                setButtonLoading(submitBtn, true);
-
-                fetch("{{ route('user.send-otp') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        mobile_number: mobileInput.value
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    setButtonLoading(submitBtn, false);
-                    if (data.success) {
-                        document.getElementById('phoneSection').style.display = 'none';
-                        document.getElementById('otpSection').style.display = 'block';
-                        document.getElementById('otpCode').focus();
-                    } else {
-                        alert(data.message || 'Failed to send OTP.');
-                    }
-                })
-                .catch(err => {
-                    setButtonLoading(submitBtn, false);
-                    alert('Server error occurred. Please try again.');
+            if (!mobile || mobile.length !== 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Mobile Number',
+                    text: 'Please enter a valid 10-digit mobile number.',
+                    confirmButtonColor: '#0e7a43'
                 });
-            });
+                return;
+            }
+
+            if (!password) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Required',
+                    text: 'Please enter your password.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            document.getElementById('pageLoader').classList.add('active');
+
+            setTimeout(() => {
+                document.getElementById('pageLoader').classList.remove('active');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Successful',
+                    text: 'Redirecting to User Dashboard...',
+                    timer: 1200,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "{{ route('user.dashboard') }}";
+                });
+            }, 800);
+        });
+
+        // ================= UI-ONLY MODAL INTERACTIONS =================
+        let forgotTimerInterval = null;
+
+        function openForgotPasswordModal() {
+            const currentMobile = document.getElementById('mobileInput').value;
+            if (currentMobile && currentMobile.length === 10) {
+                document.getElementById('forgotMobile').value = currentMobile;
+            }
+            resetForgotStep();
+            const modal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+            modal.show();
         }
 
-        const otpForm = document.getElementById('otpForm');
-        if (otpForm) {
-            otpForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const mobileInput = document.getElementById('mobileNumber');
-                const otpInput = document.getElementById('otpCode');
-                const submitBtn = otpForm.querySelector('button[type="submit"]');
-                const otpError = document.getElementById('otpError');
+        function resetForgotStep() {
+            const titleEl = document.getElementById('forgotModalTitle');
+            const subTitleEl = document.getElementById('forgotModalSubtitle');
+            if (titleEl) titleEl.textContent = 'Forgot Password';
+            if (subTitleEl) subTitleEl.textContent = 'Verify via OTP to reset and update your user password.';
 
-                if (!otpInput || !/^[0-9]{6}$/.test(otpInput.value)) {
-                    otpForm.classList.add('was-validated');
-                    if (otpError) {
-                        otpError.innerText = 'Please enter a valid 6-digit OTP.';
-                        otpError.style.display = 'block';
-                    }
-                    return;
-                }
-
-                setButtonLoading(submitBtn, true);
-                document.getElementById('pageLoader').classList.add('show');
-
-                fetch("{{ route('user.verify-otp') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        mobile_number: mobileInput.value,
-                        otp: otpInput.value
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = data.redirect_url;
-                    } else {
-                        setButtonLoading(submitBtn, false);
-                        document.getElementById('pageLoader').classList.remove('show');
-                        if (otpError) {
-                            otpError.innerText = data.message || 'Invalid OTP code.';
-                            otpError.style.display = 'block';
-                        }
-                    }
-                })
-                .catch(err => {
-                    setButtonLoading(submitBtn, false);
-                    document.getElementById('pageLoader').classList.remove('show');
-                    if (otpError) {
-                        otpError.innerText = 'Server error occurred during verification.';
-                        otpError.style.display = 'block';
-                    }
-                });
-            });
+            document.getElementById('forgotStep1').style.display = 'block';
+            document.getElementById('forgotStep2').style.display = 'none';
+            document.getElementById('forgotStep3').style.display = 'none';
+            document.getElementById('forgotOtpCode').value = '';
+            document.getElementById('forgotNewPassword').value = '';
+            document.getElementById('forgotConfirmPassword').value = '';
+            document.getElementById('confirmPasswordBelowArea').style.display = 'none';
+            if (forgotTimerInterval) clearInterval(forgotTimerInterval);
         }
-    })();
 
-    function showOtp(e) {
-        if (e) e.preventDefault();
-    }
+        function simulateSendForgotOtp() {
+            const mobile = document.getElementById('forgotMobile').value.trim();
+            if (!mobile || mobile.length !== 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Mobile Number',
+                    text: 'Please enter your registered 10-digit mobile number.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
 
-    function showPhone() {
-        document.getElementById('otpSection').style.display = 'none';
-        document.getElementById('phoneSection').style.display = 'block';
-    }
+            const btn = document.getElementById('btnSendForgotOtp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Sending OTP...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Send Verification OTP</span> <i class="fa-solid fa-paper-plane ms-1"></i>';
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'block';
+                document.getElementById('forgotStep3').style.display = 'none';
+
+                const titleEl = document.getElementById('forgotModalTitle');
+                const subTitleEl = document.getElementById('forgotModalSubtitle');
+                if (titleEl) titleEl.textContent = 'Verify OTP';
+                if (subTitleEl) subTitleEl.textContent = 'Enter the 6-digit OTP code sent to your mobile.';
+
+                document.getElementById('forgotMobileDisplay').textContent = mobile;
+                document.getElementById('forgotOtpCode').value = '';
+                document.getElementById('forgotOtpCode').focus();
+
+                let seconds = 30;
+                const timerEl = document.getElementById('resendForgotTimer');
+                const resendBtn = document.getElementById('btnResendForgotOtp');
+                resendBtn.disabled = true;
+                timerEl.textContent = seconds;
+                if (forgotTimerInterval) clearInterval(forgotTimerInterval);
+                forgotTimerInterval = setInterval(() => {
+                    seconds--;
+                    timerEl.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(forgotTimerInterval);
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = 'Resend OTP';
+                    }
+                }, 1000);
+            }, 600);
+        }
+
+        function verifyForgotOtp() {
+            const otp = document.getElementById('forgotOtpCode').value.trim();
+            if (!otp || otp.length !== 6) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Enter 6-Digit OTP',
+                    text: 'Please enter the complete 6-digit verification code.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btnVerifyForgotOtp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Verifying OTP...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Verify OTP</span> <i class="fa-solid fa-shield-halved ms-1"></i>';
+
+                // Transition to Step 3: Reset Password
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'none';
+                document.getElementById('forgotStep3').style.display = 'block';
+
+                const titleEl = document.getElementById('forgotModalTitle');
+                const subTitleEl = document.getElementById('forgotModalSubtitle');
+                if (titleEl) titleEl.textContent = 'Reset Password';
+                if (subTitleEl) subTitleEl.textContent = 'Create a new secure password for user login.';
+
+                document.getElementById('forgotNewPassword').value = '';
+                document.getElementById('forgotConfirmPassword').value = '';
+                document.getElementById('confirmPasswordBelowArea').style.display = 'none';
+                document.getElementById('forgotNewPassword').focus();
+            }, 600);
+        }
+
+        function checkPasswordMatch() {
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+            const belowArea = document.getElementById('confirmPasswordBelowArea');
+            const statusEl = document.getElementById('confirmPasswordMatchStatus');
+            const hintEl = document.getElementById('newPasswordHint');
+
+            if (newPassword.length > 0 && newPassword.length < 6) {
+                hintEl.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i> Password must be at least 6 characters</span>';
+            } else if (newPassword.length >= 6) {
+                hintEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Password length requirement met</span>';
+            } else {
+                hintEl.textContent = 'Must be at least 6 characters.';
+            }
+
+            if (!confirmPassword) {
+                belowArea.style.display = 'none';
+                return;
+            }
+
+            belowArea.style.display = 'block';
+
+            if (newPassword.length < 6) {
+                statusEl.innerHTML = '<span style="color: #ea580c;"><i class="fa-solid fa-triangle-exclamation me-1"></i> New password is less than 6 characters</span>';
+            } else if (newPassword === confirmPassword) {
+                statusEl.innerHTML = '<span style="color: #16a34a; font-weight: 600;"><i class="fa-solid fa-circle-check me-1"></i> Passwords match</span>';
+            } else {
+                statusEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;"><i class="fa-solid fa-circle-xmark me-1"></i> Password does not match</span>';
+            }
+        }
+
+        function submitResetPassword() {
+            const mobile = document.getElementById('forgotMobile').value.trim();
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+
+            if (!newPassword || newPassword.length < 6) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Too Short',
+                    text: 'New password must be at least 6 characters.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Mismatch',
+                    text: 'New password and confirm password do not match.',
+                    confirmButtonColor: '#0e7a43'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitResetPassword');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Updating Password...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Update Password</span> <i class="fa-solid fa-key ms-1"></i>';
+
+                const modalEl = document.getElementById('forgotPasswordModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                // Pre-fill login credentials so user can login immediately
+                document.getElementById('mobileInput').value = mobile;
+                document.getElementById('passwordInput').value = newPassword;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Password Updated!',
+                    text: 'Your password has been changed. You can now login.',
+                    confirmButtonColor: '#0e7a43'
+                });
+            }, 700);
+        }
+
+        // Backward-compatibility alias
+        window.simulateSubmitResetPassword = submitResetPassword;
     </script>
-</body>
 
+    @if(session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: @json(session('success')),
+            confirmButtonColor: '#0e7a43'
+        });
+    </script>
+    @endif
+
+    @if($errors->any())
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Authentication Failed',
+            text: @json($errors->first()),
+            confirmButtonColor: '#0e7a43'
+        });
+    </script>
+    @endif
+
+</body>
 </html>
