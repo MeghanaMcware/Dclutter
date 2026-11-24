@@ -180,8 +180,12 @@ Route::prefix('user')->name('user.')->group(function () {
         return auth()->check() ? redirect()->route('user.dashboard') : redirect()->route('user.login');
     });
     
-    // Guest / Public Authentication Routes (Login & OTP)
+    // Guest / Public Authentication Routes (Login & Password)
     Route::get('/login', [UserPwaAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [UserPwaAuthController::class, 'login'])->name('login.submit');
+    Route::post('/send-forgot-otp', [UserPwaAuthController::class, 'sendForgotOtp'])->name('send-forgot-otp');
+    Route::post('/verify-forgot-otp', [UserPwaAuthController::class, 'verifyForgotOtp'])->name('verify-forgot-otp');
+    Route::post('/reset-password', [UserPwaAuthController::class, 'resetPassword'])->name('reset-password');
     Route::post('/send-otp', [UserPwaAuthController::class, 'sendOtp'])->name('send-otp');
     Route::post('/verify-otp', [UserPwaAuthController::class, 'verifyOtp'])->name('verify-otp');
     Route::post('/otp/send', [UserPwaAuthController::class, 'sendOtp'])->name('otp.send');
